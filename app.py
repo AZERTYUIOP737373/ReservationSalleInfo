@@ -50,11 +50,8 @@ HTML_LOGIN = """
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Connexion - Salle informatique</title>
-
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -131,7 +128,8 @@ button:hover {
     background: #1d4ed8;
 }
 
-.secondary {
+.secondary,
+.back {
     display: block;
     text-align: center;
     margin-top: 15px;
@@ -141,10 +139,6 @@ button:hover {
     color: #172033;
     text-decoration: none;
     font-weight: bold;
-}
-
-.secondary:hover {
-    background: #cbd5e1;
 }
 
 .error {
@@ -175,23 +169,17 @@ button:hover {
 
     <h1>Salle informatique</h1>
 
-    <div class="subtitle">
-        Connexion
-    </div>
+    <div class="subtitle">Connexion</div>
 
     {% if error %}
-        <div class="error">
-            {{ error }}
-        </div>
+        <div class="error">{{ error }}</div>
     {% endif %}
 
     {% if success %}
-        <div class="success">
-            {{ success }}
-        </div>
+        <div class="success">{{ success }}</div>
     {% endif %}
 
-    <form method="POST">
+    <form method="POST" action="/login">
 
         <label>Nom d'utilisateur</label>
 
@@ -375,7 +363,7 @@ button:hover {
         </div>
     {% endif %}
 
-    <form method="POST">
+    <form method="POST" action="/inscription">
 
         <label>Nom d'utilisateur</label>
 
@@ -447,9 +435,7 @@ HTML = """
 <title>Salle informatique</title>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -489,8 +475,8 @@ header h1 {
     font-size: 14px;
 }
 
-.logout {
-    background: #334155;
+.logout,
+.admin-link {
     color: white;
     padding: 9px 13px;
     border-radius: 8px;
@@ -498,17 +484,12 @@ header h1 {
     font-weight: bold;
 }
 
-.logout:hover {
-    background: #475569;
+.logout {
+    background: #334155;
 }
 
 .admin-link {
     background: #2563eb;
-    color: white;
-    padding: 9px 13px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
 }
 
 .container {
@@ -539,7 +520,6 @@ h2 {
 
 .navigation button {
     width: auto;
-    margin: 0;
 }
 
 .navigation .current {
@@ -559,10 +539,6 @@ button {
     cursor: pointer;
 }
 
-button:hover {
-    background: #1d4ed8;
-}
-
 .week-wrapper {
     overflow-x: auto;
 }
@@ -576,17 +552,16 @@ button:hover {
     overflow: hidden;
 }
 
-.corner {
-    background: #172033;
-}
-
+.corner,
 .day-header {
     background: #172033;
     color: white;
+}
+
+.day-header {
     padding: 15px 8px;
     text-align: center;
     font-weight: bold;
-    border-left: 1px solid rgba(255,255,255,.12);
 }
 
 .day-header small {
@@ -671,28 +646,20 @@ button:hover {
     margin-top: 4px;
 }
 
-.reserve-btn {
-    width: 100%;
-    padding: 7px;
-    margin-top: 7px;
-    background: #16a34a;
-    font-size: 12px;
-}
-
-.reserve-btn:hover {
-    background: #15803d;
-}
-
+.reserve-btn,
 .delete-btn {
     width: 100%;
     padding: 7px;
     margin-top: 7px;
-    background: #dc2626;
     font-size: 12px;
 }
 
-.delete-btn:hover {
-    background: #b91c1c;
+.reserve-btn {
+    background: #16a34a;
+}
+
+.delete-btn {
+    background: #dc2626;
 }
 
 .form-grid {
@@ -743,11 +710,6 @@ select {
     color: #b91c1c;
 }
 
-.success {
-    background: #dcfce7;
-    color: #15803d;
-}
-
 .legend {
     display: flex;
     gap: 25px;
@@ -780,7 +742,6 @@ select {
 }
 
 @media (max-width: 700px) {
-
     .header-content {
         flex-direction: column;
         text-align: center;
@@ -809,33 +770,31 @@ select {
 <body>
 
 <header>
+<div class="header-content">
 
-    <div class="header-content">
+    <div>
+        <h1>💻 Salle informatique</h1>
+    </div>
 
-        <div>
-            <h1>💻 Salle informatique</h1>
+    <div class="header-right">
+
+        <div class="user">
+            👤 {{ username }}
         </div>
 
-        <div class="header-right">
-
-            <div class="user">
-                👤 {{ username }}
-            </div>
-
-            {% if role == "admin" %}
-                <a class="admin-link" href="/admin">
-                    👑 Administration
-                </a>
-            {% endif %}
-
-            <a class="logout" href="/logout">
-                Déconnexion
+        {% if role == "admin" %}
+            <a class="admin-link" href="/admin">
+                👑 Administration
             </a>
+        {% endif %}
 
-        </div>
+        <a class="logout" href="/logout">
+            Déconnexion
+        </a>
 
     </div>
 
+</div>
 </header>
 
 <div class="container">
@@ -920,28 +879,13 @@ select {
 
                                 {% if role == "admin" or reservation.professeur == username %}
 
-                                    <form
-                                        method="POST"
-                                        action="/annuler"
-                                        onsubmit="return confirm('Voulez-vous vraiment annuler cette réservation ?');"
-                                    >
+                                    <form method="POST" action="/annuler"
+                                          onsubmit="return confirm('Voulez-vous vraiment annuler cette réservation ?');">
 
-                                        <input
-                                            type="hidden"
-                                            name="id"
-                                            value="{{ reservation.id }}"
-                                        >
+                                        <input type="hidden" name="id" value="{{ reservation.id }}">
+                                        <input type="hidden" name="week" value="{{ selected_week }}">
 
-                                        <input
-                                            type="hidden"
-                                            name="week"
-                                            value="{{ selected_week }}"
-                                        >
-
-                                        <button
-                                            class="delete-btn"
-                                            type="submit"
-                                        >
+                                        <button class="delete-btn" type="submit">
                                             🗑 Annuler
                                         </button>
 
@@ -1018,11 +962,7 @@ select {
 
     <form method="POST" action="/reserver">
 
-        <input
-            type="hidden"
-            name="week"
-            value="{{ selected_week }}"
-        >
+        <input type="hidden" name="week" value="{{ selected_week }}">
 
         <div class="form-grid">
 
@@ -1044,11 +984,7 @@ select {
 
                 <label>Créneau</label>
 
-                <select
-                    id="horaire"
-                    name="horaire"
-                    required
-                >
+                <select id="horaire" name="horaire" required>
 
                     {% for horaire in horaires %}
                         <option value="{{ horaire }}">
@@ -1101,7 +1037,6 @@ select {
 
 <script>
 function ouvrirReservation(date, horaire) {
-
     document.getElementById("date").value = date;
     document.getElementById("horaire").value = horaire;
 
@@ -1228,18 +1163,13 @@ th {
     font-weight: bold;
 }
 
-.delete:hover {
-    background: #b91c1c;
+.table-wrapper {
+    overflow-x: auto;
 }
 
 @media (max-width: 700px) {
-
     .header-content {
         flex-direction: column;
-    }
-
-    .table-wrapper {
-        overflow-x: auto;
     }
 
     table {
@@ -1255,15 +1185,15 @@ th {
 
 <header>
 
-    <div class="header-content">
+<div class="header-content">
 
-        <h1>👑 Administration</h1>
+    <h1>👑 Administration</h1>
 
-        <a class="back" href="/">
-            ← Retour au planning
-        </a>
+    <a class="back" href="/">
+        ← Retour au planning
+    </a>
 
-    </div>
+</div>
 
 </header>
 
@@ -1303,18 +1233,14 @@ th {
 
             <tr>
 
-                <td>
-                    {{ user.username }}
-                </td>
+                <td>{{ user.username }}</td>
 
                 <td>
-
                     {% if user.role == "admin" %}
                         👑 Administrateur
                     {% else %}
                         👨‍🏫 Utilisateur
                     {% endif %}
-
                 </td>
 
             </tr>
@@ -1347,41 +1273,23 @@ th {
 
             <tr>
 
-                <td>
-                    {{ reservation.date }}
-                </td>
-
-                <td>
-                    {{ reservation.horaire }}
-                </td>
-
-                <td>
-                    {{ reservation.professeur }}
-                </td>
-
-                <td>
-                    {{ reservation.motif }}
-                </td>
+                <td>{{ reservation.date }}</td>
+                <td>{{ reservation.horaire }}</td>
+                <td>{{ reservation.professeur }}</td>
+                <td>{{ reservation.motif }}</td>
 
                 <td>
 
-                    <form
-                        method="POST"
-                        action="/annuler"
-                        onsubmit="return confirm('Annuler cette réservation ?');"
-                    >
+                    <form method="POST" action="/annuler"
+                          onsubmit="return confirm('Annuler cette réservation ?');">
 
-                        <input
-                            type="hidden"
-                            name="id"
-                            value="{{ reservation.id }}"
-                        >
+                        <input type="hidden"
+                               name="id"
+                               value="{{ reservation.id }}">
 
-                        <input
-                            type="hidden"
-                            name="week"
-                            value="{{ reservation.date }}"
-                        >
+                        <input type="hidden"
+                               name="week"
+                               value="{{ reservation.date }}">
 
                         <button class="delete" type="submit">
                             🗑 Annuler
@@ -1426,9 +1334,11 @@ def get_db():
 
 
 def init_db():
+
     conn = get_db()
 
     try:
+
         with conn.cursor() as cur:
 
             cur.execute("""
@@ -1460,6 +1370,7 @@ def init_db():
             admin = cur.fetchone()
 
             if not admin:
+
                 cur.execute("""
                     INSERT INTO users
                     (username, password, role)
@@ -1559,38 +1470,48 @@ def login():
             ""
         )
 
-        conn = get_db()
-
         try:
 
-            with conn.cursor(
-                cursor_factory=psycopg2.extras.RealDictCursor
-            ) as cur:
+            init_db()
 
-                cur.execute("""
-                    SELECT username, password, role
-                    FROM users
-                    WHERE username = %s
-                """, (username,))
+            conn = get_db()
 
-                user = cur.fetchone()
+            try:
 
-        finally:
-            conn.close()
+                with conn.cursor(
+                    cursor_factory=psycopg2.extras.RealDictCursor
+                ) as cur:
 
-        if user and check_password_hash(
-            user["password"],
-            password
-        ):
+                    cur.execute("""
+                        SELECT username, password, role
+                        FROM users
+                        WHERE username = %s
+                    """, (username,))
 
-            session.clear()
+                    user = cur.fetchone()
 
-            session["username"] = user["username"]
-            session["role"] = user["role"]
+            finally:
+                conn.close()
 
-            return redirect(url_for("index"))
+            if user and check_password_hash(
+                user["password"],
+                password
+            ):
 
-        error = "❌ Nom d'utilisateur ou mot de passe incorrect."
+                session.clear()
+
+                session["username"] = user["username"]
+                session["role"] = user["role"]
+
+                return redirect(url_for("index"))
+
+            error = "❌ Nom d'utilisateur ou mot de passe incorrect."
+
+        except Exception as e:
+
+            print("Erreur connexion :", repr(e))
+
+            error = "❌ Impossible de contacter la base de données."
 
     return render_template_string(
         HTML_LOGIN,
@@ -1608,6 +1529,9 @@ def inscription():
     error = None
 
     if request.method == "POST":
+
+        print("========== INSCRIPTION ==========")
+        print("POST /inscription reçu")
 
         username = request.form.get(
             "username",
@@ -1628,6 +1552,9 @@ def inscription():
             "code",
             ""
         ).strip()
+
+        print("Nom utilisateur :", username)
+        print("Code reçu :", "OUI" if code else "NON")
 
         if code != CODE_INSCRIPTION:
 
@@ -1655,9 +1582,17 @@ def inscription():
 
         else:
 
-            conn = get_db()
+            conn = None
 
             try:
+
+                print("Initialisation/vérification de la base...")
+
+                init_db()
+
+                print("Base OK.")
+
+                conn = get_db()
 
                 with conn.cursor() as cur:
 
@@ -1675,6 +1610,8 @@ def inscription():
 
                     else:
 
+                        print("Création du compte...")
+
                         cur.execute("""
                             INSERT INTO users
                             (username, password, role)
@@ -1687,6 +1624,8 @@ def inscription():
 
                         conn.commit()
 
+                        print("Compte créé avec succès.")
+
                         return redirect(
                             url_for(
                                 "login",
@@ -1696,17 +1635,20 @@ def inscription():
 
             except Exception as e:
 
-                conn.rollback()
+                if conn:
+                    conn.rollback()
 
-                print(
-                    "Erreur inscription :",
-                    e
+                print("ERREUR INSCRIPTION :", repr(e))
+
+                error = (
+                    "❌ Une erreur est survenue lors de la création du compte. "
+                    "Consultez les logs Render."
                 )
 
-                error = "❌ Une erreur est survenue lors de la création du compte."
-
             finally:
-                conn.close()
+
+                if conn:
+                    conn.close()
 
     return render_template_string(
         HTML_REGISTER,
@@ -1732,16 +1674,9 @@ def index():
     )
 
     try:
-
-        monday = get_monday(
-            requested_week
-        )
-
+        monday = get_monday(requested_week)
     except ValueError:
-
-        monday = get_monday(
-            date.today().isoformat()
-        )
+        monday = get_monday(date.today().isoformat())
 
     selected_week = monday.isoformat()
 
@@ -1779,17 +1714,10 @@ def index():
 
         reservation_date = reservation["date"]
 
-        if hasattr(
-            reservation_date,
-            "isoformat"
-        ):
+        if hasattr(reservation_date, "isoformat"):
             reservation_date = reservation_date.isoformat()
 
-        key = (
-            reservation_date
-            + "|"
-            + reservation["horaire"]
-        )
+        key = reservation_date + "|" + reservation["horaire"]
 
         reservations[key] = {
             "id": reservation["id"],
@@ -1852,23 +1780,7 @@ def reserver():
         ""
     ).strip()
 
-    if selected_date == "":
-        return redirect(
-            url_for(
-                "index",
-                week=selected_week
-            )
-        )
-
-    if horaire not in HORAIRES:
-        return redirect(
-            url_for(
-                "index",
-                week=selected_week
-            )
-        )
-
-    if motif == "":
+    if not selected_date or horaire not in HORAIRES or not motif:
         return redirect(
             url_for(
                 "index",
@@ -1893,7 +1805,6 @@ def reserver():
         )
 
     if selected_date_obj.weekday() > 4:
-
         return redirect(
             url_for(
                 "index",
@@ -1934,10 +1845,6 @@ def reserver():
 
                 conn.commit()
 
-            else:
-
-                conn.rollback()
-
     except psycopg2.errors.UniqueViolation:
 
         conn.rollback()
@@ -1948,7 +1855,7 @@ def reserver():
 
         print(
             "Erreur réservation :",
-            e
+            repr(e)
         )
 
     finally:
@@ -2006,9 +1913,7 @@ def annuler():
 
             if reservation:
 
-                is_admin = (
-                    session.get("role") == "admin"
-                )
+                is_admin = session.get("role") == "admin"
 
                 is_owner = (
                     reservation["professeur"]
@@ -2032,7 +1937,7 @@ def annuler():
 
         print(
             "Erreur annulation :",
-            e
+            repr(e)
         )
 
     finally:
@@ -2088,15 +1993,16 @@ def admin():
 @app.route("/health")
 def health():
 
+    conn = None
+
     try:
 
         conn = get_db()
 
         with conn.cursor() as cur:
+
             cur.execute("SELECT 1")
             cur.fetchone()
-
-        conn.close()
 
         return "OK", 200
 
@@ -2104,20 +2010,30 @@ def health():
 
         print(
             "Erreur health :",
-            e
+            repr(e)
         )
 
         return "DATABASE ERROR", 500
 
+    finally:
+
+        if conn:
+            conn.close()
+
 
 try:
+
     init_db()
-    print("Base PostgreSQL initialisée avec succès.")
+
+    print(
+        "Base PostgreSQL initialisée avec succès."
+    )
 
 except Exception as e:
+
     print(
         "ERREUR INITIALISATION BASE DE DONNÉES :",
-        e
+        repr(e)
     )
 
 

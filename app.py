@@ -1,16 +1,27 @@
-﻿from flask import Flask, render_template_string, request, redirect, url_for, session
-import sqlite3
+﻿import os
 from datetime import date, datetime, timedelta
 from functools import wraps
+
+import psycopg2
+import psycopg2.extras
+
+from flask import Flask, render_template_string, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
+
 
 app = Flask(__name__)
 
-app.secret_key = "reservation-salle-informatique-cle-secrete-a-changer"
+app.secret_key = os.environ.get(
+    "SECRET_KEY",
+    "cle-secrete-locale-a-changer"
+)
 
-DB = "reservations.db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 CODE_INSCRIPTION = "INFO-2026-93X7"
+
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "admin123"
 
 HORAIRES = [
     "08:00 - 09:00",
@@ -38,11 +49,9 @@ HTML_LOGIN = """
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Connexion - Salle informatique</title>
 
 <style>
-
 * {
     box-sizing: border-box;
 }
@@ -155,7 +164,6 @@ button:hover {
     margin-bottom: 18px;
     font-weight: bold;
 }
-
 </style>
 </head>
 
@@ -232,7 +240,6 @@ HTML_REGISTER = """
 <title>Créer un compte</title>
 
 <style>
-
 * {
     box-sizing: border-box;
 }
@@ -342,7 +349,6 @@ button:hover {
     margin-bottom: 18px;
     font-weight: bold;
 }
-
 </style>
 </head>
 
@@ -441,7 +447,6 @@ HTML = """
 <title>Salle informatique</title>
 
 <style>
-
 * {
     box-sizing: border-box;
 }
@@ -706,7 +711,8 @@ label {
     margin-bottom: 7px;
 }
 
-input {
+input,
+select {
     padding: 12px;
     border: 1px solid #cbd5e1;
     border-radius: 9px;
@@ -796,9 +802,7 @@ input {
     .form-grid {
         grid-template-columns: 1fr;
     }
-
 }
-
 </style>
 </head>
 
@@ -834,9 +838,7 @@ input {
 
 </header>
 
-
 <div class="container">
-
 
 <div class="card">
 
@@ -864,7 +866,6 @@ input {
 
     </div>
 
-
     <div class="week-wrapper">
 
         <div class="week-grid">
@@ -872,14 +873,11 @@ input {
             <div class="corner"></div>
 
             {% for day in days %}
-
                 <div class="day-header">
                     {{ day.name }}
                     <small>{{ day.display }}</small>
                 </div>
-
             {% endfor %}
-
 
             {% for horaire in horaires %}
 
@@ -905,25 +903,22 @@ input {
                                     </div>
 
                                     <div class="teacher">
-                                        👤 {{ reservation[3] }}
+                                        👤 {{ reservation.professeur }}
                                     </div>
 
                                     <div class="reason">
-                                        {{ reservation[4] }}
+                                        {{ reservation.motif }}
                                     </div>
 
-                                    {% if reservation[3] == username %}
-
+                                    {% if reservation.professeur == username %}
                                         <div class="mine">
                                             ★ Votre réservation
                                         </div>
-
                                     {% endif %}
 
                                 </div>
 
-
-                                {% if role == "admin" or reservation[3] == username %}
+                                {% if role == "admin" or reservation.professeur == username %}
 
                                     <form
                                         method="POST"
@@ -934,7 +929,7 @@ input {
                                         <input
                                             type="hidden"
                                             name="id"
-                                            value="{{ reservation[0] }}"
+                                            value="{{ reservation.id }}"
                                         >
 
                                         <input
@@ -990,7 +985,6 @@ input {
 
     </div>
 
-
     <div class="legend">
 
         <span>
@@ -1012,17 +1006,14 @@ input {
 
 </div>
 
-
 <div class="card" id="reservation">
 
     <h2>📝 Nouvelle réservation</h2>
 
     {% if error %}
-
         <div class="message error">
             {{ error }}
         </div>
-
     {% endif %}
 
     <form method="POST" action="/reserver">
@@ -1049,7 +1040,6 @@ input {
 
             </div>
 
-
             <div class="field">
 
                 <label>Créneau</label>
@@ -1061,17 +1051,14 @@ input {
                 >
 
                     {% for horaire in horaires %}
-
                         <option value="{{ horaire }}">
                             {{ horaire }}
                         </option>
-
                     {% endfor %}
 
                 </select>
 
             </div>
-
 
             <div class="field">
 
@@ -1085,7 +1072,6 @@ input {
                 >
 
             </div>
-
 
             <div class="field">
 
@@ -1103,7 +1089,6 @@ input {
 
         </div>
 
-
         <button class="form-button" type="submit">
             🟢 Réserver la salle
         </button>
@@ -1114,21 +1099,16 @@ input {
 
 </div>
 
-
 <script>
-
 function ouvrirReservation(date, horaire) {
 
     document.getElementById("date").value = date;
-
     document.getElementById("horaire").value = horaire;
 
     document.getElementById("reservation").scrollIntoView({
         behavior: "smooth"
     });
-
 }
-
 </script>
 
 </body>
@@ -1139,7 +1119,9 @@ function ouvrirReservation(date, horaire) {
 HTML_ADMIN = """
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -1177,17 +1159,13 @@ header h1 {
     margin: 0;
 }
 
-a {
-    color: #2563eb;
-    text-decoration: none;
-    font-weight: bold;
-}
-
 .back {
     color: white;
     background: #334155;
     padding: 10px 14px;
     border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
 }
 
 .container {
@@ -1267,10 +1245,10 @@ th {
     table {
         min-width: 650px;
     }
-
 }
 
 </style>
+
 </head>
 
 <body>
@@ -1289,9 +1267,7 @@ th {
 
 </header>
 
-
 <div class="container">
-
 
 <div class="card">
 
@@ -1309,7 +1285,6 @@ th {
     </div>
 
 </div>
-
 
 <div class="card">
 
@@ -1329,12 +1304,12 @@ th {
             <tr>
 
                 <td>
-                    {{ user[0] }}
+                    {{ user.username }}
                 </td>
 
                 <td>
 
-                    {% if user[1] == "admin" %}
+                    {% if user.role == "admin" %}
                         👑 Administrateur
                     {% else %}
                         👨‍🏫 Utilisateur
@@ -1351,7 +1326,6 @@ th {
     </div>
 
 </div>
-
 
 <div class="card">
 
@@ -1374,19 +1348,19 @@ th {
             <tr>
 
                 <td>
-                    {{ reservation[1] }}
+                    {{ reservation.date }}
                 </td>
 
                 <td>
-                    {{ reservation[2] }}
+                    {{ reservation.horaire }}
                 </td>
 
                 <td>
-                    {{ reservation[3] }}
+                    {{ reservation.professeur }}
                 </td>
 
                 <td>
-                    {{ reservation[4] }}
+                    {{ reservation.motif }}
                 </td>
 
                 <td>
@@ -1400,13 +1374,13 @@ th {
                         <input
                             type="hidden"
                             name="id"
-                            value="{{ reservation[0] }}"
+                            value="{{ reservation.id }}"
                         >
 
                         <input
                             type="hidden"
                             name="week"
-                            value="{{ reservation[1] }}"
+                            value="{{ reservation.date }}"
                         >
 
                         <button class="delete" type="submit">
@@ -1435,58 +1409,75 @@ th {
 
 
 def get_db():
-    conn = sqlite3.connect(DB)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if not DATABASE_URL:
+        raise RuntimeError(
+            "DATABASE_URL n'est pas configurée dans les variables d'environnement."
+        )
+
+    database_url = DATABASE_URL
+
+    if "sslmode=" not in database_url:
+        if "?" in database_url:
+            database_url += "&sslmode=require"
+        else:
+            database_url += "?sslmode=require"
+
+    return psycopg2.connect(database_url)
 
 
 def init_db():
-
     conn = get_db()
 
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL DEFAULT 'prof'
-        )
-    """)
+    try:
+        with conn.cursor() as cur:
 
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS reservations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            date TEXT NOT NULL,
-            horaire TEXT NOT NULL,
-            professeur TEXT NOT NULL,
-            motif TEXT NOT NULL,
-            UNIQUE(date, horaire)
-        )
-    """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS users (
+                    id BIGSERIAL PRIMARY KEY,
+                    username VARCHAR(30) UNIQUE NOT NULL,
+                    password TEXT NOT NULL,
+                    role VARCHAR(20) NOT NULL DEFAULT 'prof'
+                )
+            """)
 
-    conn.commit()
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS reservations (
+                    id BIGSERIAL PRIMARY KEY,
+                    date DATE NOT NULL,
+                    horaire VARCHAR(30) NOT NULL,
+                    professeur VARCHAR(30) NOT NULL,
+                    motif VARCHAR(200) NOT NULL,
+                    UNIQUE(date, horaire)
+                )
+            """)
 
-    admin = conn.execute("""
-        SELECT id
-        FROM users
-        WHERE username = 'admin'
-    """).fetchone()
+            cur.execute("""
+                SELECT id
+                FROM users
+                WHERE username = %s
+            """, (ADMIN_USERNAME,))
 
-    if not admin:
+            admin = cur.fetchone()
 
-        conn.execute("""
-            INSERT INTO users
-            (username, password, role)
-            VALUES (?, ?, ?)
-        """, (
-            "admin",
-            generate_password_hash("admin123"),
-            "admin"
-        ))
+            if not admin:
+                cur.execute("""
+                    INSERT INTO users
+                    (username, password, role)
+                    VALUES (%s, %s, %s)
+                """, (
+                    ADMIN_USERNAME,
+                    generate_password_hash(ADMIN_PASSWORD),
+                    "admin"
+                ))
 
         conn.commit()
 
-    conn.close()
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        conn.close()
 
 
 def login_required(function):
@@ -1495,9 +1486,7 @@ def login_required(function):
     def wrapper(*args, **kwargs):
 
         if "username" not in session:
-            return redirect(
-                url_for("login")
-            )
+            return redirect(url_for("login"))
 
         return function(*args, **kwargs)
 
@@ -1510,14 +1499,10 @@ def admin_required(function):
     def wrapper(*args, **kwargs):
 
         if "username" not in session:
-            return redirect(
-                url_for("login")
-            )
+            return redirect(url_for("login"))
 
         if session.get("role") != "admin":
-            return redirect(
-                url_for("index")
-            )
+            return redirect(url_for("index"))
 
         return function(*args, **kwargs)
 
@@ -1557,9 +1542,7 @@ def build_week(monday):
 def login():
 
     if "username" in session:
-        return redirect(
-            url_for("index")
-        )
+        return redirect(url_for("index"))
 
     error = None
     success = request.args.get("success")
@@ -1578,15 +1561,22 @@ def login():
 
         conn = get_db()
 
-        user = conn.execute("""
-            SELECT username, password, role
-            FROM users
-            WHERE username = ?
-        """, (
-            username,
-        )).fetchone()
+        try:
 
-        conn.close()
+            with conn.cursor(
+                cursor_factory=psycopg2.extras.RealDictCursor
+            ) as cur:
+
+                cur.execute("""
+                    SELECT username, password, role
+                    FROM users
+                    WHERE username = %s
+                """, (username,))
+
+                user = cur.fetchone()
+
+        finally:
+            conn.close()
 
         if user and check_password_hash(
             user["password"],
@@ -1598,9 +1588,7 @@ def login():
             session["username"] = user["username"]
             session["role"] = user["role"]
 
-            return redirect(
-                url_for("index")
-            )
+            return redirect(url_for("index"))
 
         error = "❌ Nom d'utilisateur ou mot de passe incorrect."
 
@@ -1615,9 +1603,7 @@ def login():
 def inscription():
 
     if "username" in session:
-        return redirect(
-            url_for("index")
-        )
+        return redirect(url_for("index"))
 
     error = None
 
@@ -1655,6 +1641,10 @@ def inscription():
 
             error = "❌ Le nom d'utilisateur est trop long."
 
+        elif password == "":
+
+            error = "❌ Le mot de passe est obligatoire."
+
         elif len(password) < 6:
 
             error = "❌ Le mot de passe doit contenir au moins 6 caractères."
@@ -1667,41 +1657,56 @@ def inscription():
 
             conn = get_db()
 
-            existing = conn.execute("""
-                SELECT id
-                FROM users
-                WHERE username = ?
-            """, (
-                username,
-            )).fetchone()
+            try:
 
-            if existing:
+                with conn.cursor() as cur:
 
-                error = "❌ Ce nom d'utilisateur existe déjà."
+                    cur.execute("""
+                        SELECT id
+                        FROM users
+                        WHERE username = %s
+                    """, (username,))
 
-                conn.close()
+                    existing = cur.fetchone()
 
-            else:
+                    if existing:
 
-                conn.execute("""
-                    INSERT INTO users
-                    (username, password, role)
-                    VALUES (?, ?, ?)
-                """, (
-                    username,
-                    generate_password_hash(password),
-                    "prof"
-                ))
+                        error = "❌ Ce nom d'utilisateur existe déjà."
 
-                conn.commit()
-                conn.close()
+                    else:
 
-                return redirect(
-                    url_for(
-                        "login",
-                        success="Compte créé avec succès. Vous pouvez maintenant vous connecter."
-                    )
+                        cur.execute("""
+                            INSERT INTO users
+                            (username, password, role)
+                            VALUES (%s, %s, %s)
+                        """, (
+                            username,
+                            generate_password_hash(password),
+                            "prof"
+                        ))
+
+                        conn.commit()
+
+                        return redirect(
+                            url_for(
+                                "login",
+                                success="Compte créé avec succès. Vous pouvez maintenant vous connecter."
+                            )
+                        )
+
+            except Exception as e:
+
+                conn.rollback()
+
+                print(
+                    "Erreur inscription :",
+                    e
                 )
+
+                error = "❌ Une erreur est survenue lors de la création du compte."
+
+            finally:
+                conn.close()
 
     return render_template_string(
         HTML_REGISTER,
@@ -1714,9 +1719,7 @@ def logout():
 
     session.clear()
 
-    return redirect(
-        url_for("login")
-    )
+    return redirect(url_for("login"))
 
 
 @app.route("/")
@@ -1748,44 +1751,60 @@ def index():
 
     conn = get_db()
 
-    rows = conn.execute("""
-        SELECT id, date, horaire, professeur, motif
-        FROM reservations
-        WHERE date >= ? AND date <= ?
-        ORDER BY date, horaire
-    """, (
-        monday.isoformat(),
-        sunday.isoformat()
-    )).fetchall()
+    try:
 
-    conn.close()
+        with conn.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor
+        ) as cur:
+
+            cur.execute("""
+                SELECT id, date, horaire, professeur, motif
+                FROM reservations
+                WHERE date >= %s
+                AND date <= %s
+                ORDER BY date, horaire
+            """, (
+                monday,
+                sunday
+            ))
+
+            rows = cur.fetchall()
+
+    finally:
+        conn.close()
 
     reservations = {}
 
     for reservation in rows:
 
+        reservation_date = reservation["date"]
+
+        if hasattr(
+            reservation_date,
+            "isoformat"
+        ):
+            reservation_date = reservation_date.isoformat()
+
         key = (
-            reservation["date"]
+            reservation_date
             + "|"
             + reservation["horaire"]
         )
 
-        reservations[key] = (
-            reservation["id"],
-            reservation["date"],
-            reservation["horaire"],
-            reservation["professeur"],
-            reservation["motif"]
-        )
+        reservations[key] = {
+            "id": reservation["id"],
+            "date": reservation_date,
+            "horaire": reservation["horaire"],
+            "professeur": reservation["professeur"],
+            "motif": reservation["motif"]
+        }
 
     previous_week = (
-        monday
-        - timedelta(days=7)
+        monday - timedelta(days=7)
     ).isoformat()
 
     next_week = (
-        monday
-        + timedelta(days=7)
+        monday + timedelta(days=7)
     ).isoformat()
 
     week_label = (
@@ -1857,33 +1876,83 @@ def reserver():
             )
         )
 
+    try:
+
+        selected_date_obj = datetime.strptime(
+            selected_date,
+            "%Y-%m-%d"
+        ).date()
+
+    except ValueError:
+
+        return redirect(
+            url_for(
+                "index",
+                week=selected_week
+            )
+        )
+
+    if selected_date_obj.weekday() > 4:
+
+        return redirect(
+            url_for(
+                "index",
+                week=selected_week
+            )
+        )
+
     conn = get_db()
 
-    existing = conn.execute("""
-        SELECT id
-        FROM reservations
-        WHERE date = ? AND horaire = ?
-    """, (
-        selected_date,
-        horaire
-    )).fetchone()
+    try:
 
-    if not existing:
+        with conn.cursor() as cur:
 
-        conn.execute("""
-            INSERT INTO reservations
-            (date, horaire, professeur, motif)
-            VALUES (?, ?, ?, ?)
-        """, (
-            selected_date,
-            horaire,
-            session["username"],
-            motif
-        ))
+            cur.execute("""
+                SELECT id
+                FROM reservations
+                WHERE date = %s
+                AND horaire = %s
+            """, (
+                selected_date_obj,
+                horaire
+            ))
 
-        conn.commit()
+            existing = cur.fetchone()
 
-    conn.close()
+            if not existing:
+
+                cur.execute("""
+                    INSERT INTO reservations
+                    (date, horaire, professeur, motif)
+                    VALUES (%s, %s, %s, %s)
+                """, (
+                    selected_date_obj,
+                    horaire,
+                    session["username"],
+                    motif
+                ))
+
+                conn.commit()
+
+            else:
+
+                conn.rollback()
+
+    except psycopg2.errors.UniqueViolation:
+
+        conn.rollback()
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print(
+            "Erreur réservation :",
+            e
+        )
+
+    finally:
+        conn.close()
 
     return redirect(
         url_for(
@@ -1907,39 +1976,67 @@ def annuler():
         date.today().isoformat()
     )
 
+    try:
+        reservation_id = int(reservation_id)
+    except ValueError:
+        return redirect(
+            url_for(
+                "index",
+                week=selected_week
+            )
+        )
+
     conn = get_db()
 
-    reservation = conn.execute("""
-        SELECT professeur
-        FROM reservations
-        WHERE id = ?
-    """, (
-        reservation_id,
-    )).fetchone()
+    try:
 
-    if reservation:
+        with conn.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor
+        ) as cur:
 
-        is_admin = (
-            session.get("role") == "admin"
-        )
-
-        is_owner = (
-            reservation["professeur"]
-            == session["username"]
-        )
-
-        if is_admin or is_owner:
-
-            conn.execute("""
-                DELETE FROM reservations
-                WHERE id = ?
+            cur.execute("""
+                SELECT professeur
+                FROM reservations
+                WHERE id = %s
             """, (
                 reservation_id,
             ))
 
-            conn.commit()
+            reservation = cur.fetchone()
 
-    conn.close()
+            if reservation:
+
+                is_admin = (
+                    session.get("role") == "admin"
+                )
+
+                is_owner = (
+                    reservation["professeur"]
+                    == session["username"]
+                )
+
+                if is_admin or is_owner:
+
+                    cur.execute("""
+                        DELETE FROM reservations
+                        WHERE id = %s
+                    """, (
+                        reservation_id,
+                    ))
+
+                    conn.commit()
+
+    except Exception as e:
+
+        conn.rollback()
+
+        print(
+            "Erreur annulation :",
+            e
+        )
+
+    finally:
+        conn.close()
 
     return redirect(
         url_for(
@@ -1955,19 +2052,30 @@ def admin():
 
     conn = get_db()
 
-    users = conn.execute("""
-        SELECT username, role
-        FROM users
-        ORDER BY username
-    """).fetchall()
+    try:
 
-    reservations = conn.execute("""
-        SELECT id, date, horaire, professeur, motif
-        FROM reservations
-        ORDER BY date, horaire
-    """).fetchall()
+        with conn.cursor(
+            cursor_factory=psycopg2.extras.RealDictCursor
+        ) as cur:
 
-    conn.close()
+            cur.execute("""
+                SELECT username, role
+                FROM users
+                ORDER BY username
+            """)
+
+            users = cur.fetchall()
+
+            cur.execute("""
+                SELECT id, date, horaire, professeur, motif
+                FROM reservations
+                ORDER BY date, horaire
+            """)
+
+            reservations = cur.fetchall()
+
+    finally:
+        conn.close()
 
     return render_template_string(
         HTML_ADMIN,
@@ -1977,9 +2085,43 @@ def admin():
     )
 
 
-if __name__ == "__main__":
+@app.route("/health")
+def health():
 
+    try:
+
+        conn = get_db()
+
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            cur.fetchone()
+
+        conn.close()
+
+        return "OK", 200
+
+    except Exception as e:
+
+        print(
+            "Erreur health :",
+            e
+        )
+
+        return "DATABASE ERROR", 500
+
+
+try:
     init_db()
+    print("Base PostgreSQL initialisée avec succès.")
+
+except Exception as e:
+    print(
+        "ERREUR INITIALISATION BASE DE DONNÉES :",
+        e
+    )
+
+
+if __name__ == "__main__":
 
     print()
     print("======================================")
@@ -1988,12 +2130,9 @@ if __name__ == "__main__":
     print()
     print("http://127.0.0.1:5000")
     print()
-    print("Code d'inscription :")
-    print(CODE_INSCRIPTION)
-    print()
     print("Compte administrateur :")
-    print("Identifiant : admin")
-    print("Mot de passe : admin123")
+    print("Identifiant :", ADMIN_USERNAME)
+    print("Mot de passe :", ADMIN_PASSWORD)
     print()
 
     app.run(

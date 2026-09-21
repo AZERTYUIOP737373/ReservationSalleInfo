@@ -370,7 +370,7 @@ button:hover {
         <input
             type="text"
             name="username"
-            placeholder="Ex : dupont"
+            placeholder="username"
             required
             maxlength="30"
             autocomplete="username"

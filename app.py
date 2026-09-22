@@ -16,12 +16,14 @@ app.secret_key = os.environ.get(
     "cle-secrete-locale-a-changer"
 )
 
+
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 CODE_INSCRIPTION = "INFO-2026-93X7"
 
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "admin123"
+
 
 HORAIRES = [
     "08:00 - 09:00",
@@ -33,6 +35,7 @@ HORAIRES = [
     "15:00 - 16:00",
     "16:00 - 17:00"
 ]
+
 
 JOURS = [
     "Lundi",
@@ -49,7 +52,9 @@ HTML_LOGIN = """
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Connexion - Salle informatique</title>
+
+<title>Collège Edmond Rostand - Salle informatique</title>
+
 <style>
 * { box-sizing: border-box; }
 
@@ -167,9 +172,9 @@ button:hover {
 
     <div class="logo">💻</div>
 
-    <h1>Salle informatique</h1>
+    <h1>Collège Edmond Rostand</h1>
 
-    <div class="subtitle">Connexion</div>
+    <div class="subtitle">Salle informatique • Connexion</div>
 
     {% if error %}
         <div class="error">{{ error }}</div>
@@ -225,7 +230,7 @@ HTML_REGISTER = """
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Créer un compte</title>
+<title>Collège Edmond Rostand - Créer un compte</title>
 
 <style>
 * {
@@ -346,10 +351,10 @@ button:hover {
 
     <div class="logo">➕</div>
 
-    <h1>Créer un compte</h1>
+    <h1>Collège Edmond Rostand</h1>
 
     <div class="subtitle">
-        Salle informatique
+        Salle informatique • Créer un compte
     </div>
 
     <div class="info">
@@ -432,7 +437,7 @@ HTML = """
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Salle informatique</title>
+<title>Collège Edmond Rostand - Salle informatique</title>
 
 <style>
 * { box-sizing: border-box; }
@@ -773,7 +778,8 @@ select {
 <div class="header-content">
 
     <div>
-        <h1>💻 Salle informatique</h1>
+        <h1>💻 Collège Edmond Rostand</h1>
+        <div style="font-size:15px; opacity:.8; margin-top:4px;">Salle informatique</div>
     </div>
 
     <div class="header-right">
@@ -1060,7 +1066,7 @@ HTML_ADMIN = """
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Administration</title>
+<title>Collège Edmond Rostand - Administration</title>
 
 <style>
 
@@ -1187,7 +1193,12 @@ th {
 
 <div class="header-content">
 
-    <h1>👑 Administration</h1>
+    <div>
+        <h1>👑 Administration</h1>
+        <div style="font-size:14px; opacity:.8; margin-top:4px;">
+            Collège Edmond Rostand • Salle informatique
+        </div>
+    </div>
 
     <a class="back" href="/">
         ← Retour au planning
@@ -1317,6 +1328,7 @@ th {
 
 
 def get_db():
+
     if not DATABASE_URL:
         raise RuntimeError(
             "DATABASE_URL n'est pas configurée dans les variables d'environnement."
@@ -1384,10 +1396,12 @@ def init_db():
         conn.commit()
 
     except Exception:
+
         conn.rollback()
         raise
 
     finally:
+
         conn.close()
 
 
@@ -1491,6 +1505,7 @@ def login():
                     user = cur.fetchone()
 
             finally:
+
                 conn.close()
 
             if user and check_password_hash(
@@ -1674,8 +1689,11 @@ def index():
     )
 
     try:
+
         monday = get_monday(requested_week)
+
     except ValueError:
+
         monday = get_monday(date.today().isoformat())
 
     selected_week = monday.isoformat()
@@ -1706,6 +1724,7 @@ def index():
             rows = cur.fetchall()
 
     finally:
+
         conn.close()
 
     reservations = {}
@@ -1781,6 +1800,7 @@ def reserver():
     ).strip()
 
     if not selected_date or horaire not in HORAIRES or not motif:
+
         return redirect(
             url_for(
                 "index",
@@ -1805,6 +1825,7 @@ def reserver():
         )
 
     if selected_date_obj.weekday() > 4:
+
         return redirect(
             url_for(
                 "index",
@@ -1859,6 +1880,7 @@ def reserver():
         )
 
     finally:
+
         conn.close()
 
     return redirect(
@@ -1884,8 +1906,11 @@ def annuler():
     )
 
     try:
+
         reservation_id = int(reservation_id)
+
     except ValueError:
+
         return redirect(
             url_for(
                 "index",
@@ -1941,6 +1966,7 @@ def annuler():
         )
 
     finally:
+
         conn.close()
 
     return redirect(
@@ -1980,6 +2006,7 @@ def admin():
             reservations = cur.fetchall()
 
     finally:
+
         conn.close()
 
     return render_template_string(
@@ -2042,10 +2069,13 @@ if __name__ == "__main__":
     print()
     print("======================================")
     print("   RESERVATION SALLE INFORMATIQUE")
+    print("   COLLEGE EDMOND ROSTAND")
     print("======================================")
     print()
+
     print("http://127.0.0.1:5000")
     print()
+
     print("Compte administrateur :")
     print("Identifiant :", ADMIN_USERNAME)
     print("Mot de passe :", ADMIN_PASSWORD)

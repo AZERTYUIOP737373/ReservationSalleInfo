@@ -37,7 +37,30 @@ def admin_required(route):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    auteur = session.get("auteur")
+    mes_signalements = []
+
+    if auteur:
+        try:
+            result = (
+                supabase
+                .table("problemes")
+                .select("*")
+                .eq("auteur", auteur)
+                .order("date_creation", desc=True)
+                .execute()
+            )
+
+            mes_signalements = result.data or []
+
+        except Exception as e:
+            print("Erreur récupération signalements :", e)
+
+    return render_template(
+        "index.html",
+        mes_signalements=mes_signalements,
+        auteur=auteur
+    )
 
 
 @app.route("/signaler", methods=["POST"])
@@ -48,8 +71,10 @@ def signaler():
     description = request.form.get("description", "").strip()
     urgence = request.form.get("urgence", "normale").strip()
 
-    if not salle or not categorie or not description:
+    if not auteur or not salle or not categorie or not description:
         return "Informations manquantes.", 400
+
+    session["auteur"] = auteur
 
     photo_url = None
 
@@ -108,10 +133,7 @@ def signaler():
 
     probleme = result.data[0]
 
-    return render_template(
-        "confirmation.html",
-        probleme=probleme
-    )
+    return redirect(url_for("index"))
 
 
 @app.route("/connexion", methods=["GET", "POST"])
@@ -132,7 +154,7 @@ def connexion():
 
 @app.route("/deconnexion")
 def deconnexion():
-    session.clear()
+    session.pop("admin", None)
     return redirect(url_for("index"))
 
 

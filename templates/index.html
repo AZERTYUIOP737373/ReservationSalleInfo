@@ -36,178 +36,290 @@
         </p>
     </section>
 
-    <section class="card">
+    <section class="sos-layout">
 
-        <h2>📝 Nouveau signalement</h2>
+        <section class="card">
 
-        <p class="muted">
-            Décrivez le problème pour permettre une intervention rapide.
-        </p>
+            <h2>📝 Nouveau signalement</h2>
 
-        <form
-            action="{{ url_for('signaler') }}"
-            method="POST"
-            enctype="multipart/form-data"
-        >
+            <p class="muted">
+                Décrivez le problème pour permettre une intervention rapide.
+            </p>
 
-            <div class="grid">
+            <form
+                action="{{ url_for('signaler') }}"
+                method="POST"
+                enctype="multipart/form-data"
+            >
 
-                <div class="field">
-                    <label for="auteur">Votre nom</label>
+                <div class="grid">
 
-                    <input
-                        type="text"
-                        id="auteur"
-                        name="auteur"
-                        placeholder="Ex. M. Besset"
-                    >
+                    <div class="field">
+                        <label for="auteur">Votre nom</label>
+
+                        <input
+                            type="text"
+                            id="auteur"
+                            name="auteur"
+                            value="{{ auteur or '' }}"
+                            placeholder="Votre nom"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label for="salle">Salle</label>
+
+                        <input
+                            type="text"
+                            id="salle"
+                            name="salle"
+                            placeholder="Ex. 23"
+                            required
+                        >
+                    </div>
+
                 </div>
 
                 <div class="field">
-                    <label for="salle">Salle</label>
 
-                    <input
-                        type="text"
-                        id="salle"
-                        name="salle"
-                        placeholder="Ex. 23"
+                    <label for="categorie">
+                        Catégorie
+                    </label>
+
+                    <select
+                        id="categorie"
+                        name="categorie"
                         required
                     >
-                </div>
+                        <option value="">
+                            Choisir une catégorie
+                        </option>
 
-            </div>
+                        <option value="Informatique">
+                            💻 Informatique
+                        </option>
 
-            <div class="field">
+                        <option value="Impression">
+                            🖨️ Impression
+                        </option>
 
-                <label for="categorie">
-                    Catégorie
-                </label>
+                        <option value="Vidéoprojecteur">
+                            📽️ Vidéoprojecteur
+                        </option>
 
-                <select
-                    id="categorie"
-                    name="categorie"
-                    required
-                >
-                    <option value="">
-                        Choisir une catégorie
-                    </option>
+                        <option value="Salle">
+                            🏫 Salle
+                        </option>
 
-                    <option value="Informatique">
-                        💻 Informatique
-                    </option>
+                        <option value="Clé">
+                            🔑 Clé
+                        </option>
 
-                    <option value="Impression">
-                        🖨️ Impression
-                    </option>
+                        <option value="Matériel">
+                            📦 Matériel
+                        </option>
 
-                    <option value="Vidéoprojecteur">
-                        📽️ Vidéoprojecteur
-                    </option>
+                        <option value="Entretien">
+                            🧹 Entretien
+                        </option>
 
-                    <option value="Salle">
-                        🏫 Salle
-                    </option>
-
-                    <option value="Clé">
-                        🔑 Clé
-                    </option>
-
-                    <option value="Matériel">
-                        📦 Matériel
-                    </option>
-
-                    <option value="Entretien">
-                        🧹 Entretien
-                    </option>
-
-                    <option value="Autre">
-                        🔧 Autre
-                    </option>
-                </select>
-
-            </div>
-
-            <div class="field">
-
-                <label for="description">
-                    Description du problème
-                </label>
-
-                <textarea
-                    id="description"
-                    name="description"
-                    rows="6"
-                    placeholder="Ex. Le PC de la salle 23 ne s'allume plus..."
-                    required
-                ></textarea>
-
-            </div>
-
-            <div class="field">
-
-                <label for="photo">
-                    📷 Photo du problème
-                </label>
-
-                <input
-                    type="file"
-                    id="photo"
-                    name="photo"
-                    accept="image/jpeg,image/png,image/webp"
-                >
-
-                <small>
-                    Facultatif · JPG, PNG ou WEBP · 8 Mo maximum
-                </small>
-
-            </div>
-
-            <div class="field">
-
-                <label>Urgence</label>
-
-                <div class="urgency">
-
-                    <label class="urgency-option">
-                        <input
-                            type="radio"
-                            name="urgence"
-                            value="faible"
-                        >
-                        <span>🟢 Faible</span>
-                    </label>
-
-                    <label class="urgency-option">
-                        <input
-                            type="radio"
-                            name="urgence"
-                            value="normale"
-                            checked
-                        >
-                        <span>🟠 Normale</span>
-                    </label>
-
-                    <label class="urgency-option urgent">
-                        <input
-                            type="radio"
-                            name="urgence"
-                            value="urgente"
-                        >
-                        <span>🔴 Urgente</span>
-                    </label>
+                        <option value="Autre">
+                            🔧 Autre
+                        </option>
+                    </select>
 
                 </div>
 
+                <div class="field">
+
+                    <label for="description">
+                        Description du problème
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="6"
+                        placeholder="Ex. Le PC de la salle 23 ne s'allume plus..."
+                        required
+                    ></textarea>
+
+                </div>
+
+                <div class="field">
+
+                    <label for="photo">
+                        📷 Photo du problème
+                    </label>
+
+                    <input
+                        type="file"
+                        id="photo"
+                        name="photo"
+                        accept="image/jpeg,image/png,image/webp"
+                    >
+
+                    <small>
+                        Facultatif · JPG, PNG ou WEBP · 8 Mo maximum
+                    </small>
+
+                </div>
+
+                <div class="field">
+
+                    <label>Urgence</label>
+
+                    <div class="urgency">
+
+                        <label class="urgency-option">
+                            <input
+                                type="radio"
+                                name="urgence"
+                                value="faible"
+                            >
+                            <span>🟢 Faible</span>
+                        </label>
+
+                        <label class="urgency-option">
+                            <input
+                                type="radio"
+                                name="urgence"
+                                value="normale"
+                                checked
+                            >
+                            <span>🟠 Normale</span>
+                        </label>
+
+                        <label class="urgency-option urgent">
+                            <input
+                                type="radio"
+                                name="urgence"
+                                value="urgente"
+                            >
+                            <span>🔴 Urgente</span>
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <button
+                    class="submit-button"
+                    type="submit"
+                >
+                    🚨 Envoyer le signalement
+                </button>
+
+            </form>
+
+        </section>
+
+        <section class="card my-reports">
+
+            <div class="reports-header">
+                <div>
+                    <h2>📋 Mes signalements</h2>
+
+                    {% if auteur %}
+                        <p class="muted">
+                            Signalements de <strong>{{ auteur }}</strong>
+                        </p>
+                    {% else %}
+                        <p class="muted">
+                            Vos signalements apparaîtront ici après votre premier envoi.
+                        </p>
+                    {% endif %}
+                </div>
             </div>
 
-            <button
-                class="submit-button"
-                type="submit"
-            >
-                🚨 Envoyer le signalement
-            </button>
+            {% if mes_signalements %}
 
-        </form>
+                <div class="reports-list">
+
+                    {% for probleme in mes_signalements %}
+
+                        <article class="report-item">
+
+                            <div class="report-top">
+
+                                <div>
+                                    <h3>
+                                        {{ probleme.categorie }}
+                                    </h3>
+
+                                    <p class="report-room">
+                                        📍 Salle {{ probleme.salle }}
+                                    </p>
+                                </div>
+
+                                {% if probleme.statut == "nouveau" %}
+
+                                    <span class="status status-new">
+                                        📨 Envoyé
+                                    </span>
+
+                                {% elif probleme.statut == "en_cours" %}
+
+                                    <span class="status status-progress">
+                                        🟠 En cours de résolution
+                                    </span>
+
+                                {% elif probleme.statut == "resolu" %}
+
+                                    <span class="status status-done">
+                                        🟢 Résolu
+                                    </span>
+
+                                {% endif %}
+
+                            </div>
+
+                            <p class="report-description">
+                                {{ probleme.description }}
+                            </p>
+
+                            {% if probleme.urgence == "urgente" %}
+                                <span class="urgency-badge urgent-badge">
+                                    🔴 Urgent
+                                </span>
+                            {% elif probleme.urgence == "faible" %}
+                                <span class="urgency-badge">
+                                    🟢 Faible
+                                </span>
+                            {% else %}
+                                <span class="urgency-badge">
+                                    🟠 Normale
+                                </span>
+                            {% endif %}
+
+                            {% if probleme.responsable %}
+                                <p class="responsible">
+                                    👤 Responsable : {{ probleme.responsable }}
+                                </p>
+                            {% endif %}
+
+                        </article>
+
+                    {% endfor %}
+
+                </div>
+
+            {% else %}
+
+                <div class="empty-reports">
+                    <div class="empty-icon">📭</div>
+
+                    <h3>Aucun signalement</h3>
+
+                    <p>
+                        Vous n'avez encore envoyé aucun problème.
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </section>
 
     </section>
 

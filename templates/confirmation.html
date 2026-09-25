@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signalement envoyé — Collège SOS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="page-center">
+
+    <div class="success-card">
+
+        <div class="success-icon">✓</div>
+
+        <h1>Signalement envoyé</h1>
+
+        <p>
+            Votre problème a bien été enregistré.
+        </p>
+
+        {% if probleme %}
+        <div class="reference">
+            Signalement <strong>#{{ probleme.id }}</strong>
+        </div>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}" class="button">
+            ← Nouveau signalement
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

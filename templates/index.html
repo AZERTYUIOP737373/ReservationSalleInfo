@@ -1,0 +1,221 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collège SOS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+    <div>
+        <div class="logo">🛠️ Collège SOS</div>
+        <div class="school">Collège Edmond Rostand</div>
+    </div>
+
+    <a href="{{ url_for('connexion') }}" class="admin-link">
+        Administration
+    </a>
+</header>
+
+<main class="container">
+
+    <section class="hero">
+        <span class="badge">ASSISTANCE COLLÈGE</span>
+
+        <h1>
+            Un problème au collège ?
+            <br>
+            <span>Signalez-le en quelques secondes.</span>
+        </h1>
+
+        <p>
+            Signalez rapidement un problème informatique,
+            matériel, dans une salle ou lié à l'entretien.
+        </p>
+    </section>
+
+    <section class="card">
+
+        <h2>📝 Nouveau signalement</h2>
+
+        <p class="muted">
+            Décrivez le problème pour permettre une intervention rapide.
+        </p>
+
+        <form
+            action="{{ url_for('signaler') }}"
+            method="POST"
+            enctype="multipart/form-data"
+        >
+
+            <div class="grid">
+
+                <div class="field">
+                    <label for="auteur">Votre nom</label>
+
+                    <input
+                        type="text"
+                        id="auteur"
+                        name="auteur"
+                        placeholder="Ex. M. Besset"
+                    >
+                </div>
+
+                <div class="field">
+                    <label for="salle">Salle</label>
+
+                    <input
+                        type="text"
+                        id="salle"
+                        name="salle"
+                        placeholder="Ex. 203"
+                        required
+                    >
+                </div>
+
+            </div>
+
+            <div class="field">
+
+                <label for="categorie">
+                    Catégorie
+                </label>
+
+                <select
+                    id="categorie"
+                    name="categorie"
+                    required
+                >
+                    <option value="">
+                        Choisir une catégorie
+                    </option>
+
+                    <option value="Informatique">
+                        💻 Informatique
+                    </option>
+
+                    <option value="Impression">
+                        🖨️ Impression
+                    </option>
+
+                    <option value="Vidéoprojecteur">
+                        📽️ Vidéoprojecteur
+                    </option>
+
+                    <option value="Salle">
+                        🏫 Salle
+                    </option>
+
+                    <option value="Clé">
+                        🔑 Clé
+                    </option>
+
+                    <option value="Matériel">
+                        📦 Matériel
+                    </option>
+
+                    <option value="Entretien">
+                        🧹 Entretien
+                    </option>
+
+                    <option value="Autre">
+                        🔧 Autre
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="field">
+
+                <label for="description">
+                    Description du problème
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="6"
+                    placeholder="Ex. Le PC de la salle 203 ne s'allume plus..."
+                    required
+                ></textarea>
+
+            </div>
+
+            <div class="field">
+
+                <label for="photo">
+                    📷 Photo du problème
+                </label>
+
+                <input
+                    type="file"
+                    id="photo"
+                    name="photo"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+                <small>
+                    Facultatif · JPG, PNG ou WEBP · 8 Mo maximum
+                </small>
+
+            </div>
+
+            <div class="field">
+
+                <label>Urgence</label>
+
+                <div class="urgency">
+
+                    <label class="urgency-option">
+                        <input
+                            type="radio"
+                            name="urgence"
+                            value="faible"
+                        >
+                        <span>🟢 Faible</span>
+                    </label>
+
+                    <label class="urgency-option">
+                        <input
+                            type="radio"
+                            name="urgence"
+                            value="normale"
+                            checked
+                        >
+                        <span>🟠 Normale</span>
+                    </label>
+
+                    <label class="urgency-option urgent">
+                        <input
+                            type="radio"
+                            name="urgence"
+                            value="urgente"
+                        >
+                        <span>🔴 Urgente</span>
+                    </label>
+
+                </div>
+
+            </div>
+
+            <button
+                class="submit-button"
+                type="submit"
+            >
+                🚨 Envoyer le signalement
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+<footer>
+    Collège SOS · Collège Edmond Rostand
+</footer>
+
+</body>
+</html>

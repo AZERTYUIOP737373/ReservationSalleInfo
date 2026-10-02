@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
+
 <title>Administration — Collège SOS</title>
 
 <style>
@@ -146,6 +146,7 @@
 
     .button.notification-active {
         background: #16794c;
+        color: white;
     }
 
     .stats {
@@ -227,6 +228,48 @@
         font-size: 13px;
     }
 
+    .filters {
+        padding: 18px 24px;
+        border-bottom: 1px solid #edf0f5;
+        background: #fafbfd;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .filter-group label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #596477;
+    }
+
+    .filter-group select {
+        width: 100%;
+        padding: 12px 13px;
+        border: 1px solid #dfe5ee;
+        border-radius: 11px;
+        background: white;
+        color: #172033;
+        font-family: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .filter-group select:focus {
+        border-color: #5975b8;
+        box-shadow: 0 0 0 4px #e9effd;
+    }
+
+    .filter-result {
+        grid-column: 1 / -1;
+        color: #7a8495;
+        font-size: 12px;
+    }
+
     .problem-list {
         display: flex;
         flex-direction: column;
@@ -249,6 +292,10 @@
 
     .problem-item:hover {
         background: #f8fafc;
+    }
+
+    .problem-item.hidden-by-filter {
+        display: none;
     }
 
     .problem-main {
@@ -295,6 +342,11 @@
         color: #c52c2c;
     }
 
+    .tag.normal {
+        background: #eaf8f0;
+        color: #16794c;
+    }
+
     .tag.new {
         background: #e8f0ff;
         color: #315db8;
@@ -307,6 +359,26 @@
 
     .tag.done {
         background: #ddf7e8;
+        color: #16794c;
+    }
+
+    .timer {
+        padding: 7px 10px;
+        border-radius: 9px;
+        background: #f3f5f8;
+        color: #4e596c;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .timer.running {
+        background: #fff5df;
+        color: #996400;
+    }
+
+    .timer.finished {
+        background: #eaf8f0;
         color: #16794c;
     }
 
@@ -327,6 +399,17 @@
     .empty p {
         margin: 0;
         color: #7a8495;
+    }
+
+    .no-filter-result {
+        display: none;
+        padding: 50px 20px;
+        text-align: center;
+        color: #7a8495;
+    }
+
+    .no-filter-result.show {
+        display: block;
     }
 
     .notification-box {
@@ -399,6 +482,14 @@
             grid-template-columns: 1fr;
         }
 
+        .filters {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-result {
+            grid-column: auto;
+        }
+
         .problem-item {
             flex-direction: column;
         }
@@ -415,7 +506,7 @@
         }
     }
 </style>
-```
+
 
 </head>
 
@@ -424,31 +515,39 @@
 <header class="topbar">
     <div class="brand">
         <div class="brand-icon">🛠️</div>
-        <div>
-            <div class="logo">Collège SOS</div>
-            <div class="school">Collège Edmond Rostand · Administration</div>
+
+
+    <div>
+        <div class="logo">Collège SOS</div>
+        <div class="school">
+            Collège Edmond Rostand · Administration
         </div>
     </div>
+</div>
 
-```
 <a href="{{ url_for('deconnexion') }}" class="logout">
     🚪 Déconnexion
 </a>
-```
+
 
 </header>
 
 <main class="container">
 
-```
+
 <section class="hero">
     <div>
         <span class="badge">ADMINISTRATION</span>
+
         <h1>Signalements</h1>
-        <p>Centralisez et suivez les problèmes signalés au collège.</p>
+
+        <p>
+            Centralisez et suivez les problèmes signalés au collège.
+        </p>
     </div>
 
     <div class="actions">
+
         <button
             type="button"
             class="button secondary"
@@ -458,19 +557,33 @@
             🔔 Activer les notifications
         </button>
 
-        <a href="{{ url_for('index') }}" class="button">
+        <a
+            href="{{ url_for('index') }}"
+            class="button"
+        >
             ＋ Nouveau signalement
         </a>
+
     </div>
 </section>
 
 <div class="notification-box" id="notificationBox">
+
     <div class="notification-text">
-        <strong>🔔 Notifications administrateur</strong>
+
+        <strong>
+            🔔 Notifications administrateur
+        </strong>
+
         <span id="notificationMessage">
             Activez les notifications pour être prévenu lorsqu'un nouveau signalement arrive.
         </span>
-        <div class="notification-status" id="notificationStatus"></div>
+
+        <div
+            class="notification-status"
+            id="notificationStatus"
+        ></div>
+
     </div>
 
     <button
@@ -480,38 +593,63 @@
     >
         Activer
     </button>
+
 </div>
 
 <section class="stats">
 
     <div class="stat-card danger">
+
         <div class="stat-top">
             <span>Signalements urgents</span>
-            <div class="stat-icon">🔴</div>
+
+            <div class="stat-icon">
+                🔴
+            </div>
         </div>
 
         <strong>{{ urgents }}</strong>
-        <p>À traiter en priorité</p>
+
+        <p>
+            À traiter en priorité
+        </p>
+
     </div>
 
     <div class="stat-card progress">
+
         <div class="stat-top">
             <span>En cours</span>
-            <div class="stat-icon">🟠</div>
+
+            <div class="stat-icon">
+                🟠
+            </div>
         </div>
 
         <strong>{{ en_cours }}</strong>
-        <p>Problèmes actuellement traités</p>
+
+        <p>
+            Problèmes actuellement traités
+        </p>
+
     </div>
 
     <div class="stat-card success">
+
         <div class="stat-top">
             <span>Résolus</span>
-            <div class="stat-icon">🟢</div>
+
+            <div class="stat-icon">
+                🟢
+            </div>
         </div>
 
         <strong>{{ resolus }}</strong>
-        <p>Problèmes terminés</p>
+
+        <p>
+            Problèmes terminés
+        </p>
+
     </div>
 
 </section>
@@ -519,8 +657,115 @@
 <section class="card">
 
     <div class="card-header">
-        <h2>📋 Signalements récents</h2>
-        <p>Cliquez sur un signalement pour consulter ses détails.</p>
+
+        <h2>
+            📋 Signalements récents
+        </h2>
+
+        <p>
+            Cliquez sur un signalement pour consulter ses détails.
+        </p>
+
+    </div>
+
+    <div class="filters">
+
+        <div class="filter-group">
+
+            <label for="urgenceFilter">
+                🚦 Niveau d'urgence
+            </label>
+
+            <select
+                id="urgenceFilter"
+                onchange="appliquerFiltres()"
+            >
+                <option value="tous">
+                    Tous les signalements
+                </option>
+
+                <option value="urgente">
+                    🔴 Urgents
+                </option>
+
+                <option value="normale">
+                    🟢 Normaux
+                </option>
+            </select>
+
+        </div>
+
+        <div class="filter-group">
+
+            <label for="categorieFilter">
+                🛠️ Catégorie
+            </label>
+
+            <select
+                id="categorieFilter"
+                onchange="appliquerFiltres()"
+            >
+                <option value="toutes">
+                    Toutes les catégories
+                </option>
+
+                <option value="Informatique">
+                    💻 Informatique
+                </option>
+
+                <option value="Vidéoprojecteur">
+                    📽️ Vidéoprojecteur
+                </option>
+
+                <option value="Entretien">
+                    🧰 Entretien
+                </option>
+
+                <option value="Électricité">
+                    ⚡ Électricité
+                </option>
+
+                <option value="Mobilier">
+                    🪑 Mobilier
+                </option>
+
+                <option value="Chauffage">
+                    🔥 Chauffage
+                </option>
+
+                <option value="Éclairage">
+                    💡 Éclairage
+                </option>
+
+                <option value="Réseau / Internet">
+                    🌐 Réseau / Internet
+                </option>
+
+                <option value="Nettoyage">
+                    🧹 Nettoyage
+                </option>
+
+                <option value="Bâtiment">
+                    🏫 Bâtiment
+                </option>
+
+                <option value="Sécurité">
+                    🔒 Sécurité
+                </option>
+
+                <option value="Autre">
+                    🔧 Autre
+                </option>
+
+            </select>
+
+        </div>
+
+        <div
+            class="filter-result"
+            id="filterResult"
+        ></div>
+
     </div>
 
     {% if problemes %}
@@ -529,126 +774,230 @@
 
             {% for probleme in problemes %}
 
-            <a
-                href="{{ url_for('probleme', probleme_id=probleme.id) }}"
-                class="problem-item"
-            >
+                <a
+                    href="{{ url_for('probleme', probleme_id=probleme.id) }}"
+                    class="problem-item"
+                    data-urgence="{{ probleme.urgence }}"
+                    data-categorie="{{ probleme.categorie }}"
+                    data-statut="{{ probleme.statut }}"
+                    data-date-creation="{{ probleme.date_creation or '' }}"
+                    data-date-modification="{{ probleme.date_modification or '' }}"
+                >
 
-                <div class="problem-main">
+                    <div class="problem-main">
 
-                    <div class="problem-title">
-                        {{ probleme.categorie }}
+                        <div class="problem-title">
+                            {{ probleme.categorie }}
+                        </div>
+
+                        <div class="problem-description">
+                            {{ probleme.description }}
+                        </div>
+
+                        <div class="problem-meta">
+
+                            📍 {{ probleme.salle }}
+
+                            {% if probleme.auteur %}
+                                · 👤 {{ probleme.auteur }}
+                            {% endif %}
+
+                        </div>
+
                     </div>
 
-                    <div class="problem-description">
-                        {{ probleme.description }}
-                    </div>
+                    <div class="problem-status">
 
-                    <div class="problem-meta">
-                        📍 {{ probleme.salle }}
+                        {% if probleme.urgence == "urgente" %}
 
-                        {% if probleme.auteur %}
-                            · 👤 {{ probleme.auteur }}
+                            <span class="tag urgent">
+                                🔴 URGENT
+                            </span>
+
+                        {% else %}
+
+                            <span class="tag normal">
+                                🟢 NORMAL
+                            </span>
+
                         {% endif %}
+
+                        {% if probleme.statut == "nouveau" %}
+
+                            <span class="tag new">
+                                NOUVEAU
+                            </span>
+
+                        {% elif probleme.statut == "en_cours" %}
+
+                            <span class="tag progress">
+                                EN COURS
+                            </span>
+
+                        {% else %}
+
+                            <span class="tag done">
+                                RÉSOLU
+                            </span>
+
+                        {% endif %}
+
+                        <span
+                            class="timer {% if probleme.statut == 'resolu' %}finished{% else %}running{% endif %}"
+                            data-timer
+                        >
+                            ⏱️ Calcul...
+                        </span>
+
                     </div>
 
-                </div>
-
-                <div class="problem-status">
-
-                    {% if probleme.urgence == "urgente" %}
-                        <span class="tag urgent">🔴 URGENT</span>
-                    {% endif %}
-
-                    {% if probleme.statut == "nouveau" %}
-                        <span class="tag new">NOUVEAU</span>
-
-                    {% elif probleme.statut == "en_cours" %}
-                        <span class="tag progress">EN COURS</span>
-
-                    {% else %}
-                        <span class="tag done">RÉSOLU</span>
-                    {% endif %}
-
-                </div>
-
-            </a>
+                </a>
 
             {% endfor %}
 
         </div>
 
+        <div
+            class="no-filter-result"
+            id="noFilterResult"
+        >
+            <div style="font-size:38px;margin-bottom:10px;">
+                🔎
+            </div>
+
+            <strong>
+                Aucun signalement ne correspond aux filtres.
+            </strong>
+
+            <div style="margin-top:6px;">
+                Essayez une autre combinaison de filtres.
+            </div>
+        </div>
+
     {% else %}
 
         <div class="empty">
-            <div class="empty-icon">🎉</div>
-            <h3>Aucun signalement</h3>
-            <p>Tout semble fonctionner correctement.</p>
+
+            <div class="empty-icon">
+                🎉
+            </div>
+
+            <h3>
+                Aucun signalement
+            </h3>
+
+            <p>
+                Tout semble fonctionner correctement.
+            </p>
+
         </div>
 
     {% endif %}
 
 </section>
-```
+
 
 </main>
 
 <script>
+
 const VAPID_PUBLIC_KEY =
     "BAFbXzUBcO30aqu7ly0oIV0fhv3jDQRsIPUtuoGKiw67PjYUpyPD4QCC-k1SpIIuxgix4SvJyWeJRNyf7mrnQKI";
 
+
 function urlBase64ToUint8Array(base64String) {
-    const padding = "=".repeat((4 - base64String.length % 4) % 4);
 
-    const base64 = (base64String + padding)
-        .replace(/-/g, "+")
-        .replace(/_/g, "/");
+    const padding =
+        "=".repeat(
+            (4 - base64String.length % 4) % 4
+        );
 
-    const rawData = window.atob(base64);
+    const base64 =
+        (base64String + padding)
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+
+    const rawData =
+        window.atob(base64);
 
     return Uint8Array.from(
-        [...rawData].map(char => char.charCodeAt(0))
+        [...rawData].map(
+            char => char.charCodeAt(0)
+        )
     );
 }
 
+
 async function activerNotifications() {
 
-    const button = document.getElementById("notificationButton");
-    const box = document.getElementById("notificationBox");
-    const message = document.getElementById("notificationMessage");
-    const status = document.getElementById("notificationStatus");
+    const button =
+        document.getElementById(
+            "notificationButton"
+        );
+
+    const box =
+        document.getElementById(
+            "notificationBox"
+        );
+
+    const message =
+        document.getElementById(
+            "notificationMessage"
+        );
+
+    const status =
+        document.getElementById(
+            "notificationStatus"
+        );
 
     box.classList.add("show");
 
     if (!("serviceWorker" in navigator)) {
-        message.textContent = "Les notifications ne sont pas prises en charge par ce navigateur.";
+
+        message.textContent =
+            "Les notifications ne sont pas prises en charge par ce navigateur.";
+
         return;
     }
 
     if (!("PushManager" in window)) {
-        message.textContent = "Les notifications push ne sont pas prises en charge par ce navigateur.";
+
+        message.textContent =
+            "Les notifications push ne sont pas prises en charge par ce navigateur.";
+
         return;
     }
 
     try {
 
         button.disabled = true;
-        button.textContent = "⏳ Activation...";
 
-        message.textContent = "Demande d'autorisation des notifications...";
+        button.textContent =
+            "⏳ Activation...";
 
-        const permission = await Notification.requestPermission();
+        message.textContent =
+            "Demande d'autorisation des notifications...";
+
+        const permission =
+            await Notification.requestPermission();
 
         if (permission !== "granted") {
+
             message.textContent =
                 "Les notifications sont désactivées. Autorisez-les dans les paramètres du navigateur.";
+
             button.disabled = false;
-            button.textContent = "🔔 Réessayer";
+
+            button.textContent =
+                "🔔 Réessayer";
+
             return;
         }
 
         const registration =
-            await navigator.serviceWorker.register("/service-worker.js");
+            await navigator.serviceWorker.register(
+                "/service-worker.js"
+            );
 
         let subscription =
             await registration.pushManager.getSubscription();
@@ -658,22 +1007,38 @@ async function activerNotifications() {
             subscription =
                 await registration.pushManager.subscribe({
                     userVisibleOnly: true,
+
                     applicationServerKey:
-                        urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                        urlBase64ToUint8Array(
+                            VAPID_PUBLIC_KEY
+                        )
                 });
 
         }
 
-        const response = await fetch("/api/push/subscribe", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(subscription.toJSON())
-        });
+        const response =
+            await fetch(
+                "/api/push/subscribe",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify(
+                            subscription.toJSON()
+                        )
+                }
+            );
 
         if (!response.ok) {
-            throw new Error("Erreur lors de l'enregistrement de l'abonnement.");
+
+            throw new Error(
+                "Erreur lors de l'enregistrement de l'abonnement."
+            );
         }
 
         message.textContent =
@@ -682,8 +1047,13 @@ async function activerNotifications() {
         status.textContent =
             "Vous recevrez une notification lorsqu'un nouveau signalement sera créé.";
 
-        button.textContent = "🔔 Notifications activées";
-        button.classList.add("notification-active");
+        button.textContent =
+            "🔔 Notifications activées";
+
+        button.classList.add(
+            "notification-active"
+        );
+
         button.disabled = true;
 
     } catch (error) {
@@ -693,12 +1063,16 @@ async function activerNotifications() {
         message.textContent =
             "Impossible d'activer les notifications pour le moment.";
 
-        status.textContent = error.message;
+        status.textContent =
+            error.message;
 
         button.disabled = false;
-        button.textContent = "🔔 Réessayer";
+
+        button.textContent =
+            "🔔 Réessayer";
     }
 }
+
 
 async function verifierNotifications() {
 
@@ -708,17 +1082,353 @@ async function verifierNotifications() {
 
     if (Notification.permission === "granted") {
 
-        const box = document.getElementById("notificationBox");
-        const button = document.getElementById("notificationButton");
+        const box =
+            document.getElementById(
+                "notificationBox"
+            );
+
+        const button =
+            document.getElementById(
+                "notificationButton"
+            );
 
         box.classList.add("show");
 
-        button.textContent = "🔔 Notifications déjà autorisées";
-        button.classList.add("notification-active");
+        button.textContent =
+            "🔔 Notifications déjà autorisées";
+
+        button.classList.add(
+            "notification-active"
+        );
     }
 }
 
-verifierNotifications();
+
+function formaterDuree(secondes) {
+
+    secondes =
+        Math.max(
+            0,
+            Math.floor(secondes)
+        );
+
+    const jours =
+        Math.floor(
+            secondes / 86400
+        );
+
+    secondes %= 86400;
+
+    const heures =
+        Math.floor(
+            secondes / 3600
+        );
+
+    secondes %= 3600;
+
+    const minutes =
+        Math.floor(
+            secondes / 60
+        );
+
+    secondes %= 60;
+
+    if (jours > 0) {
+
+        return (
+            jours +
+            " j " +
+            heures +
+            " h " +
+            minutes +
+            " min"
+        );
+    }
+
+    if (heures > 0) {
+
+        return (
+            heures +
+            " h " +
+            minutes +
+            " min"
+        );
+    }
+
+    if (minutes > 0) {
+
+        return (
+            minutes +
+            " min " +
+            secondes +
+            " s"
+        );
+    }
+
+    return secondes + " s";
+}
+
+
+function convertirDate(dateString) {
+
+    if (!dateString) {
+        return null;
+    }
+
+    let valeur =
+        String(dateString).trim();
+
+    /*
+     * Supabase peut renvoyer une date avec
+     * un espace au lieu du T.
+     */
+    valeur =
+        valeur.replace(
+            " ",
+            "T"
+        );
+
+    const date =
+        new Date(valeur);
+
+    if (Number.isNaN(date.getTime())) {
+        return null;
+    }
+
+    return date;
+}
+
+
+function mettreAJourChronometres() {
+
+    const elements =
+        document.querySelectorAll(
+            "[data-timer]"
+        );
+
+    const maintenant =
+        Date.now();
+
+    elements.forEach(
+        function(timer) {
+
+            const item =
+                timer.closest(
+                    ".problem-item"
+                );
+
+            if (!item) {
+                return;
+            }
+
+            const dateCreation =
+                convertirDate(
+                    item.dataset.dateCreation
+                );
+
+            if (!dateCreation) {
+
+                timer.textContent =
+                    "⏱️ Date inconnue";
+
+                return;
+            }
+
+            const dateModification =
+                convertirDate(
+                    item.dataset.dateModification
+                );
+
+            const statut =
+                item.dataset.statut;
+
+            let fin;
+
+            /*
+             * Pour un problème résolu, on utilise
+             * date_modification comme moment de résolution.
+             */
+            if (
+                statut === "resolu" &&
+                dateModification
+            ) {
+
+                fin =
+                    dateModification.getTime();
+
+                timer.classList.remove(
+                    "running"
+                );
+
+                timer.classList.add(
+                    "finished"
+                );
+
+            } else {
+
+                /*
+                 * Pour un problème encore actif,
+                 * le chrono continue en temps réel.
+                 */
+                fin =
+                    maintenant;
+
+                timer.classList.remove(
+                    "finished"
+                );
+
+                timer.classList.add(
+                    "running"
+                );
+            }
+
+            const duree =
+                Math.floor(
+                    (
+                        fin -
+                        dateCreation.getTime()
+                    ) / 1000
+                );
+
+            if (
+                statut === "resolu"
+            ) {
+
+                timer.textContent =
+                    "⏱️ Résolu en " +
+                    formaterDuree(
+                        duree
+                    );
+
+            } else {
+
+                timer.textContent =
+                    "⏱️ Temps écoulé : " +
+                    formaterDuree(
+                        duree
+                    );
+            }
+
+        }
+    );
+}
+
+
+function appliquerFiltres() {
+
+    const urgence =
+        document.getElementById(
+            "urgenceFilter"
+        ).value;
+
+    const categorie =
+        document.getElementById(
+            "categorieFilter"
+        ).value;
+
+    const problemes =
+        document.querySelectorAll(
+            ".problem-item"
+        );
+
+    const resultat =
+        document.getElementById(
+            "filterResult"
+        );
+
+    const aucun =
+        document.getElementById(
+            "noFilterResult"
+        );
+
+    let visibles = 0;
+
+    problemes.forEach(
+        function(probleme) {
+
+            const urgenceProbleme =
+                probleme.dataset.urgence;
+
+            const categorieProbleme =
+                probleme.dataset.categorie;
+
+            const urgenceOK =
+                urgence === "tous" ||
+                urgenceProbleme === urgence;
+
+            const categorieOK =
+                categorie === "toutes" ||
+                categorieProbleme === categorie;
+
+            if (
+                urgenceOK &&
+                categorieOK
+            ) {
+
+                probleme.classList.remove(
+                    "hidden-by-filter"
+                );
+
+                visibles++;
+
+            } else {
+
+                probleme.classList.add(
+                    "hidden-by-filter"
+                );
+            }
+        }
+    );
+
+    if (resultat) {
+
+        resultat.textContent =
+            visibles +
+            " signalement" +
+            (visibles > 1 ? "s" : "") +
+            " affiché" +
+            (visibles > 1 ? "s" : "");
+    }
+
+    if (aucun) {
+
+        if (visibles === 0) {
+
+            aucun.classList.add(
+                "show"
+            );
+
+        } else {
+
+            aucun.classList.remove(
+                "show"
+            );
+        }
+    }
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        mettreAJourChronometres();
+
+        appliquerFiltres();
+
+        verifierNotifications();
+
+        /*
+         * Actualisation du chrono toutes les secondes.
+         */
+        setInterval(
+            mettreAJourChronometres,
+            1000
+        );
+
+    }
+);
+
 </script>
 
 </body>

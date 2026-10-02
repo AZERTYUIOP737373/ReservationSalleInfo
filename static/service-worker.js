@@ -1,7 +1,7 @@
 
 self.addEventListener("push", function (event) {
     let data = {
-        title: "Collège SOS",
+        title: "CollÃ¨ge SOS",
         body: "Nouveau signalement",
         url: "/dashboard",
         tag: "college-sos"
@@ -27,7 +27,7 @@ self.addEventListener("push", function (event) {
 
     event.waitUntil(
         self.registration.showNotification(
-            data.title || "Collège SOS",
+            data.title || "CollÃ¨ge SOS",
             options
         )
     );
@@ -37,15 +37,65 @@ self.addEventListener("push", function (event) {
 self.addEventListener("notificationclick", function (event) {
     event.notification.close();
 
-    let targetUrl = event.notification.data?.url || "/dashboard";
+    const notificationData = event.notification.data || {};
+    let targetUrl = notificationData.url || "/dashboard";
 
-    /*
-     * Toujours construire l'adresse à partir du site
-     * qui a enregistré le service worker.
-     */
-    const url = new URL(targetUrl, self.location.origin);
+    try {
+        const url = new URL(targetUrl, self.location.origin);
 
-    event.waitUntil(
-        clients.openWindow(url.href)
-    );
+        /*
+         * On force l'utilisation du domaine Render.
+         * Cela Ã©vite les anciennes adresses locales
+         * comme 127.0.0.1 ou localhost.
+         */
+        const renderUrl =
+            "https://reservation-salle-info.onrender.com" +
+            url.pathname +
+            url.search +
+            url.hash;
+
+        event.waitUntil(
+            clients.matchAll({
+                type: "window",
+                includeUncontrolled: true
+            }).then(function (clientList) {
+
+                /*
+                 * Si le site Render est dÃ©jÃ  ouvert,
+                 * on essaie de le mettre au premier plan.
+                 */
+                for (const client of clientList) {
+                    try {
+                        const clientUrl = new URL(client.url);
+
+                        if (
+                            clientUrl.origin ===
+                            "https://reservation-salle-info.onrender.com"
+                        ) {
+                            return client.focus().then(function () {
+                                if ("navigate" in client) {
+                                    return client.navigate(renderUrl);
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        // On continue vers openWindow
+                    }
+                }
+
+                /*
+                 * Sinon on ouvre directement une nouvelle
+                 * fenÃªtre/onglet vers le site Render.
+                 */
+                return clients.openWindow(renderUrl);
+            })
+        );
+
+    } catch (error) {
+        event.waitUntil(
+            clients.openWindow(
+                "https://reservation-salle-info.onrender.com/dashboard"
+            )
+        );
+    }
 });

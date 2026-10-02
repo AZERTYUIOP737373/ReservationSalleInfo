@@ -1,3 +1,4 @@
+
 self.addEventListener("push", function (event) {
     let data = {
         title: "Collège SOS",
@@ -15,9 +16,7 @@ self.addEventListener("push", function (event) {
     }
 
     const options = {
-        body: data.body,
-        icon: "/static/icon-192.png",
-        badge: "/static/icon-192.png",
+        body: data.body || "Nouveau signalement",
         tag: data.tag || "college-sos",
         renotify: true,
         requireInteraction: true,
@@ -38,11 +37,38 @@ self.addEventListener("push", function (event) {
 self.addEventListener("notificationclick", function (event) {
     event.notification.close();
 
-    const targetUrl =
+    let targetUrl = "/dashboard";
+
+    if (
         event.notification.data &&
         event.notification.data.url
-            ? event.notification.data.url
-            : "/dashboard";
+    ) {
+        targetUrl = event.notification.data.url;
+    }
+
+    /*
+     * Si l'ancienne notification contient une adresse locale
+     * comme 127.0.0.1 ou localhost, on la remplace par
+     * l'adresse actuelle du site.
+     */
+    try {
+        const parsedUrl = new URL(
+            targetUrl,
+            self.location.origin
+        );
+
+        if (
+            parsedUrl.hostname === "127.0.0.1" ||
+            parsedUrl.hostname === "localhost" ||
+            parsedUrl.hostname === "0.0.0.0"
+        ) {
+            targetUrl = "/dashboard";
+        } else {
+            targetUrl = parsedUrl.href;
+        }
+    } catch (error) {
+        targetUrl = "/dashboard";
+    }
 
     event.waitUntil(
         clients.matchAll({
@@ -51,10 +77,16 @@ self.addEventListener("notificationclick", function (event) {
         }).then(function (clientList) {
 
             for (const client of clientList) {
+
+                if ("navigate" in client) {
+                    return client.navigate(targetUrl)
+                        .then(function () {
+                            return client.focus();
+                        });
+                }
+
                 if ("focus" in client) {
-                    return client.focus().then(function () {
-                        return client.navigate(targetUrl);
-                    });
+                    return client.focus();
                 }
             }
 

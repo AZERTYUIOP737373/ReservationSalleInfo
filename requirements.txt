@@ -1,5 +1,5 @@
-Flask
+flask
 gunicorn
-psycopg2-binary
-python-dotenv
-supabasepywebpush
+supabase
+werkzeug
+pywebpush

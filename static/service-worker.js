@@ -1,7 +1,6 @@
-
 self.addEventListener("push", function (event) {
     let data = {
-        title: "CollÃ¨ge SOS",
+        title: "Collège SOS",
         body: "Nouveau signalement",
         url: "/dashboard",
         tag: "college-sos"
@@ -27,7 +26,7 @@ self.addEventListener("push", function (event) {
 
     event.waitUntil(
         self.registration.showNotification(
-            data.title || "CollÃ¨ge SOS",
+            data.title || "Collège SOS",
             options
         )
     );
@@ -41,13 +40,11 @@ self.addEventListener("notificationclick", function (event) {
     let targetUrl = notificationData.url || "/dashboard";
 
     try {
-        const url = new URL(targetUrl, self.location.origin);
+        const url = new URL(
+            targetUrl,
+            "https://reservation-salle-info.onrender.com"
+        );
 
-        /*
-         * On force l'utilisation du domaine Render.
-         * Cela Ã©vite les anciennes adresses locales
-         * comme 127.0.0.1 ou localhost.
-         */
         const renderUrl =
             "https://reservation-salle-info.onrender.com" +
             url.pathname +
@@ -55,40 +52,7 @@ self.addEventListener("notificationclick", function (event) {
             url.hash;
 
         event.waitUntil(
-            clients.matchAll({
-                type: "window",
-                includeUncontrolled: true
-            }).then(function (clientList) {
-
-                /*
-                 * Si le site Render est dÃ©jÃ  ouvert,
-                 * on essaie de le mettre au premier plan.
-                 */
-                for (const client of clientList) {
-                    try {
-                        const clientUrl = new URL(client.url);
-
-                        if (
-                            clientUrl.origin ===
-                            "https://reservation-salle-info.onrender.com"
-                        ) {
-                            return client.focus().then(function () {
-                                if ("navigate" in client) {
-                                    return client.navigate(renderUrl);
-                                }
-                            });
-                        }
-                    } catch (error) {
-                        // On continue vers openWindow
-                    }
-                }
-
-                /*
-                 * Sinon on ouvre directement une nouvelle
-                 * fenÃªtre/onglet vers le site Render.
-                 */
-                return clients.openWindow(renderUrl);
-            })
+            clients.openWindow(renderUrl)
         );
 
     } catch (error) {
@@ -99,3 +63,4 @@ self.addEventListener("notificationclick", function (event) {
         );
     }
 });
+

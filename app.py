@@ -1,5 +1,4 @@
-﻿
-import os
+﻿import os
 import uuid
 import json
 from functools import wraps
@@ -155,7 +154,33 @@ def recuperer_utilisateur(username):
     return result.data[0]
 
 
+def supprimer_abonnement_push(endpoint):
+    if not endpoint:
+        return
+
+    try:
+        (
+            supabase
+            .table("push_subscriptions")
+            .delete()
+            .eq("endpoint", endpoint)
+            .execute()
+        )
+
+        print("[PUSH] Abonnement supprimé :", endpoint[:80])
+
+    except Exception as e:
+        print(
+            "[PUSH] Impossible de supprimer l'abonnement :",
+            repr(e)
+        )
+
+
 def envoyer_notification_admins(probleme):
+    print("[PUSH] ========================================")
+    print("[PUSH] Début envoi notification")
+    print("[PUSH] Signalement :", probleme.get("id"))
+
     try:
         admins_result = (
             supabase
@@ -177,7 +202,10 @@ def envoyer_notification_admins(probleme):
             if admin.get("username")
         ]
 
+        print("[PUSH] Administrateurs :", noms_admins)
+
         if not noms_admins:
+            print("[PUSH] Aucun nom administrateur valide.")
             return
 
         subscriptions_result = (
@@ -189,6 +217,11 @@ def envoyer_notification_admins(probleme):
         )
 
         subscriptions = subscriptions_result.data or []
+
+        print(
+            "[PUSH] Nombre d'abonnements trouvés :",
+            len(subscriptions)
+        )
 
         if not subscriptions:
             print(
@@ -207,7 +240,7 @@ def envoyer_notification_admins(probleme):
             description = description[:137] + "..."
 
         if urgence == "urgente":
-            titre = "🚨 SIGNALement URGENT"
+            titre = "🚨 Signalement URGENT"
         else:
             titre = "🚨 Nouveau signalement"
 
@@ -216,31 +249,68 @@ def envoyer_notification_admins(probleme):
             f"{description}"
         )
 
+        # URL ABSOLUE afin que le navigateur ne puisse jamais
+        # interpréter l'adresse comme une ancienne URL locale.
+        url_signalement = (
+            f"https://reservation-salle-info.onrender.com"
+            f"/probleme/{probleme_id}"
+        )
+
         payload = {
             "title": titre,
             "body": corps,
-            "url": f"/probleme/{probleme_id}",
+            "url": url_signalement,
             "tag": f"signalement-{probleme_id}"
         }
 
-        for subscription in subscriptions:
-            endpoint = subscription.get("endpoint")
+        print("[PUSH] Payload :", json.dumps(
+            payload,
+            ensure_ascii=False
+        ))
 
-            if not endpoint:
+        succes = 0
+        echecs = 0
+
+        for subscription in subscriptions:
+
+            username = subscription.get("username")
+            endpoint = subscription.get("endpoint")
+            p256dh = subscription.get("p256dh")
+            auth = subscription.get("auth")
+
+            print(
+                "[PUSH] ----------------------------------------"
+            )
+            print("[PUSH] Utilisateur :", username)
+            print(
+                "[PUSH] Endpoint :",
+                endpoint[:100] if endpoint else "ABSENT"
+            )
+
+            if not endpoint or not p256dh or not auth:
+                print(
+                    "[PUSH] Abonnement incomplet -> suppression."
+                )
+
+                supprimer_abonnement_push(endpoint)
+                echecs += 1
                 continue
 
             subscription_info = {
                 "endpoint": endpoint,
                 "keys": {
-                    "p256dh": subscription.get("p256dh"),
-                    "auth": subscription.get("auth")
+                    "p256dh": p256dh,
+                    "auth": auth
                 }
             }
 
             try:
-                webpush(
+                response = webpush(
                     subscription_info=subscription_info,
-                    data=json.dumps(payload),
+                    data=json.dumps(
+                        payload,
+                        ensure_ascii=False
+                    ),
                     vapid_private_key=VAPID_PRIVATE_KEY,
                     vapid_claims={
                         "sub": VAPID_EMAIL
@@ -248,48 +318,90 @@ def envoyer_notification_admins(probleme):
                     ttl=86400
                 )
 
+                succes += 1
+
                 print(
-                    "[PUSH] Notification envoyée à",
-                    subscription.get("username")
+                    "[PUSH] ✓ Notification acceptée par le service Push"
                 )
+
+                if response is not None:
+                    try:
+                        print(
+                            "[PUSH] Réponse Push :",
+                            getattr(response, "status_code", response)
+                        )
+                    except Exception:
+                        pass
 
             except WebPushException as e:
-                status_code = getattr(
-                    e,
-                    "status_code",
-                    None
-                )
+                echecs += 1
+
+                response = getattr(e, "response", None)
+
+                status_code = None
+
+                if response is not None:
+                    status_code = getattr(
+                        response,
+                        "status_code",
+                        None
+                    )
+
+                if status_code is None:
+                    status_code = getattr(
+                        e,
+                        "status_code",
+                        None
+                    )
 
                 print(
-                    "[PUSH] Erreur Web Push :",
+                    "[PUSH] ✗ WebPushException"
+                )
+                print(
+                    "[PUSH] Utilisateur :",
+                    username
+                )
+                print(
+                    "[PUSH] Status HTTP :",
+                    status_code
+                )
+                print(
+                    "[PUSH] Erreur :",
                     repr(e)
                 )
 
-                if status_code in (404, 410):
+                if response is not None:
                     try:
-                        (
-                            supabase
-                            .table("push_subscriptions")
-                            .delete()
-                            .eq("endpoint", endpoint)
-                            .execute()
-                        )
-
                         print(
-                            "[PUSH] Ancien abonnement supprimé."
+                            "[PUSH] Réponse serveur :",
+                            response.text[:1000]
                         )
+                    except Exception:
+                        pass
 
-                    except Exception as delete_error:
-                        print(
-                            "[PUSH] Erreur suppression abonnement :",
-                            delete_error
-                        )
+                # Un abonnement avec 404/410 est généralement
+                # définitivement expiré.
+                if status_code in (404, 410):
+                    print(
+                        "[PUSH] Abonnement expiré/introuvable."
+                    )
+
+                    supprimer_abonnement_push(endpoint)
 
             except Exception as e:
+                echecs += 1
+
                 print(
-                    "[PUSH] Erreur inattendue :",
+                    "[PUSH] ✗ Erreur inattendue :",
                     repr(e)
                 )
+
+        print("[PUSH] ========================================")
+        print(
+            f"[PUSH] Résultat : {succes} accepté(s), "
+            f"{echecs} échec(s)"
+        )
+        print("[PUSH] ========================================")
 
     except Exception as e:
         print(
@@ -915,11 +1027,19 @@ def push_subscribe():
             "error": "Données manquantes."
         }), 400
 
-    endpoint = data.get("endpoint")
+    endpoint = str(
+        data.get("endpoint") or ""
+    ).strip()
+
     keys = data.get("keys") or {}
 
-    p256dh = keys.get("p256dh")
-    auth = keys.get("auth")
+    p256dh = str(
+        keys.get("p256dh") or ""
+    ).strip()
+
+    auth = str(
+        keys.get("auth") or ""
+    ).strip()
 
     if not endpoint or not p256dh or not auth:
         return jsonify({
@@ -928,6 +1048,18 @@ def push_subscribe():
         }), 400
 
     try:
+        # Un endpoint correspond à un appareil/navigateur.
+        # On supprime d'abord toute ancienne association
+        # avec un autre compte.
+        (
+            supabase
+            .table("push_subscriptions")
+            .delete()
+            .eq("endpoint", endpoint)
+            .neq("username", user["username"])
+            .execute()
+        )
+
         result = (
             supabase
             .table("push_subscriptions")
@@ -944,10 +1076,19 @@ def push_subscribe():
         )
 
         if not result.data:
+            print(
+                "[PUSH] Echec enregistrement abonnement."
+            )
+
             return jsonify({
                 "success": False,
                 "error": "Impossible d'enregistrer l'abonnement."
             }), 500
+
+        print(
+            "[PUSH] Nouvel abonnement enregistré pour",
+            user["username"]
+        )
 
         return jsonify({
             "success": True
@@ -977,7 +1118,9 @@ def push_unsubscribe():
 
     data = request.get_json(silent=True) or {}
 
-    endpoint = data.get("endpoint")
+    endpoint = str(
+        data.get("endpoint") or ""
+    ).strip()
 
     if not endpoint:
         return jsonify({
@@ -993,6 +1136,11 @@ def push_unsubscribe():
             .eq("endpoint", endpoint)
             .eq("username", user["username"])
             .execute()
+        )
+
+        print(
+            "[PUSH] Abonnement supprimé pour",
+            user["username"]
         )
 
         return jsonify({
@@ -1012,11 +1160,21 @@ def push_unsubscribe():
 
 @app.route("/service-worker.js")
 def service_worker():
-    return send_from_directory(
+    response = send_from_directory(
         app.static_folder,
         "service-worker.js",
         mimetype="application/javascript"
     )
+
+    # Empêche le navigateur de conserver trop longtemps
+    # une ancienne version du service worker.
+    response.headers["Cache-Control"] = (
+        "no-cache, no-store, must-revalidate"
+    )
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
+    return response
 
 
 @app.route("/health")

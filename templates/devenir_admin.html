@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Devenir administrateur — Collège SOS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="page-center">
+
+    <div class="login-card">
+
+        <div class="login-icon">
+            ⚙️
+        </div>
+
+        <span class="badge">
+            ADMINISTRATION
+        </span>
+
+        <h1>
+            Devenir administrateur
+        </h1>
+
+        <p class="subtitle">
+            Transformez votre compte en compte administrateur.
+        </p>
+
+        {% if erreur %}
+
+        <div class="error-message">
+            {{ erreur }}
+        </div>
+
+        {% endif %}
+
+        {% if succes %}
+
+        <div class="success-message">
+            {{ succes }}
+        </div>
+
+        {% endif %}
+
+        <form method="POST">
+
+            <div class="field">
+
+                <label for="username">
+                    Identifiant du compte
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Votre identifiant"
+                    autocomplete="username"
+                    required
+                    autofocus
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="password">
+                    Mot de passe du compte
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Votre mot de passe"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="admin_password">
+                    Code administrateur
+                </label>
+
+                <input
+                    type="password"
+                    id="admin_password"
+                    name="admin_password"
+                    placeholder="Code fourni par l'administration"
+                    required
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="submit-button"
+                style="width: 100%;"
+            >
+                ⚙️ Devenir administrateur
+            </button>
+
+        </form>
+
+        <div style="
+            margin-top: 25px;
+            padding: 14px;
+            background: #f3f4f6;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        ">
+            Le code administrateur est nécessaire pour obtenir
+            les droits d'administration.
+        </div>
+
+        <a
+            href="{{ url_for('connexion') }}"
+            class="back-link"
+        >
+            ← Retour à la connexion
+        </a>
+
+        <a
+            href="{{ url_for('index') }}"
+            class="back-link"
+        >
+            ← Retour à Collège SOS
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,22 +1,69 @@
-﻿import os
+﻿
+import os
 import uuid
+import json
 from functools import wraps
-from flask import Flask, render_template, request, redirect, url_for, session, abort
+
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    abort,
+    jsonify,
+    send_from_directory
+)
+
 from supabase import create_client, Client
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from pywebpush import webpush, WebPushException
+
 
 app = Flask(__name__)
 
-app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-secret-change-me")
+app.secret_key = os.environ.get(
+    "FLASK_SECRET_KEY",
+    "dev-secret-change-me"
+)
+
 app.config["MAX_CONTENT_LENGTH"] = 8 * 1024 * 1024
+
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "admin123")
+
+PROF_SIGNUP_PASSWORD = os.environ.get(
+    "PROF_SIGNUP_PASSWORD",
+    "change-this-signup-password"
+)
+
+ADMIN_PROMOTION_PASSWORD = os.environ.get(
+    "ADMIN_PROMOTION_PASSWORD",
+    "change-this-admin-password"
+)
+
+
+VAPID_PRIVATE_KEY = "6dlCw-898B4sND2xNNSRMkyusOb3pOvApo07UTEmgww"
+
+VAPID_PUBLIC_KEY = "BAFbXzUBcO30aqu7ly0oIV0fhv3jDQRsIPUtuoGKiw67PjYUpyPD4QCC-k1SpIIuxgix4SvJyWeJRNyf7mrnQKI"
+
+VAPID_EMAIL = "mailto:baptiste.brygal@gmail.com"
+
 
 if not SUPABASE_URL or not SUPABASE_KEY:
-    raise RuntimeError("SUPABASE_URL et SUPABASE_KEY doivent être configurées.")
+    raise RuntimeError(
+        "SUPABASE_URL et SUPABASE_KEY doivent être configurées."
+    )
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+supabase: Client = create_client(
+    SUPABASE_URL,
+    SUPABASE_KEY
+)
+
 
 ALLOWED_IMAGES = {
     "image/jpeg": ".jpg",
@@ -25,56 +72,298 @@ ALLOWED_IMAGES = {
 }
 
 
-def admin_required(route):
+def get_current_user():
+    if not session.get("user_id"):
+        return None
+
+    return {
+        "id": session.get("user_id"),
+        "username": session.get("username"),
+        "role": session.get("role")
+    }
+
+
+def professor_required(route):
     @wraps(route)
     def wrapper(*args, **kwargs):
-        if not session.get("admin"):
+        user = get_current_user()
+
+        if not user:
             return redirect(url_for("connexion"))
+
+        if user.get("role") not in ("prof", "professeur"):
+            if user.get("role") == "admin":
+                return redirect(url_for("dashboard"))
+
+            session.clear()
+            return redirect(url_for("connexion"))
+
         return route(*args, **kwargs)
 
     return wrapper
 
 
+def admin_required(route):
+    @wraps(route)
+    def wrapper(*args, **kwargs):
+        user = get_current_user()
+
+        if not user:
+            return redirect(url_for("connexion"))
+
+        if user.get("role") != "admin":
+            if user.get("role") in ("prof", "professeur"):
+                return redirect(url_for("professeur"))
+
+            session.clear()
+            return redirect(url_for("connexion"))
+
+        return route(*args, **kwargs)
+
+    return wrapper
+
+
+def verifier_mot_de_passe(stored_password, password):
+    if not stored_password:
+        return False
+
+    try:
+        if check_password_hash(stored_password, password):
+            return True
+    except Exception:
+        pass
+
+    if stored_password == password:
+        return True
+
+    return False
+
+
+def recuperer_utilisateur(username):
+    result = (
+        supabase
+        .table("users")
+        .select("*")
+        .eq("username", username)
+        .limit(1)
+        .execute()
+    )
+
+    if not result.data:
+        return None
+
+    return result.data[0]
+
+
+def envoyer_notification_admins(probleme):
+    try:
+        admins_result = (
+            supabase
+            .table("users")
+            .select("username")
+            .eq("role", "admin")
+            .execute()
+        )
+
+        admins = admins_result.data or []
+
+        if not admins:
+            print("[PUSH] Aucun administrateur trouvé.")
+            return
+
+        noms_admins = [
+            admin.get("username")
+            for admin in admins
+            if admin.get("username")
+        ]
+
+        if not noms_admins:
+            return
+
+        subscriptions_result = (
+            supabase
+            .table("push_subscriptions")
+            .select("*")
+            .in_("username", noms_admins)
+            .execute()
+        )
+
+        subscriptions = subscriptions_result.data or []
+
+        if not subscriptions:
+            print(
+                "[PUSH] Aucun appareil administrateur "
+                "abonné aux notifications."
+            )
+            return
+
+        urgence = probleme.get("urgence", "normale")
+        salle = probleme.get("salle", "Salle inconnue")
+        categorie = probleme.get("categorie", "Problème")
+        description = probleme.get("description", "")
+        probleme_id = probleme.get("id")
+
+        if len(description) > 140:
+            description = description[:137] + "..."
+
+        if urgence == "urgente":
+            titre = "🚨 SIGNALement URGENT"
+        else:
+            titre = "🚨 Nouveau signalement"
+
+        corps = (
+            f"{salle} • {categorie}\n"
+            f"{description}"
+        )
+
+        payload = {
+            "title": titre,
+            "body": corps,
+            "url": f"/probleme/{probleme_id}",
+            "tag": f"signalement-{probleme_id}"
+        }
+
+        for subscription in subscriptions:
+            endpoint = subscription.get("endpoint")
+
+            if not endpoint:
+                continue
+
+            subscription_info = {
+                "endpoint": endpoint,
+                "keys": {
+                    "p256dh": subscription.get("p256dh"),
+                    "auth": subscription.get("auth")
+                }
+            }
+
+            try:
+                webpush(
+                    subscription_info=subscription_info,
+                    data=json.dumps(payload),
+                    vapid_private_key=VAPID_PRIVATE_KEY,
+                    vapid_claims={
+                        "sub": VAPID_EMAIL
+                    },
+                    ttl=86400
+                )
+
+                print(
+                    "[PUSH] Notification envoyée à",
+                    subscription.get("username")
+                )
+
+            except WebPushException as e:
+                status_code = getattr(
+                    e,
+                    "status_code",
+                    None
+                )
+
+                print(
+                    "[PUSH] Erreur Web Push :",
+                    repr(e)
+                )
+
+                if status_code in (404, 410):
+                    try:
+                        (
+                            supabase
+                            .table("push_subscriptions")
+                            .delete()
+                            .eq("endpoint", endpoint)
+                            .execute()
+                        )
+
+                        print(
+                            "[PUSH] Ancien abonnement supprimé."
+                        )
+
+                    except Exception as delete_error:
+                        print(
+                            "[PUSH] Erreur suppression abonnement :",
+                            delete_error
+                        )
+
+            except Exception as e:
+                print(
+                    "[PUSH] Erreur inattendue :",
+                    repr(e)
+                )
+
+    except Exception as e:
+        print(
+            "[PUSH] Impossible d'envoyer les notifications :",
+            repr(e)
+        )
+
+
 @app.route("/")
 def index():
-    auteur = session.get("auteur")
-    mes_signalements = []
+    user = get_current_user()
 
-    if auteur:
-        try:
-            result = (
-                supabase
-                .table("problemes")
-                .select("*")
-                .eq("auteur", auteur)
-                .order("date_creation", desc=True)
-                .execute()
-            )
+    if user:
+        if user.get("role") == "admin":
+            return redirect(url_for("dashboard"))
 
-            mes_signalements = result.data or []
-
-        except Exception as e:
-            print("Erreur récupération signalements :", e)
+        if user.get("role") in ("prof", "professeur"):
+            return redirect(url_for("professeur"))
 
     return render_template(
         "index.html",
+        user=None,
+        mes_signalements=[],
+        auteur=None
+    )
+
+
+@app.route("/professeur")
+@professor_required
+def professeur():
+    user = get_current_user()
+
+    mes_signalements = []
+
+    try:
+        result = (
+            supabase
+            .table("problemes")
+            .select("*")
+            .eq("auteur", user["username"])
+            .order("date_creation", desc=True)
+            .execute()
+        )
+
+        mes_signalements = result.data or []
+
+    except Exception as e:
+        print("Erreur récupération signalements :", e)
+
+    return render_template(
+        "index.html",
+        user=user,
         mes_signalements=mes_signalements,
-        auteur=auteur
+        auteur=user["username"]
     )
 
 
 @app.route("/signaler", methods=["POST"])
+@professor_required
 def signaler():
-    auteur = request.form.get("auteur", "").strip()
+    user = get_current_user()
+
+    if not user:
+        return redirect(url_for("connexion"))
+
+    auteur = user["username"]
+
     salle = request.form.get("salle", "").strip()
     categorie = request.form.get("categorie", "").strip()
     description = request.form.get("description", "").strip()
     urgence = request.form.get("urgence", "normale").strip()
 
-    if not auteur or not salle or not categorie or not description:
+    if not salle or not categorie or not description:
         return "Informations manquantes.", 400
-
-    session["auteur"] = auteur
 
     photo_url = None
 
@@ -84,7 +373,11 @@ def signaler():
         mime = photo.mimetype
 
         if mime not in ALLOWED_IMAGES:
-            return "Format d'image non autorisé. Utilisez JPG, PNG ou WEBP.", 400
+            return (
+                "Format d'image non autorisé. "
+                "Utilisez JPG, PNG ou WEBP.",
+                400
+            )
 
         extension = ALLOWED_IMAGES[mime]
         nom_fichier = f"{uuid.uuid4().hex}{extension}"
@@ -92,10 +385,16 @@ def signaler():
         photo_bytes = photo.read()
 
         if len(photo_bytes) > 8 * 1024 * 1024:
-            return "La photo est trop volumineuse. Maximum : 8 Mo.", 400
+            return (
+                "La photo est trop volumineuse. "
+                "Maximum : 8 Mo.",
+                400
+            )
 
         try:
-            supabase.storage.from_("signalements").upload(
+            supabase.storage.from_(
+                "signalements"
+            ).upload(
                 nom_fichier,
                 photo_bytes,
                 {
@@ -104,13 +403,21 @@ def signaler():
                 }
             )
 
-            photo_url = supabase.storage.from_("signalements").get_public_url(
-                nom_fichier
+            photo_url = (
+                supabase
+                .storage
+                .from_("signalements")
+                .get_public_url(
+                    nom_fichier
+                )
             )
 
         except Exception as e:
             print("Erreur upload photo :", e)
-            return "Impossible d'envoyer la photo.", 500
+            return (
+                "Impossible d'envoyer la photo.",
+                500
+            )
 
     data = {
         "auteur": auteur,
@@ -123,17 +430,138 @@ def signaler():
     }
 
     try:
-        result = supabase.table("problemes").insert(data).execute()
+        result = (
+            supabase
+            .table("problemes")
+            .insert(data)
+            .execute()
+        )
+
     except Exception as e:
         print("Erreur création signalement :", e)
-        return "Impossible de créer le signalement.", 500
+        return (
+            "Impossible de créer le signalement.",
+            500
+        )
 
     if not result.data:
-        return "Impossible de créer le signalement.", 500
+        return (
+            "Impossible de créer le signalement.",
+            500
+        )
 
     probleme = result.data[0]
 
-    return redirect(url_for("index"))
+    envoyer_notification_admins(probleme)
+
+    return redirect(url_for("professeur"))
+
+
+@app.route("/inscription", methods=["GET", "POST"])
+def inscription():
+    erreur = None
+    succes = None
+
+    if request.method == "POST":
+
+        username = request.form.get("username", "").strip()
+        password = request.form.get("password", "")
+        password_confirmation = request.form.get(
+            "password_confirmation",
+            ""
+        )
+        signup_password = request.form.get(
+            "signup_password",
+            ""
+        )
+
+        if (
+            not username
+            or not password
+            or not password_confirmation
+            or not signup_password
+        ):
+            erreur = "Tous les champs sont obligatoires."
+
+        elif signup_password != PROF_SIGNUP_PASSWORD:
+            erreur = (
+                "Le mot de passe administrateur "
+                "de création est incorrect."
+            )
+
+        elif password != password_confirmation:
+            erreur = (
+                "Les deux mots de passe "
+                "ne correspondent pas."
+            )
+
+        elif len(username) < 3:
+            erreur = (
+                "L'identifiant doit contenir "
+                "au moins 3 caractères."
+            )
+
+        elif len(password) < 8:
+            erreur = (
+                "Le mot de passe doit contenir "
+                "au moins 8 caractères."
+            )
+
+        else:
+            try:
+                existing = (
+                    supabase
+                    .table("users")
+                    .select("id")
+                    .eq("username", username)
+                    .execute()
+                )
+
+                if existing.data:
+                    erreur = (
+                        "Cet identifiant est "
+                        "déjà utilisé."
+                    )
+
+                else:
+                    password_hash = generate_password_hash(
+                        password
+                    )
+
+                    result = (
+                        supabase
+                        .table("users")
+                        .insert({
+                            "username": username,
+                            "password": password_hash,
+                            "role": "prof"
+                        })
+                        .execute()
+                    )
+
+                    if not result.data:
+                        erreur = (
+                            "Impossible de créer le compte."
+                        )
+                    else:
+                        succes = (
+                            "Compte professeur créé "
+                            "avec succès."
+                        )
+
+            except Exception as e:
+                print("Erreur création compte :", e)
+
+                erreur = (
+                    "Impossible de créer le compte. "
+                    "Vérifiez la configuration de Supabase."
+                )
+
+    return render_template(
+        "inscription.html",
+        erreur=erreur,
+        succes=succes
+    )
 
 
 @app.route("/connexion", methods=["GET", "POST"])
@@ -141,21 +569,213 @@ def connexion():
     erreur = None
 
     if request.method == "POST":
+
+        username = request.form.get("username", "").strip()
         password = request.form.get("password", "")
 
-        if password == ADMIN_PASSWORD:
-            session["admin"] = True
-            return redirect(url_for("dashboard"))
+        if not username or not password:
+            erreur = (
+                "Veuillez remplir tous les champs."
+            )
 
-        erreur = "Mot de passe incorrect."
+        else:
+            try:
+                user = recuperer_utilisateur(username)
 
-    return render_template("connexion.html", erreur=erreur)
+                if not user:
+                    erreur = (
+                        "Identifiant ou mot de passe incorrect."
+                    )
+
+                else:
+                    stored_password = user.get(
+                        "password",
+                        ""
+                    )
+
+                    password_ok = verifier_mot_de_passe(
+                        stored_password,
+                        password
+                    )
+
+                    if not password_ok:
+                        erreur = (
+                            "Identifiant ou mot de passe incorrect."
+                        )
+
+                    else:
+                        if stored_password == password:
+                            try:
+                                supabase.table(
+                                    "users"
+                                ).update({
+                                    "password": generate_password_hash(
+                                        password
+                                    )
+                                }).eq(
+                                    "id",
+                                    user["id"]
+                                ).execute()
+
+                            except Exception as e:
+                                print(
+                                    "Erreur sécurisation "
+                                    "ancien mot de passe :",
+                                    e
+                                )
+
+                        session.clear()
+
+                        session["user_id"] = user["id"]
+                        session["username"] = user["username"]
+                        session["role"] = user["role"]
+
+                        if user.get("role") == "admin":
+                            return redirect(
+                                url_for("dashboard")
+                            )
+
+                        if user.get("role") in (
+                            "prof",
+                            "professeur"
+                        ):
+                            return redirect(
+                                url_for("professeur")
+                            )
+
+                        session.clear()
+
+                        erreur = (
+                            "Le rôle de ce compte "
+                            "n'est pas reconnu."
+                        )
+
+            except Exception as e:
+                print("Erreur connexion :", e)
+
+                erreur = (
+                    "Erreur lors de la connexion."
+                )
+
+    return render_template(
+        "connexion.html",
+        erreur=erreur
+    )
+
+
+@app.route("/devenir-admin", methods=["GET", "POST"])
+def devenir_admin():
+    erreur = None
+    succes = None
+
+    if request.method == "POST":
+
+        username = request.form.get(
+            "username",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        admin_password = request.form.get(
+            "admin_password",
+            ""
+        )
+
+        if not username or not password or not admin_password:
+            erreur = "Tous les champs sont obligatoires."
+
+        elif admin_password != ADMIN_PROMOTION_PASSWORD:
+            erreur = "Le code administrateur est incorrect."
+
+        else:
+            try:
+                user = recuperer_utilisateur(username)
+
+                if not user:
+                    erreur = (
+                        "Aucun compte ne correspond "
+                        "à cet identifiant."
+                    )
+
+                else:
+                    stored_password = user.get(
+                        "password",
+                        ""
+                    )
+
+                    if not verifier_mot_de_passe(
+                        stored_password,
+                        password
+                    ):
+                        erreur = (
+                            "Identifiant ou mot de passe incorrect."
+                        )
+
+                    elif user.get("role") == "admin":
+                        erreur = (
+                            "Ce compte est déjà administrateur."
+                        )
+
+                    else:
+                        result = (
+                            supabase
+                            .table("users")
+                            .update({
+                                "role": "admin"
+                            })
+                            .eq(
+                                "id",
+                                user["id"]
+                            )
+                            .execute()
+                        )
+
+                        if not result.data:
+                            erreur = (
+                                "Impossible de modifier "
+                                "le rôle du compte."
+                            )
+
+                        else:
+                            session.clear()
+
+                            session["user_id"] = user["id"]
+                            session["username"] = user["username"]
+                            session["role"] = "admin"
+
+                            return redirect(
+                                url_for("dashboard")
+                            )
+
+            except Exception as e:
+                print(
+                    "Erreur promotion administrateur :",
+                    e
+                )
+
+                erreur = (
+                    "Impossible de devenir administrateur. "
+                    "Vérifiez la configuration de Supabase."
+                )
+
+    return render_template(
+        "devenir_admin.html",
+        erreur=erreur,
+        succes=succes
+    )
 
 
 @app.route("/deconnexion")
 def deconnexion():
-    session.pop("admin", None)
-    return redirect(url_for("index"))
+    session.clear()
+
+    return redirect(
+        url_for("index")
+    )
 
 
 @app.route("/dashboard")
@@ -165,25 +785,31 @@ def dashboard():
         supabase
         .table("problemes")
         .select("*")
-        .order("date_creation", desc=True)
+        .order(
+            "date_creation",
+            desc=True
+        )
         .execute()
     )
 
     problemes = result.data or []
 
     urgents = sum(
-        1 for p in problemes
+        1
+        for p in problemes
         if p.get("urgence") == "urgente"
         and p.get("statut") != "resolu"
     )
 
     en_cours = sum(
-        1 for p in problemes
+        1
+        for p in problemes
         if p.get("statut") == "en_cours"
     )
 
     resolus = sum(
-        1 for p in problemes
+        1
+        for p in problemes
         if p.get("statut") == "resolu"
     )
 
@@ -217,11 +843,21 @@ def probleme(probleme_id):
     )
 
 
-@app.route("/probleme/<int:probleme_id>/statut", methods=["POST"])
+@app.route(
+    "/probleme/<int:probleme_id>/statut",
+    methods=["POST"]
+)
 @admin_required
 def modifier_statut(probleme_id):
-    statut = request.form.get("statut", "nouveau")
-    responsable = request.form.get("responsable", "").strip()
+    statut = request.form.get(
+        "statut",
+        "nouveau"
+    )
+
+    responsable = request.form.get(
+        "responsable",
+        ""
+    ).strip()
 
     statuts_autorises = {
         "nouveau",
@@ -232,13 +868,155 @@ def modifier_statut(probleme_id):
     if statut not in statuts_autorises:
         return "Statut invalide.", 400
 
-    supabase.table("problemes").update({
+    supabase.table(
+        "problemes"
+    ).update({
         "statut": statut,
         "responsable": responsable,
         "date_modification": "now()"
-    }).eq("id", probleme_id).execute()
+    }).eq(
+        "id",
+        probleme_id
+    ).execute()
 
-    return redirect(url_for("probleme", probleme_id=probleme_id))
+    return redirect(
+        url_for(
+            "probleme",
+            probleme_id=probleme_id
+        )
+    )
+
+
+@app.route("/notifications")
+@admin_required
+def notifications():
+    return render_template(
+        "notifications.html",
+        vapid_public_key=VAPID_PUBLIC_KEY
+    )
+
+
+@app.route("/api/push/subscribe", methods=["POST"])
+@admin_required
+def push_subscribe():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({
+            "success": False,
+            "error": "Non connecté."
+        }), 401
+
+    data = request.get_json(silent=True)
+
+    if not data:
+        return jsonify({
+            "success": False,
+            "error": "Données manquantes."
+        }), 400
+
+    endpoint = data.get("endpoint")
+    keys = data.get("keys") or {}
+
+    p256dh = keys.get("p256dh")
+    auth = keys.get("auth")
+
+    if not endpoint or not p256dh or not auth:
+        return jsonify({
+            "success": False,
+            "error": "Abonnement invalide."
+        }), 400
+
+    try:
+        result = (
+            supabase
+            .table("push_subscriptions")
+            .upsert(
+                {
+                    "username": user["username"],
+                    "endpoint": endpoint,
+                    "p256dh": p256dh,
+                    "auth": auth
+                },
+                on_conflict="endpoint"
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return jsonify({
+                "success": False,
+                "error": "Impossible d'enregistrer l'abonnement."
+            }), 500
+
+        return jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+        print(
+            "Erreur enregistrement abonnement push :",
+            repr(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Erreur serveur."
+        }), 500
+
+
+@app.route("/api/push/unsubscribe", methods=["POST"])
+@admin_required
+def push_unsubscribe():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({
+            "success": False
+        }), 401
+
+    data = request.get_json(silent=True) or {}
+
+    endpoint = data.get("endpoint")
+
+    if not endpoint:
+        return jsonify({
+            "success": False,
+            "error": "Endpoint manquant."
+        }), 400
+
+    try:
+        (
+            supabase
+            .table("push_subscriptions")
+            .delete()
+            .eq("endpoint", endpoint)
+            .eq("username", user["username"])
+            .execute()
+        )
+
+        return jsonify({
+            "success": True
+        })
+
+    except Exception as e:
+        print(
+            "Erreur suppression abonnement push :",
+            repr(e)
+        )
+
+        return jsonify({
+            "success": False
+        }), 500
+
+
+@app.route("/service-worker.js")
+def service_worker():
+    return send_from_directory(
+        app.static_folder,
+        "service-worker.js",
+        mimetype="application/javascript"
+    )
 
 
 @app.route("/health")
@@ -247,4 +1025,8 @@ def health():
 
 
 if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(
+        host="127.0.0.1",
+        port=5000,
+        debug=True
+    )

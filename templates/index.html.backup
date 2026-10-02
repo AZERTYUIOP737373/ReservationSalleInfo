@@ -1,0 +1,463 @@
+﻿
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Collège SOS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="page-center">
+
+    <div class="login-card">
+
+        {% if user %}
+
+        <div class="login-icon">
+            👨‍🏫
+        </div>
+
+        <span class="badge">
+            COLLÈGE EDMOND ROSTAND
+        </span>
+
+        <h1>
+            Collège SOS
+        </h1>
+
+        <p class="subtitle">
+            Bonjour {{ user.username }} 👋
+        </p>
+
+        <div style="
+            margin-top: 25px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            text-align: center;
+        ">
+            <strong>
+                Signaler un problème
+            </strong>
+
+            <p style="
+                margin: 8px 0 0 0;
+                font-size: 14px;
+                color: #6b7280;
+            ">
+                Remplissez le formulaire ci-dessous.
+            </p>
+        </div>
+
+        <form
+            method="POST"
+            action="{{ url_for('signaler') }}"
+            enctype="multipart/form-data"
+            style="margin-top: 25px;"
+        >
+
+            <div class="field">
+
+                <label for="salle">
+                    Salle / emplacement
+                </label>
+
+                <input
+                    type="text"
+                    id="salle"
+                    name="salle"
+                    placeholder="Ex. Salle 204"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="categorie">
+                    Catégorie
+                </label>
+
+                <select
+                    id="categorie"
+                    name="categorie"
+                    required
+                    style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 1px solid #d1d5db;
+                        border-radius: 10px;
+                        background: white;
+                        font-size: 15px;
+                    "
+                >
+                    <option value="">Choisir une catégorie</option>
+                    <option value="Informatique">💻 Informatique</option>
+                    <option value="Électricité">💡 Électricité</option>
+                    <option value="Mobilier">🪑 Mobilier</option>
+                    <option value="Chauffage">🔥 Chauffage</option>
+                    <option value="Plomberie">🚰 Plomberie</option>
+                    <option value="Bâtiment">🏫 Bâtiment</option>
+                    <option value="Autre">🔧 Autre</option>
+                </select>
+
+            </div>
+
+            <div class="field">
+
+                <label for="description">
+                    Description du problème
+                </label>
+
+                <textarea
+                    id="description"
+                    name="description"
+                    rows="5"
+                    placeholder="Décrivez le problème..."
+                    required
+                    style="
+                        width: 100%;
+                        box-sizing: border-box;
+                        padding: 12px;
+                        border: 1px solid #d1d5db;
+                        border-radius: 10px;
+                        font-family: inherit;
+                        font-size: 15px;
+                        resize: vertical;
+                    "
+                ></textarea>
+
+            </div>
+
+            <div class="field">
+
+                <label for="urgence">
+                    Niveau d'urgence
+                </label>
+
+                <select
+                    id="urgence"
+                    name="urgence"
+                    required
+                    style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 1px solid #d1d5db;
+                        border-radius: 10px;
+                        background: white;
+                        font-size: 15px;
+                    "
+                >
+                    <option value="normale">
+                        🟢 Normale
+                    </option>
+
+                    <option value="urgente">
+                        🔴 Urgente
+                    </option>
+                </select>
+
+            </div>
+
+            <div class="field">
+
+                <label for="photo">
+                    Photo (facultatif)
+                </label>
+
+                <input
+                    type="file"
+                    id="photo"
+                    name="photo"
+                    accept="image/jpeg,image/png,image/webp"
+                >
+
+                <p style="
+                    font-size: 12px;
+                    color: #6b7280;
+                    margin-top: 6px;
+                ">
+                    JPG, PNG ou WEBP — maximum 8 Mo
+                </p>
+
+            </div>
+
+            <button
+                type="submit"
+                class="submit-button"
+                style="width: 100%;"
+            >
+                🚨 Envoyer le signalement
+            </button>
+
+        </form>
+
+        <div style="
+            margin-top: 40px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 25px;
+        ">
+
+            <h2 style="
+                margin-bottom: 8px;
+            ">
+                📋 Mes signalements
+            </h2>
+
+            <p style="
+                font-size: 14px;
+                color: #6b7280;
+                margin-bottom: 20px;
+            ">
+                Retrouvez ici les problèmes que vous avez signalés.
+            </p>
+
+            {% if mes_signalements %}
+
+                {% for probleme in mes_signalements %}
+
+                <div style="
+                    border: 1px solid #e5e7eb;
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-bottom: 14px;
+                    text-align: left;
+                    background: white;
+                ">
+
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        gap: 10px;
+                        align-items: center;
+                        flex-wrap: wrap;
+                    ">
+
+                        <strong>
+                            {{ probleme.salle }}
+                        </strong>
+
+                        {% if probleme.statut == "nouveau" %}
+
+                        <span style="
+                            background: #dbeafe;
+                            color: #1d4ed8;
+                            padding: 5px 10px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            font-weight: bold;
+                        ">
+                            🔵 Nouveau
+                        </span>
+
+                        {% elif probleme.statut == "en_cours" %}
+
+                        <span style="
+                            background: #fef3c7;
+                            color: #b45309;
+                            padding: 5px 10px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            font-weight: bold;
+                        ">
+                            🟠 En cours
+                        </span>
+
+                        {% elif probleme.statut == "resolu" %}
+
+                        <span style="
+                            background: #dcfce7;
+                            color: #15803d;
+                            padding: 5px 10px;
+                            border-radius: 20px;
+                            font-size: 12px;
+                            font-weight: bold;
+                        ">
+                            🟢 Résolu
+                        </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <p style="
+                        margin: 10px 0 5px 0;
+                        font-size: 14px;
+                        color: #374151;
+                    ">
+                        <strong>
+                            {{ probleme.categorie }}
+                        </strong>
+                    </p>
+
+                    <p style="
+                        margin: 0;
+                        font-size: 14px;
+                        color: #6b7280;
+                        line-height: 1.5;
+                    ">
+                        {{ probleme.description }}
+                    </p>
+
+                    {% if probleme.urgence == "urgente" %}
+
+                    <p style="
+                        margin-top: 10px;
+                        margin-bottom: 0;
+                        color: #dc2626;
+                        font-size: 13px;
+                        font-weight: bold;
+                    ">
+                        🔴 Signalement urgent
+                    </p>
+
+                    {% endif %}
+
+                </div>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div style="
+                    padding: 20px;
+                    background: #f9fafb;
+                    border-radius: 12px;
+                    color: #6b7280;
+                    font-size: 14px;
+                ">
+                    Vous n'avez encore envoyé aucun signalement.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+        <div style="
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        ">
+
+            <a
+                href="{{ url_for('devenir_admin') }}"
+                class="back-link"
+                style="
+                    display: block;
+                    padding: 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 10px;
+                    text-decoration: none;
+                "
+            >
+                ⚙️ Devenir administrateur
+            </a>
+
+            <a
+                href="{{ url_for('deconnexion') }}"
+                class="back-link"
+                style="
+                    display: block;
+                    padding: 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 10px;
+                    text-decoration: none;
+                "
+            >
+                🚪 Se déconnecter
+            </a>
+
+        </div>
+
+        {% else %}
+
+        <div class="login-icon">
+            🛠️
+        </div>
+
+        <span class="badge">
+            COLLÈGE EDMOND ROSTAND
+        </span>
+
+        <h1>
+            Collège SOS
+        </h1>
+
+        <p class="subtitle">
+            Un problème au collège ?<br>
+            Signalez-le en quelques secondes.
+        </p>
+
+        <div style="
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        ">
+
+            <a
+                href="{{ url_for('connexion') }}"
+                class="submit-button"
+                style="
+                    display: block;
+                    text-align: center;
+                    text-decoration: none;
+                "
+            >
+                🔐 Se connecter
+            </a>
+
+            <a
+                href="{{ url_for('inscription') }}"
+                class="back-link"
+                style="
+                    display: block;
+                    padding: 14px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 10px;
+                    text-decoration: none;
+                "
+            >
+                👨‍🏫 Créer un compte professeur
+            </a>
+
+            <a
+                href="{{ url_for('devenir_admin') }}"
+                class="back-link"
+                style="
+                    display: block;
+                    padding: 14px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 10px;
+                    text-decoration: none;
+                "
+            >
+                ⚙️ Devenir administrateur
+            </a>
+
+        </div>
+
+        <p style="
+            margin-top: 30px;
+            font-size: 13px;
+            color: #6b7280;
+            line-height: 1.5;
+        ">
+            Les professeurs doivent disposer du mot de passe
+            fourni par l'administration pour créer leur compte.
+        </p>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+</body>
+</html>

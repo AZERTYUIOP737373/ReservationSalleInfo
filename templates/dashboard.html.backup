@@ -1,0 +1,129 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Collège SOS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<header class="topbar">
+    <div>
+        <div class="logo">🛠️ Collège SOS</div>
+        <div class="school">Tableau de bord</div>
+    </div>
+
+    <a href="{{ url_for('deconnexion') }}" class="admin-link">
+        Déconnexion
+    </a>
+</header>
+
+<main class="container">
+
+    <section class="dashboard-header">
+        <div>
+            <span class="badge">ADMINISTRATION</span>
+            <h1>Signalements</h1>
+            <p>Suivez les problèmes du collège.</p>
+        </div>
+
+        <a href="{{ url_for('index') }}" class="button">
+            + Nouveau signalement
+        </a>
+    </section>
+
+    <section class="stats">
+
+        <div class="stat-card danger">
+            <span>🔴</span>
+            <strong>{{ urgents }}</strong>
+            <p>Urgents</p>
+        </div>
+
+        <div class="stat-card">
+            <span>🟠</span>
+            <strong>{{ en_cours }}</strong>
+            <p>En cours</p>
+        </div>
+
+        <div class="stat-card success">
+            <span>🟢</span>
+            <strong>{{ resolus }}</strong>
+            <p>Résolus</p>
+        </div>
+
+    </section>
+
+    <section class="card">
+
+        <h2>Signalements récents</h2>
+
+        {% if problemes %}
+
+            <div class="problem-list">
+
+                {% for probleme in problemes %}
+
+                <a
+                    href="{{ url_for('probleme', probleme_id=probleme.id) }}"
+                    class="problem-item"
+                >
+
+                    <div class="problem-main">
+
+                        <div class="problem-title">
+                            {{ probleme.categorie }}
+                        </div>
+
+                        <div class="problem-description">
+                            {{ probleme.description }}
+                        </div>
+
+                        <div class="problem-meta">
+                            Salle {{ probleme.salle }}
+                            {% if probleme.auteur %}
+                            · {{ probleme.auteur }}
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <div class="problem-status">
+
+                        {% if probleme.urgence == "urgente" %}
+                            <span class="tag urgent">URGENT</span>
+                        {% endif %}
+
+                        {% if probleme.statut == "nouveau" %}
+                            <span class="tag new">NOUVEAU</span>
+                        {% elif probleme.statut == "en_cours" %}
+                            <span class="tag progress">EN COURS</span>
+                        {% else %}
+                            <span class="tag done">RÉSOLU</span>
+                        {% endif %}
+
+                    </div>
+
+                </a>
+
+                {% endfor %}
+
+            </div>
+
+        {% else %}
+
+            <div class="empty">
+                <div>🎉</div>
+                <h3>Aucun signalement</h3>
+                <p>Tout semble fonctionner correctement.</p>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</main>
+
+</body>
+</html>

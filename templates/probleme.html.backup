@@ -1,0 +1,203 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>
+        Signalement #{{ probleme.id }} — Collège SOS
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div>
+        <div class="logo">
+            🛠️ Collège SOS
+        </div>
+
+        <div class="school">
+            Administration
+        </div>
+    </div>
+
+    <a
+        href="{{ url_for('dashboard') }}"
+        class="admin-link"
+    >
+        ← Dashboard
+    </a>
+
+</header>
+
+<main class="container">
+
+    <section class="card">
+
+        <span class="badge">
+            SIGNALEMENT #{{ probleme.id }}
+        </span>
+
+        <h1>
+            {{ probleme.categorie }}
+        </h1>
+
+        <div class="detail-grid">
+
+            <div>
+                <span class="detail-label">
+                    Salle
+                </span>
+
+                <strong>
+                    {{ probleme.salle }}
+                </strong>
+            </div>
+
+            <div>
+                <span class="detail-label">
+                    Auteur
+                </span>
+
+                <strong>
+                    {{ probleme.auteur or "Non renseigné" }}
+                </strong>
+            </div>
+
+            <div>
+                <span class="detail-label">
+                    Urgence
+                </span>
+
+                <strong>
+                    {{ probleme.urgence }}
+                </strong>
+            </div>
+
+            <div>
+                <span class="detail-label">
+                    Statut actuel
+                </span>
+
+                <strong>
+                    {{ probleme.statut }}
+                </strong>
+            </div>
+
+        </div>
+
+        <div class="description-box">
+
+            <span class="detail-label">
+                Description
+            </span>
+
+            <p>
+                {{ probleme.description }}
+            </p>
+
+        </div>
+
+        {% if probleme.photo_url %}
+
+        <div class="photo-section">
+
+            <span class="detail-label">
+                Photo du problème
+            </span>
+
+            <img
+                src="{{ probleme.photo_url }}"
+                alt="Photo du problème signalé"
+                class="problem-photo"
+            >
+
+        </div>
+
+        {% endif %}
+
+        <hr>
+
+        <h2>
+            Modifier le signalement
+        </h2>
+
+        <form
+            method="POST"
+            action="{{ url_for('modifier_statut', probleme_id=probleme.id) }}"
+        >
+
+            <div class="field">
+
+                <label for="statut">
+                    Statut
+                </label>
+
+                <select
+                    id="statut"
+                    name="statut"
+                >
+
+                    <option
+                        value="nouveau"
+                        {% if probleme.statut == "nouveau" %}selected{% endif %}
+                    >
+                        Nouveau
+                    </option>
+
+                    <option
+                        value="en_cours"
+                        {% if probleme.statut == "en_cours" %}selected{% endif %}
+                    >
+                        En cours
+                    </option>
+
+                    <option
+                        value="resolu"
+                        {% if probleme.statut == "resolu" %}selected{% endif %}
+                    >
+                        Résolu
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="field">
+
+                <label for="responsable">
+                    Responsable
+                </label>
+
+                <input
+                    type="text"
+                    id="responsable"
+                    name="responsable"
+                    value="{{ probleme.responsable or '' }}"
+                    placeholder="Personne chargée de l'intervention"
+                >
+
+            </div>
+
+            <button
+                class="submit-button"
+                type="submit"
+            >
+                💾 Enregistrer
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+</body>
+</html>

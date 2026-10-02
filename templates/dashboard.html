@@ -1,129 +1,725 @@
 ﻿<!DOCTYPE html>
+
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — Collège SOS</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+```
+<title>Administration — Collège SOS</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background: #f4f7fb;
+        color: #172033;
+    }
+
+    .topbar {
+        background: white;
+        border-bottom: 1px solid #e5eaf2;
+        padding: 18px 6%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 20px;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+
+    .brand {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+    }
+
+    .brand-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: #172033;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 23px;
+    }
+
+    .logo {
+        font-size: 19px;
+        font-weight: 800;
+    }
+
+    .school {
+        margin-top: 3px;
+        font-size: 12px;
+        color: #7b8495;
+    }
+
+    .logout {
+        text-decoration: none;
+        color: #555f70;
+        font-weight: 700;
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: 1px solid #e1e6ee;
+        background: white;
+    }
+
+    .logout:hover {
+        background: #f5f7fa;
+    }
+
+    .container {
+        width: min(1150px, 92%);
+        margin: 38px auto 60px;
+    }
+
+    .hero {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 25px;
+        margin-bottom: 28px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: #e8eefc;
+        color: #3157a5;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .08em;
+    }
+
+    h1 {
+        margin: 10px 0 6px;
+        font-size: clamp(30px, 5vw, 43px);
+        letter-spacing: -1.5px;
+    }
+
+    .hero p {
+        margin: 0;
+        color: #70798a;
+        font-size: 15px;
+    }
+
+    .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .button {
+        border: 0;
+        cursor: pointer;
+        text-decoration: none;
+        padding: 13px 17px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 14px;
+        background: #172033;
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .button:hover {
+        opacity: .9;
+    }
+
+    .button.secondary {
+        background: white;
+        color: #172033;
+        border: 1px solid #dfe5ee;
+    }
+
+    .button.notification-active {
+        background: #16794c;
+    }
+
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid #e5eaf2;
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 5px 20px rgba(20, 35, 60, .04);
+    }
+
+    .stat-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f5f8;
+    }
+
+    .stat-card strong {
+        display: block;
+        margin-top: 15px;
+        font-size: 31px;
+    }
+
+    .stat-card p {
+        margin: 3px 0 0;
+        color: #7a8495;
+        font-size: 13px;
+    }
+
+    .stat-card.danger .stat-icon {
+        background: #fff0f0;
+    }
+
+    .stat-card.progress .stat-icon {
+        background: #fff8e7;
+    }
+
+    .stat-card.success .stat-icon {
+        background: #eaf8f0;
+    }
+
+    .card {
+        background: white;
+        border: 1px solid #e5eaf2;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(20, 35, 60, .04);
+    }
+
+    .card-header {
+        padding: 22px 24px;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .card-header h2 {
+        margin: 0;
+        font-size: 19px;
+    }
+
+    .card-header p {
+        margin: 5px 0 0;
+        color: #7a8495;
+        font-size: 13px;
+    }
+
+    .problem-list {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .problem-item {
+        padding: 21px 24px;
+        border-bottom: 1px solid #edf0f5;
+        text-decoration: none;
+        color: inherit;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        transition: background .15s;
+    }
+
+    .problem-item:last-child {
+        border-bottom: 0;
+    }
+
+    .problem-item:hover {
+        background: #f8fafc;
+    }
+
+    .problem-main {
+        min-width: 0;
+    }
+
+    .problem-title {
+        font-size: 16px;
+        font-weight: 800;
+        margin-bottom: 7px;
+    }
+
+    .problem-description {
+        color: #626c7c;
+        line-height: 1.5;
+        font-size: 14px;
+        word-break: break-word;
+    }
+
+    .problem-meta {
+        margin-top: 9px;
+        color: #929baa;
+        font-size: 12px;
+    }
+
+    .problem-status {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 7px;
+        flex-shrink: 0;
+    }
+
+    .tag {
+        padding: 6px 9px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .tag.urgent {
+        background: #ffe7e7;
+        color: #c52c2c;
+    }
+
+    .tag.new {
+        background: #e8f0ff;
+        color: #315db8;
+    }
+
+    .tag.progress {
+        background: #fff1cc;
+        color: #9b6800;
+    }
+
+    .tag.done {
+        background: #ddf7e8;
+        color: #16794c;
+    }
+
+    .empty {
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    .empty-icon {
+        font-size: 45px;
+        margin-bottom: 12px;
+    }
+
+    .empty h3 {
+        margin: 0 0 6px;
+    }
+
+    .empty p {
+        margin: 0;
+        color: #7a8495;
+    }
+
+    .notification-box {
+        display: none;
+        margin-bottom: 22px;
+        background: linear-gradient(135deg, #172033, #273754);
+        color: white;
+        border-radius: 18px;
+        padding: 20px 22px;
+    }
+
+    .notification-box.show {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+    }
+
+    .notification-text strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .notification-text span {
+        color: #cbd4e3;
+        font-size: 13px;
+    }
+
+    .notification-button {
+        border: 0;
+        cursor: pointer;
+        background: white;
+        color: #172033;
+        padding: 11px 15px;
+        border-radius: 10px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .notification-status {
+        font-size: 12px;
+        margin-top: 7px;
+        color: #cbd4e3;
+    }
+
+    @media (max-width: 750px) {
+        .topbar {
+            padding: 15px 4%;
+        }
+
+        .container {
+            width: 92%;
+            margin-top: 25px;
+        }
+
+        .hero {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .actions {
+            width: 100%;
+        }
+
+        .actions .button {
+            flex: 1;
+        }
+
+        .stats {
+            grid-template-columns: 1fr;
+        }
+
+        .problem-item {
+            flex-direction: column;
+        }
+
+        .problem-status {
+            align-items: flex-start;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .notification-box.show {
+            align-items: stretch;
+            flex-direction: column;
+        }
+    }
+</style>
+```
+
 </head>
+
 <body>
 
 <header class="topbar">
-    <div>
-        <div class="logo">🛠️ Collège SOS</div>
-        <div class="school">Tableau de bord</div>
+    <div class="brand">
+        <div class="brand-icon">🛠️</div>
+        <div>
+            <div class="logo">Collège SOS</div>
+            <div class="school">Collège Edmond Rostand · Administration</div>
+        </div>
     </div>
 
-    <a href="{{ url_for('deconnexion') }}" class="admin-link">
-        Déconnexion
-    </a>
+```
+<a href="{{ url_for('deconnexion') }}" class="logout">
+    🚪 Déconnexion
+</a>
+```
+
 </header>
 
 <main class="container">
 
-    <section class="dashboard-header">
-        <div>
-            <span class="badge">ADMINISTRATION</span>
-            <h1>Signalements</h1>
-            <p>Suivez les problèmes du collège.</p>
-        </div>
+```
+<section class="hero">
+    <div>
+        <span class="badge">ADMINISTRATION</span>
+        <h1>Signalements</h1>
+        <p>Centralisez et suivez les problèmes signalés au collège.</p>
+    </div>
+
+    <div class="actions">
+        <button
+            type="button"
+            class="button secondary"
+            id="notificationButton"
+            onclick="activerNotifications()"
+        >
+            🔔 Activer les notifications
+        </button>
 
         <a href="{{ url_for('index') }}" class="button">
-            + Nouveau signalement
+            ＋ Nouveau signalement
         </a>
-    </section>
+    </div>
+</section>
 
-    <section class="stats">
+<div class="notification-box" id="notificationBox">
+    <div class="notification-text">
+        <strong>🔔 Notifications administrateur</strong>
+        <span id="notificationMessage">
+            Activez les notifications pour être prévenu lorsqu'un nouveau signalement arrive.
+        </span>
+        <div class="notification-status" id="notificationStatus"></div>
+    </div>
 
-        <div class="stat-card danger">
-            <span>🔴</span>
-            <strong>{{ urgents }}</strong>
-            <p>Urgents</p>
+    <button
+        type="button"
+        class="notification-button"
+        onclick="activerNotifications()"
+    >
+        Activer
+    </button>
+</div>
+
+<section class="stats">
+
+    <div class="stat-card danger">
+        <div class="stat-top">
+            <span>Signalements urgents</span>
+            <div class="stat-icon">🔴</div>
         </div>
 
-        <div class="stat-card">
-            <span>🟠</span>
-            <strong>{{ en_cours }}</strong>
-            <p>En cours</p>
+        <strong>{{ urgents }}</strong>
+        <p>À traiter en priorité</p>
+    </div>
+
+    <div class="stat-card progress">
+        <div class="stat-top">
+            <span>En cours</span>
+            <div class="stat-icon">🟠</div>
         </div>
 
-        <div class="stat-card success">
-            <span>🟢</span>
-            <strong>{{ resolus }}</strong>
-            <p>Résolus</p>
+        <strong>{{ en_cours }}</strong>
+        <p>Problèmes actuellement traités</p>
+    </div>
+
+    <div class="stat-card success">
+        <div class="stat-top">
+            <span>Résolus</span>
+            <div class="stat-icon">🟢</div>
         </div>
 
-    </section>
+        <strong>{{ resolus }}</strong>
+        <p>Problèmes terminés</p>
+    </div>
 
-    <section class="card">
+</section>
 
-        <h2>Signalements récents</h2>
+<section class="card">
 
-        {% if problemes %}
+    <div class="card-header">
+        <h2>📋 Signalements récents</h2>
+        <p>Cliquez sur un signalement pour consulter ses détails.</p>
+    </div>
 
-            <div class="problem-list">
+    {% if problemes %}
 
-                {% for probleme in problemes %}
+        <div class="problem-list">
 
-                <a
-                    href="{{ url_for('probleme', probleme_id=probleme.id) }}"
-                    class="problem-item"
-                >
+            {% for probleme in problemes %}
 
-                    <div class="problem-main">
+            <a
+                href="{{ url_for('probleme', probleme_id=probleme.id) }}"
+                class="problem-item"
+            >
 
-                        <div class="problem-title">
-                            {{ probleme.categorie }}
-                        </div>
+                <div class="problem-main">
 
-                        <div class="problem-description">
-                            {{ probleme.description }}
-                        </div>
-
-                        <div class="problem-meta">
-                            Salle {{ probleme.salle }}
-                            {% if probleme.auteur %}
-                            · {{ probleme.auteur }}
-                            {% endif %}
-                        </div>
-
+                    <div class="problem-title">
+                        {{ probleme.categorie }}
                     </div>
 
-                    <div class="problem-status">
-
-                        {% if probleme.urgence == "urgente" %}
-                            <span class="tag urgent">URGENT</span>
-                        {% endif %}
-
-                        {% if probleme.statut == "nouveau" %}
-                            <span class="tag new">NOUVEAU</span>
-                        {% elif probleme.statut == "en_cours" %}
-                            <span class="tag progress">EN COURS</span>
-                        {% else %}
-                            <span class="tag done">RÉSOLU</span>
-                        {% endif %}
-
+                    <div class="problem-description">
+                        {{ probleme.description }}
                     </div>
 
-                </a>
+                    <div class="problem-meta">
+                        📍 {{ probleme.salle }}
 
-                {% endfor %}
+                        {% if probleme.auteur %}
+                            · 👤 {{ probleme.auteur }}
+                        {% endif %}
+                    </div>
 
-            </div>
+                </div>
 
-        {% else %}
+                <div class="problem-status">
 
-            <div class="empty">
-                <div>🎉</div>
-                <h3>Aucun signalement</h3>
-                <p>Tout semble fonctionner correctement.</p>
-            </div>
+                    {% if probleme.urgence == "urgente" %}
+                        <span class="tag urgent">🔴 URGENT</span>
+                    {% endif %}
 
-        {% endif %}
+                    {% if probleme.statut == "nouveau" %}
+                        <span class="tag new">NOUVEAU</span>
 
-    </section>
+                    {% elif probleme.statut == "en_cours" %}
+                        <span class="tag progress">EN COURS</span>
+
+                    {% else %}
+                        <span class="tag done">RÉSOLU</span>
+                    {% endif %}
+
+                </div>
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+
+        <div class="empty">
+            <div class="empty-icon">🎉</div>
+            <h3>Aucun signalement</h3>
+            <p>Tout semble fonctionner correctement.</p>
+        </div>
+
+    {% endif %}
+
+</section>
+```
 
 </main>
+
+<script>
+const VAPID_PUBLIC_KEY =
+    "BAFbXzUBcO30aqu7ly0oIV0fhv3jDQRsIPUtuoGKiw67PjYUpyPD4QCC-k1SpIIuxgix4SvJyWeJRNyf7mrnQKI";
+
+function urlBase64ToUint8Array(base64String) {
+    const padding = "=".repeat((4 - base64String.length % 4) % 4);
+
+    const base64 = (base64String + padding)
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+
+    const rawData = window.atob(base64);
+
+    return Uint8Array.from(
+        [...rawData].map(char => char.charCodeAt(0))
+    );
+}
+
+async function activerNotifications() {
+
+    const button = document.getElementById("notificationButton");
+    const box = document.getElementById("notificationBox");
+    const message = document.getElementById("notificationMessage");
+    const status = document.getElementById("notificationStatus");
+
+    box.classList.add("show");
+
+    if (!("serviceWorker" in navigator)) {
+        message.textContent = "Les notifications ne sont pas prises en charge par ce navigateur.";
+        return;
+    }
+
+    if (!("PushManager" in window)) {
+        message.textContent = "Les notifications push ne sont pas prises en charge par ce navigateur.";
+        return;
+    }
+
+    try {
+
+        button.disabled = true;
+        button.textContent = "⏳ Activation...";
+
+        message.textContent = "Demande d'autorisation des notifications...";
+
+        const permission = await Notification.requestPermission();
+
+        if (permission !== "granted") {
+            message.textContent =
+                "Les notifications sont désactivées. Autorisez-les dans les paramètres du navigateur.";
+            button.disabled = false;
+            button.textContent = "🔔 Réessayer";
+            return;
+        }
+
+        const registration =
+            await navigator.serviceWorker.register("/service-worker.js");
+
+        let subscription =
+            await registration.pushManager.getSubscription();
+
+        if (!subscription) {
+
+            subscription =
+                await registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey:
+                        urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                });
+
+        }
+
+        const response = await fetch("/api/push/subscribe", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(subscription.toJSON())
+        });
+
+        if (!response.ok) {
+            throw new Error("Erreur lors de l'enregistrement de l'abonnement.");
+        }
+
+        message.textContent =
+            "Les notifications sont maintenant activées sur cet appareil.";
+
+        status.textContent =
+            "Vous recevrez une notification lorsqu'un nouveau signalement sera créé.";
+
+        button.textContent = "🔔 Notifications activées";
+        button.classList.add("notification-active");
+        button.disabled = true;
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.textContent =
+            "Impossible d'activer les notifications pour le moment.";
+
+        status.textContent = error.message;
+
+        button.disabled = false;
+        button.textContent = "🔔 Réessayer";
+    }
+}
+
+async function verifierNotifications() {
+
+    if (!("Notification" in window)) {
+        return;
+    }
+
+    if (Notification.permission === "granted") {
+
+        const box = document.getElementById("notificationBox");
+        const button = document.getElementById("notificationButton");
+
+        box.classList.add("show");
+
+        button.textContent = "🔔 Notifications déjà autorisées";
+        button.classList.add("notification-active");
+    }
+}
+
+verifierNotifications();
+</script>
 
 </body>
 </html>

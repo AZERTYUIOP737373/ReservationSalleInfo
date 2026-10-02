@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Créer un compte — Collège SOS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="page-center">
+
+    <div class="login-card">
+
+        <div class="login-icon">
+            👨‍🏫
+        </div>
+
+        <span class="badge">
+            COMPTE PROFESSEUR
+        </span>
+
+        <h1>
+            Collège SOS
+        </h1>
+
+        <p class="subtitle">
+            Créer votre compte professeur
+        </p>
+
+        {% if erreur %}
+        <div class="error-message">
+            {{ erreur }}
+        </div>
+        {% endif %}
+
+        {% if succes %}
+        <div class="success-message">
+            {{ succes }}
+        </div>
+        {% endif %}
+
+        <form method="POST">
+
+            <div class="field">
+
+                <label for="username">
+                    Identifiant
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Ex. M. Besset"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="password">
+                    Mot de passe
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="8 caractères minimum"
+                    autocomplete="new-password"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="password_confirmation">
+                    Confirmer le mot de passe
+                </label>
+
+                <input
+                    type="password"
+                    id="password_confirmation"
+                    name="password_confirmation"
+                    placeholder="Retapez votre mot de passe"
+                    autocomplete="new-password"
+                    required
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="signup_password">
+                    Mot de passe administrateur
+                </label>
+
+                <input
+                    type="password"
+                    id="signup_password"
+                    name="signup_password"
+                    placeholder="Mot de passe fourni par l'administration"
+                    required
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="submit-button"
+            >
+                👨‍🏫 Créer mon compte
+            </button>
+
+        </form>
+
+        <a
+            href="{{ url_for('connexion') }}"
+            class="back-link"
+        >
+            ← J'ai déjà un compte
+        </a>
+
+        <a
+            href="{{ url_for('index') }}"
+            class="back-link"
+        >
+            ← Retour à Collège SOS
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

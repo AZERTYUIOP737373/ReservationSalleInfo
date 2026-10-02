@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Connexion — Collège SOS</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="page-center">
+
+    <div class="login-card">
+
+        <div class="login-icon">
+            🔐
+        </div>
+
+        <span class="badge">
+            CONNEXION
+        </span>
+
+        <h1>
+            Collège SOS
+        </h1>
+
+        <p class="subtitle">
+            Connectez-vous à votre compte
+        </p>
+
+        {% if erreur %}
+
+        <div class="error-message">
+            {{ erreur }}
+        </div>
+
+        {% endif %}
+
+        <form method="POST">
+
+            <div class="field">
+
+                <label for="username">
+                    Identifiant
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Votre identifiant"
+                    autocomplete="username"
+                    required
+                    autofocus
+                >
+
+            </div>
+
+            <div class="field">
+
+                <label for="password">
+                    Mot de passe
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Votre mot de passe"
+                    autocomplete="current-password"
+                    required
+                >
+
+            </div>
+
+            <button
+                type="submit"
+                class="submit-button"
+            >
+                🔐 Se connecter
+            </button>
+
+        </form>
+
+        <div style="margin-top: 25px; text-align: center;">
+
+            <p style="margin-bottom: 10px;">
+                Vous n'avez pas encore de compte ?
+            </p>
+
+            <a
+                href="{{ url_for('inscription') }}"
+                class="back-link"
+            >
+                👨‍🏫 Créer un compte professeur
+            </a>
+
+        </div>
+
+        <a
+            href="{{ url_for('index') }}"
+            class="back-link"
+        >
+            ← Retour à Collège SOS
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

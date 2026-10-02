@@ -37,65 +37,15 @@ self.addEventListener("push", function (event) {
 self.addEventListener("notificationclick", function (event) {
     event.notification.close();
 
-    const notificationData = event.notification.data || {};
-    let targetUrl = notificationData.url || "/dashboard";
+    let targetUrl = event.notification.data?.url || "/dashboard";
 
-    try {
-        const url = new URL(targetUrl, self.location.origin);
+    /*
+     * Toujours construire l'adresse à partir du site
+     * qui a enregistré le service worker.
+     */
+    const url = new URL(targetUrl, self.location.origin);
 
-        /*
-         * On force l'utilisation du domaine Render.
-         * Cela évite les anciennes adresses locales
-         * comme 127.0.0.1 ou localhost.
-         */
-        const renderUrl =
-            "https://reservation-salle-info.onrender.com" +
-            url.pathname +
-            url.search +
-            url.hash;
-
-        event.waitUntil(
-            clients.matchAll({
-                type: "window",
-                includeUncontrolled: true
-            }).then(function (clientList) {
-
-                /*
-                 * Si le site Render est déjà ouvert,
-                 * on essaie de le mettre au premier plan.
-                 */
-                for (const client of clientList) {
-                    try {
-                        const clientUrl = new URL(client.url);
-
-                        if (
-                            clientUrl.origin ===
-                            "https://reservation-salle-info.onrender.com"
-                        ) {
-                            return client.focus().then(function () {
-                                if ("navigate" in client) {
-                                    return client.navigate(renderUrl);
-                                }
-                            });
-                        }
-                    } catch (error) {
-                        // On continue vers openWindow
-                    }
-                }
-
-                /*
-                 * Sinon on ouvre directement une nouvelle
-                 * fenêtre/onglet vers le site Render.
-                 */
-                return clients.openWindow(renderUrl);
-            })
-        );
-
-    } catch (error) {
-        event.waitUntil(
-            clients.openWindow(
-                "https://reservation-salle-info.onrender.com/dashboard"
-            )
-        );
-    }
+    event.waitUntil(
+        clients.openWindow(url.href)
+    );
 });

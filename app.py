@@ -1,4 +1,8 @@
 ﻿import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import uuid
 import json
 from functools import wraps
@@ -78,7 +82,8 @@ def get_current_user():
     return {
         "id": session.get("user_id"),
         "username": session.get("username"),
-        "role": session.get("role")
+        "role": session.get("role"),
+        "profile_photo_url": session.get("profile_photo_url")
     }
 
 
@@ -249,8 +254,6 @@ def envoyer_notification_admins(probleme):
             f"{description}"
         )
 
-        # URL ABSOLUE afin que le navigateur ne puisse jamais
-        # interpréter l'adresse comme une ancienne URL locale.
         url_signalement = (
             f"https://reservation-salle-info.onrender.com"
             f"/probleme/{probleme_id}"
@@ -379,8 +382,6 @@ def envoyer_notification_admins(probleme):
                     except Exception:
                         pass
 
-                # Un abonnement avec 404/410 est généralement
-                # définitivement expiré.
                 if status_code in (404, 410):
                     print(
                         "[PUSH] Abonnement expiré/introuvable."
@@ -434,6 +435,17 @@ def index():
 def professeur():
     user = get_current_user()
 
+    profil = recuperer_utilisateur(user["username"])
+
+    if profil:
+        user["profile_photo_url"] = profil.get(
+            "profile_photo_url"
+        )
+
+        session["profile_photo_url"] = profil.get(
+            "profile_photo_url"
+        )
+
     mes_signalements = []
 
     try:
@@ -457,6 +469,101 @@ def professeur():
         mes_signalements=mes_signalements,
         auteur=user["username"]
     )
+
+
+@app.route(
+    "/profil/photo",
+    methods=["POST"]
+)
+@professor_required
+def modifier_photo_profil():
+    user = get_current_user()
+
+    photo = request.files.get("profile_photo")
+
+    if not photo or not photo.filename:
+        return redirect(url_for("professeur"))
+
+    mime = photo.mimetype
+
+    if mime not in ALLOWED_IMAGES:
+        return (
+            "Format d'image non autorisé. "
+            "Utilisez JPG, PNG ou WEBP.",
+            400
+        )
+
+    photo_bytes = photo.read()
+
+    if len(photo_bytes) > 8 * 1024 * 1024:
+        return (
+            "La photo est trop volumineuse. "
+            "Maximum : 8 Mo.",
+            400
+        )
+
+    extension = ALLOWED_IMAGES[mime]
+
+    nom_fichier = (
+        f"profils/{uuid.uuid4().hex}{extension}"
+    )
+
+    try:
+        supabase.storage.from_(
+            "signalements"
+        ).upload(
+            nom_fichier,
+            photo_bytes,
+            {
+                "content-type": mime,
+                "upsert": "false"
+            }
+        )
+
+        photo_url = (
+            supabase
+            .storage
+            .from_("signalements")
+            .get_public_url(
+                nom_fichier
+            )
+        )
+
+        result = (
+            supabase
+            .table("users")
+            .update({
+                "profile_photo_url": photo_url
+            })
+            .eq(
+                "id",
+                user["id"]
+            )
+            .execute()
+        )
+
+        if not result.data:
+            return (
+                "Impossible d'enregistrer la photo.",
+                500
+            )
+
+        session["profile_photo_url"] = photo_url
+
+        return redirect(
+            url_for("professeur")
+        )
+
+    except Exception as e:
+        print(
+            "Erreur photo de profil :",
+            repr(e)
+        )
+
+        return (
+            "Impossible d'enregistrer la photo de profil.",
+            500
+        )
 
 
 @app.route("/signaler", methods=["POST"])
@@ -741,6 +848,9 @@ def connexion():
                         session["user_id"] = user["id"]
                         session["username"] = user["username"]
                         session["role"] = user["role"]
+                        session["profile_photo_url"] = user.get(
+                            "profile_photo_url"
+                        )
 
                         if user.get("role") == "admin":
                             return redirect(
@@ -858,6 +968,9 @@ def devenir_admin():
                             session["user_id"] = user["id"]
                             session["username"] = user["username"]
                             session["role"] = "admin"
+                            session["profile_photo_url"] = user.get(
+                                "profile_photo_url"
+                            )
 
                             return redirect(
                                 url_for("dashboard")
@@ -906,6 +1019,33 @@ def dashboard():
 
     problemes = result.data or []
 
+    auteurs = list({
+        p.get("auteur")
+        for p in problemes
+        if p.get("auteur")
+    })
+
+    profils = {}
+
+    if auteurs:
+        try:
+            users_result = (
+                supabase
+                .table("users")
+                .select("username,profile_photo_url")
+                .in_("username", auteurs)
+                .execute()
+            )
+
+            for profil in users_result.data or []:
+                profils[profil.get("username")] = profil
+
+        except Exception as e:
+            print(
+                "Erreur récupération photos de profil :",
+                repr(e)
+            )
+
     urgents = sum(
         1
         for p in problemes
@@ -930,7 +1070,8 @@ def dashboard():
         problemes=problemes,
         urgents=urgents,
         en_cours=en_cours,
-        resolus=resolus
+        resolus=resolus,
+        profils=profils
     )
 
 
@@ -949,9 +1090,37 @@ def probleme(probleme_id):
     if not result.data:
         abort(404)
 
+    probleme_data = result.data
+
+    auteur_user = None
+
+    if probleme_data.get("auteur"):
+        try:
+            auteur_result = (
+                supabase
+                .table("users")
+                .select("username,profile_photo_url")
+                .eq(
+                    "username",
+                    probleme_data["auteur"]
+                )
+                .limit(1)
+                .execute()
+            )
+
+            if auteur_result.data:
+                auteur_user = auteur_result.data[0]
+
+        except Exception as e:
+            print(
+                "Erreur récupération profil auteur :",
+                repr(e)
+            )
+
     return render_template(
         "probleme.html",
-        probleme=result.data
+        probleme=probleme_data,
+        auteur_user=auteur_user
     )
 
 
@@ -1048,9 +1217,6 @@ def push_subscribe():
         }), 400
 
     try:
-        # Un endpoint correspond à un appareil/navigateur.
-        # On supprime d'abord toute ancienne association
-        # avec un autre compte.
         (
             supabase
             .table("push_subscriptions")
@@ -1166,8 +1332,6 @@ def service_worker():
         mimetype="application/javascript"
     )
 
-    # Empêche le navigateur de conserver trop longtemps
-    # une ancienne version du service worker.
     response.headers["Cache-Control"] = (
         "no-cache, no-store, must-revalidate"
     )

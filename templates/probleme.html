@@ -12,6 +12,46 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
+
+    <style>
+        .author-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .author-profile-avatar {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #edf1f7;
+            border: 1px solid #dfe5ee;
+            box-shadow: 0 4px 12px rgba(20, 35, 60, .10);
+            overflow: hidden;
+            font-size: 22px;
+        }
+
+        .author-profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .author-profile-info strong {
+            font-size: 15px;
+        }
+
+        .author-profile-info span {
+            font-size: 11px;
+            color: #7b8495;
+        }
+    </style>
 </head>
 
 <body>
@@ -66,9 +106,48 @@
                     Auteur
                 </span>
 
-                <strong>
-                    {{ probleme.auteur or "Non renseigné" }}
-                </strong>
+                {% if probleme.auteur %}
+
+                    <div class="author-profile">
+
+                        {% if auteur_user and auteur_user.profile_photo_url %}
+
+                            <img
+                                src="{{ auteur_user.profile_photo_url }}"
+                                alt="Photo de {{ probleme.auteur }}"
+                                class="author-profile-avatar"
+                            >
+
+                        {% else %}
+
+                            <div class="author-profile-avatar">
+                                👤
+                            </div>
+
+                        {% endif %}
+
+                        <div class="author-profile-info">
+
+                            <strong>
+                                {{ probleme.auteur }}
+                            </strong>
+
+                            <span>
+                                Auteur du signalement
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                {% else %}
+
+                    <strong>
+                        Non renseigné
+                    </strong>
+
+                {% endif %}
+
             </div>
 
             <div>

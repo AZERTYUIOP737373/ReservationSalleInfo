@@ -427,6 +427,36 @@
             color: #929baa;
             font-size: 11px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .author-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .author-avatar {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #edf1f7;
+            border: 1px solid #dfe5ee;
+            box-shadow: 0 3px 9px rgba(20, 35, 60, .08);
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        .author-avatar-placeholder {
+            color: #6f7a8d;
         }
 
         .problem-status {
@@ -1006,6 +1036,8 @@
 
             {% for probleme in problemes %}
 
+                {% set profil = profils.get(probleme.auteur) if profils else none %}
+
                 <a
                     href="{{ url_for('probleme', probleme_id=probleme.id) }}"
                     class="problem-item"
@@ -1028,10 +1060,36 @@
 
                         <div class="problem-meta">
 
-                            📍 {{ probleme.salle }}
+                            <span>
+                                📍 {{ probleme.salle }}
+                            </span>
 
                             {% if probleme.auteur %}
-                                · 👤 {{ probleme.auteur }}
+
+                                <span class="author-inline">
+
+                                    {% if profil and profil.profile_photo_url %}
+
+                                        <img
+                                            src="{{ profil.profile_photo_url }}"
+                                            alt="Photo de {{ probleme.auteur }}"
+                                            class="author-avatar"
+                                        >
+
+                                    {% else %}
+
+                                        <span class="author-avatar author-avatar-placeholder">
+                                            👤
+                                        </span>
+
+                                    {% endif %}
+
+                                    <span>
+                                        {{ probleme.auteur }}
+                                    </span>
+
+                                </span>
+
                             {% endif %}
 
                         </div>
@@ -1650,4 +1708,3 @@ document.addEventListener(
 
 </body>
 </html>
-

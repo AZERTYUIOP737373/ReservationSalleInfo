@@ -1,6 +1,10 @@
 ﻿<!DOCTYPE html>
 
-<html lang="fr"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
 <title>Collège SOS</title>
 
@@ -128,6 +132,23 @@
         margin: 6px 0 0;
         color: #8b94a3;
         font-size: 12px;
+    }
+
+    .urgent-checkbox {
+        width: auto;
+        margin: 0;
+        padding: 0;
+        accent-color: #c52c2c;
+    }
+
+    .urgent-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
     }
 
     .submit {
@@ -306,6 +327,7 @@
     }
 </style>
 
+
 </head>
 
 <body>
@@ -314,323 +336,325 @@
 
 <div class="card">
 
-    {% if user %}
 
-        <div class="icon">👨‍🏫</div>
+{% if user %}
 
-        <span class="badge">
-            COLLÈGE EDMOND ROSTAND
-        </span>
+    <div class="icon">👨‍🏫</div>
 
-        <h1>Collège SOS</h1>
+    <span class="badge">
+        COLLÈGE EDMOND ROSTAND
+    </span>
 
-        <p class="subtitle">
-            Bonjour {{ user.username }} 👋<br>
-            Signalez rapidement un problème dans le collège.
+    <h1>Collège SOS</h1>
+
+    <p class="subtitle">
+        Bonjour {{ user.username }} 👋<br>
+        Signalez rapidement un problème dans le collège.
+    </p>
+
+    <div class="intro">
+        <strong>🛠️ Signaler un problème</strong>
+        <p>
+            Donnez-nous l'emplacement, la catégorie et une description du problème.
         </p>
+    </div>
 
-        <div class="intro">
-            <strong>🛠️ Signaler un problème</strong>
-            <p>
-                Donnez-nous l'emplacement, la catégorie et une description du problème.
-            </p>
+    <form
+        method="POST"
+        action="{{ url_for('signaler') }}"
+        enctype="multipart/form-data"
+    >
+
+        <div class="field">
+
+            <label for="salle">
+                📍 Salle / emplacement
+            </label>
+
+            <input
+                type="text"
+                id="salle"
+                name="salle"
+                placeholder="Ex. Salle 204, CDI, couloir..."
+                required
+            >
+
         </div>
 
-        <form
-            method="POST"
-            action="{{ url_for('signaler') }}"
-            enctype="multipart/form-data"
-        >
+        <div class="field">
 
-            <div class="field">
+            <label for="categorie">
+                🛠️ Catégorie
+            </label>
 
-                <label for="salle">
-                    📍 Salle / emplacement
-                </label>
+            <select
+                id="categorie"
+                name="categorie"
+                required
+            >
 
+                <option value="">
+                    Choisir une catégorie
+                </option>
+
+                <option value="Informatique">
+                    💻 Informatique
+                </option>
+
+                <option value="Vidéoprojecteur">
+                    📽️ Vidéoprojecteur
+                </option>
+
+                <option value="Entretien">
+                    🧰 Entretien
+                </option>
+
+                <option value="Électricité">
+                    ⚡ Électricité
+                </option>
+
+                <option value="Mobilier">
+                    🪑 Mobilier
+                </option>
+
+                <option value="Chauffage">
+                    🔥 Chauffage
+                </option>
+
+                <option value="Plomberie">
+                    🚰 Plomberie
+                </option>
+
+                <option value="Éclairage">
+                    💡 Éclairage
+                </option>
+
+                <option value="Réseau / Internet">
+                    🌐 Réseau / Internet
+                </option>
+
+                <option value="Nettoyage">
+                    🧹 Nettoyage
+                </option>
+
+                <option value="Bâtiment">
+                    🏫 Bâtiment
+                </option>
+
+                <option value="Sécurité">
+                    🔒 Sécurité
+                </option>
+
+                <option value="Autre">
+                    🔧 Autre
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="field">
+
+            <label for="description">
+                📝 Description du problème
+            </label>
+
+            <textarea
+                id="description"
+                name="description"
+                placeholder="Expliquez ce qui ne fonctionne pas..."
+                required
+            ></textarea>
+
+        </div>
+
+        <div class="field">
+
+            <label>
+                🚦 Est-ce Urgent ?
+            </label>
+
+            <label class="urgent-label">
                 <input
-                    type="text"
-                    id="salle"
-                    name="salle"
-                    placeholder="Ex. Salle 204, CDI, couloir..."
-                    required
-                >
-
-            </div>
-
-            <div class="field">
-
-                <label for="categorie">
-                    🛠️ Catégorie
-                </label>
-
-                <select
-                    id="categorie"
-                    name="categorie"
-                    required
-                >
-
-                    <option value="">
-                        Choisir une catégorie
-                    </option>
-
-                    <option value="Informatique">
-                        💻 Informatique
-                    </option>
-
-                    <option value="Vidéoprojecteur">
-                        📽️ Vidéoprojecteur
-                    </option>
-
-                    <option value="Entretien">
-                        🧰 Entretien
-                    </option>
-
-                    <option value="Électricité">
-                        ⚡ Électricité
-                    </option>
-
-                    <option value="Mobilier">
-                        🪑 Mobilier
-                    </option>
-
-                    <option value="Chauffage">
-                        🔥 Chauffage
-                    </option>
-
-                    <option value="Éclairage">
-                        💡 Éclairage
-                    </option>
-
-                    <option value="Réseau / Internet">
-                        🌐 Réseau / Internet
-                    </option>
-
-                    <option value="Nettoyage">
-                        🧹 Nettoyage
-                    </option>
-
-                    <option value="Bâtiment">
-                        🏫 Bâtiment
-                    </option>
-
-                    <option value="Sécurité">
-                        🔒 Sécurité
-                    </option>
-
-                    <option value="Autre">
-                        🔧 Autre
-                    </option>
-
-                </select>
-
-            </div>
-
-            <div class="field">
-
-                <label for="description">
-                    📝 Description du problème
-                </label>
-
-                <textarea
-                    id="description"
-                    name="description"
-                    placeholder="Expliquez ce qui ne fonctionne pas..."
-                    required
-                ></textarea>
-
-            </div>
-
-            <div class="field">
-
-                <label for="urgence">
-                    🚦 Niveau d'urgence
-                </label>
-
-                <select
+                    type="checkbox"
                     id="urgence"
                     name="urgence"
-                    required
+                    value="urgente"
+                    class="urgent-checkbox"
                 >
+                🔴 Urgent
+            </label>
 
-                    <option value="normale">
-                        🟢 Normale
-                    </option>
+        </div>
 
-                    <option value="urgente">
-                        🔴 Urgente
-                    </option>
+        <div class="field">
 
-                </select>
+            <label for="photo">
+                📷 Photo <span style="font-weight:400;color:#8b94a3;">(facultatif)</span>
+            </label>
 
-            </div>
-
-            <div class="field">
-
-                <label for="photo">
-                    📷 Photo <span style="font-weight:400;color:#8b94a3;">(facultatif)</span>
-                </label>
-
-                <input
-                    type="file"
-                    id="photo"
-                    name="photo"
-                    accept="image/jpeg,image/png,image/webp"
-                >
-
-                <p class="help">
-                    JPG, PNG ou WEBP — maximum 8 Mo.
-                </p>
-
-            </div>
-
-            <button
-                type="submit"
-                class="submit"
+            <input
+                type="file"
+                id="photo"
+                name="photo"
+                accept="image/jpeg,image/png,image/webp"
             >
-                🚨 Envoyer le signalement
-            </button>
 
-        </form>
-
-        <section class="section">
-
-            <h2>📋 Mes signalements</h2>
-
-            <p class="section-description">
-                Retrouvez ici les problèmes que vous avez signalés et leur état d'avancement.
+            <p class="help">
+                JPG, PNG ou WEBP — maximum 8 Mo.
             </p>
 
-            {% if mes_signalements %}
+        </div>
 
-                {% for probleme in mes_signalements %}
+        <button
+            type="submit"
+            class="submit"
+        >
+            🚨 Envoyer le signalement
+        </button>
 
-                    <div class="report">
+    </form>
 
-                        <div class="report-top">
+    <section class="section">
 
-                            <div class="report-location">
-                                📍 {{ probleme.salle }}
-                            </div>
+        <h2>📋 Mes signalements</h2>
 
-                            {% if probleme.statut == "nouveau" %}
+        <p class="section-description">
+            Retrouvez ici les problèmes que vous avez signalés et leur état d'avancement.
+        </p>
 
-                                <span class="status new">
-                                    🟠 À RÉAFFECTER
-                                </span>
+        {% if mes_signalements %}
 
-                            {% elif probleme.statut == "en_cours" %}
+            {% for probleme in mes_signalements %}
 
-                                <span class="status progress">
-                                    🟠 EN COURS
-                                </span>
+                <div class="report">
 
-                            {% elif probleme.statut == "resolu" %}
+                    <div class="report-top">
 
-                                <span class="status done">
-                                    🟢 RÉSOLU
-                                </span>
-
-                            {% endif %}
-
+                        <div class="report-location">
+                            📍 {{ probleme.salle }}
                         </div>
 
-                        <div class="report-category">
-                            {{ probleme.categorie }}
-                        </div>
+                        {% if probleme.statut == "nouveau" %}
 
-                        <p class="report-description">
-                            {{ probleme.description }}
-                        </p>
+                            <span class="status new">
+                                🟠 À RÉAFFECTER
+                            </span>
 
-                        {% if probleme.urgence == "urgente" %}
+                        {% elif probleme.statut == "en_cours" %}
 
-                            <p class="urgent">
-                                🔴 Signalement urgent
-                            </p>
+                            <span class="status progress">
+                                🟠 EN COURS
+                            </span>
+
+                        {% elif probleme.statut == "resolu" %}
+
+                            <span class="status done">
+                                🟢 RÉSOLU
+                            </span>
 
                         {% endif %}
 
                     </div>
 
-                {% endfor %}
+                    <div class="report-category">
+                        {{ probleme.categorie }}
+                    </div>
 
-            {% else %}
+                    <p class="report-description">
+                        {{ probleme.description }}
+                    </p>
 
-                <div class="empty">
-                    Vous n'avez encore envoyé aucun signalement.
+                    {% if probleme.urgence == "urgente" %}
+
+                        <p class="urgent">
+                            🔴 Signalement urgent
+                        </p>
+
+                    {% endif %}
+
                 </div>
 
-            {% endif %}
+            {% endfor %}
 
-        </section>
+        {% else %}
 
-        <div class="bottom-links">
+            <div class="empty">
+                Vous n'avez encore envoyé aucun signalement.
+            </div>
 
-            <a
-                href="{{ url_for('devenir_admin') }}"
-                class="link"
-            >
-                ⚙️ Devenir administrateur
-            </a>
+        {% endif %}
 
-            <a
-                href="{{ url_for('deconnexion') }}"
-                class="link"
-            >
-                🚪 Se déconnecter
-            </a>
+    </section>
 
-        </div>
+    <div class="bottom-links">
 
-    {% else %}
+        <a
+            href="{{ url_for('devenir_admin') }}"
+            class="link"
+        >
+            ⚙️ Devenir administrateur
+        </a>
 
-        <div class="icon">🛠️</div>
+        <a
+            href="{{ url_for('deconnexion') }}"
+            class="link"
+        >
+            🚪 Se déconnecter
+        </a>
 
-        <span class="badge">
-            COLLÈGE EDMOND ROSTAND
-        </span>
+    </div>
 
-        <h1>Collège SOS</h1>
+{% else %}
 
-        <p class="subtitle">
-            Un problème au collège ?<br>
-            Signalez-le en quelques secondes.
-        </p>
+    <div class="icon">🛠️</div>
 
-        <div class="public-actions">
+    <span class="badge">
+        COLLÈGE EDMOND ROSTAND
+    </span>
 
-            <a
-                href="{{ url_for('connexion') }}"
-                class="public-primary"
-            >
-                🔐 Se connecter
-            </a>
+    <h1>Collège SOS</h1>
 
-            <a
-                href="{{ url_for('inscription') }}"
-                class="public-secondary"
-            >
-                👨‍🏫 Créer un compte professeur
-            </a>
+    <p class="subtitle">
+        Un problème au collège ?<br>
+        Signalez-le en quelques secondes.
+    </p>
 
-            <a
-                href="{{ url_for('devenir_admin') }}"
-                class="public-secondary"
-            >
-                ⚙️ Devenir administrateur
-            </a>
+    <div class="public-actions">
 
-        </div>
+        <a
+            href="{{ url_for('connexion') }}"
+            class="public-primary"
+        >
+            🔐 Se connecter
+        </a>
 
-        <p class="footer">
-            Les professeurs doivent disposer du mot de passe fourni par l'administration pour créer leur compte.
-        </p>
+        <a
+            href="{{ url_for('inscription') }}"
+            class="public-secondary"
+        >
+            👨‍🏫 Créer un compte professeur
+        </a>
 
-    {% endif %}
+        <a
+            href="{{ url_for('devenir_admin') }}"
+            class="public-secondary"
+        >
+            ⚙️ Devenir administrateur
+        </a>
+
+    </div>
+
+    <p class="footer">
+        Les professeurs doivent disposer du mot de passe fourni par l'administration pour créer leur compte.
+    </p>
+
+{% endif %}
+
 
 </div>
 
 </div>
 
-</body> </html>
+</body>
+</html>

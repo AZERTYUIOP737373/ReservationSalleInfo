@@ -3,3 +3,4 @@ gunicorn
 supabase
 werkzeug
 pywebpush
+python-dotenv

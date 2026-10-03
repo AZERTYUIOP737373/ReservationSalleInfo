@@ -537,7 +537,7 @@ def signaler():
         "categorie": categorie,
         "description": description,
         "urgence": urgence,
-        "statut": "nouveau",
+        "statut": "en_cours",
         "photo_url": photo_url
     }
 

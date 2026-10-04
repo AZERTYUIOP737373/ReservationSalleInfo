@@ -5,6 +5,7 @@ load_dotenv()
 
 import uuid
 import json
+from datetime import datetime
 from functools import wraps
 
 from flask import (
@@ -48,12 +49,18 @@ ADMIN_PROMOTION_PASSWORD = os.environ.get(
     "change-this-admin-password"
 )
 
+VAPID_PRIVATE_KEY = os.environ.get(
+    "VAPID_PRIVATE_KEY"
+)
 
-VAPID_PRIVATE_KEY = "6dlCw-898B4sND2xNNSRMkyusOb3pOvApo07UTEmgww"
+VAPID_PUBLIC_KEY = os.environ.get(
+    "VAPID_PUBLIC_KEY"
+)
 
-VAPID_PUBLIC_KEY = "BAFbXzUBcO30aqu7ly0oIV0fhv3jDQRsIPUtuoGKiw67PjYUpyPD4QCC-k1SpIIuxgix4SvJyWeJRNyf7mrnQKI"
-
-VAPID_EMAIL = "mailto:baptiste.brygal@gmail.com"
+VAPID_EMAIL = os.environ.get(
+    "VAPID_EMAIL",
+    "mailto:baptiste.brygal@gmail.com"
+)
 
 
 if not SUPABASE_URL or not SUPABASE_KEY:
@@ -159,6 +166,79 @@ def recuperer_utilisateur(username):
     return result.data[0]
 
 
+def convertir_date(date_string):
+    if not date_string:
+        return None
+
+    try:
+        valeur = str(date_string).strip()
+
+        if valeur.endswith("Z"):
+            valeur = valeur[:-1] + "+00:00"
+
+        return datetime.fromisoformat(valeur)
+
+    except Exception:
+        return None
+
+
+def calculer_duree_moyenne(problemes):
+    durees = []
+
+    for probleme in problemes:
+        if probleme.get("statut") != "resolu":
+            continue
+
+        date_creation = convertir_date(
+            probleme.get("date_creation")
+        )
+
+        date_modification = convertir_date(
+            probleme.get("date_modification")
+        )
+
+        if not date_creation or not date_modification:
+            continue
+
+        try:
+            difference = (
+                date_modification - date_creation
+            ).total_seconds()
+
+            if difference >= 0:
+                durees.append(difference)
+
+        except Exception:
+            continue
+
+    if not durees:
+        return 0
+
+    return sum(durees) / len(durees)
+
+
+def formater_duree_secondes(secondes):
+    try:
+        secondes = int(secondes)
+    except Exception:
+        secondes = 0
+
+    if secondes < 0:
+        secondes = 0
+
+    total_minutes = secondes // 60
+
+    jours = total_minutes // 1440
+    heures = (total_minutes % 1440) // 60
+    minutes = total_minutes % 60
+
+    return {
+        "jours": jours,
+        "heures": heures,
+        "minutes": minutes
+    }
+
+
 def supprimer_abonnement_push(endpoint):
     if not endpoint:
         return
@@ -255,7 +335,7 @@ def envoyer_notification_admins(probleme):
         )
 
         url_signalement = (
-            f"https://reservation-salle-info.onrender.com"
+            f"https://sos-college.onrender.com"
             f"/probleme/{probleme_id}"
         )
 
@@ -266,10 +346,13 @@ def envoyer_notification_admins(probleme):
             "tag": f"signalement-{probleme_id}"
         }
 
-        print("[PUSH] Payload :", json.dumps(
-            payload,
-            ensure_ascii=False
-        ))
+        print(
+            "[PUSH] Payload :",
+            json.dumps(
+                payload,
+                ensure_ascii=False
+            )
+        )
 
         succes = 0
         echecs = 0
@@ -331,7 +414,11 @@ def envoyer_notification_admins(probleme):
                     try:
                         print(
                             "[PUSH] Réponse Push :",
-                            getattr(response, "status_code", response)
+                            getattr(
+                                response,
+                                "status_code",
+                                response
+                            )
                         )
                     except Exception:
                         pass
@@ -339,7 +426,11 @@ def envoyer_notification_admins(probleme):
             except WebPushException as e:
                 echecs += 1
 
-                response = getattr(e, "response", None)
+                response = getattr(
+                    e,
+                    "response",
+                    None
+                )
 
                 status_code = None
 
@@ -461,7 +552,10 @@ def professeur():
         mes_signalements = result.data or []
 
     except Exception as e:
-        print("Erreur récupération signalements :", e)
+        print(
+            "Erreur récupération signalements :",
+            e
+        )
 
     return render_template(
         "index.html",
@@ -566,7 +660,10 @@ def modifier_photo_profil():
         )
 
 
-@app.route("/signaler", methods=["POST"])
+@app.route(
+    "/signaler",
+    methods=["POST"]
+)
 @professor_required
 def signaler():
     user = get_current_user()
@@ -576,10 +673,25 @@ def signaler():
 
     auteur = user["username"]
 
-    salle = request.form.get("salle", "").strip()
-    categorie = request.form.get("categorie", "").strip()
-    description = request.form.get("description", "").strip()
-    urgence = request.form.get("urgence", "normale").strip()
+    salle = request.form.get(
+        "salle",
+        ""
+    ).strip()
+
+    categorie = request.form.get(
+        "categorie",
+        ""
+    ).strip()
+
+    description = request.form.get(
+        "description",
+        ""
+    ).strip()
+
+    urgence = request.form.get(
+        "urgence",
+        "normale"
+    ).strip()
 
     if not salle or not categorie or not description:
         return "Informations manquantes.", 400
@@ -599,7 +711,10 @@ def signaler():
             )
 
         extension = ALLOWED_IMAGES[mime]
-        nom_fichier = f"{uuid.uuid4().hex}{extension}"
+
+        nom_fichier = (
+            f"{uuid.uuid4().hex}{extension}"
+        )
 
         photo_bytes = photo.read()
 
@@ -632,7 +747,11 @@ def signaler():
             )
 
         except Exception as e:
-            print("Erreur upload photo :", e)
+            print(
+                "Erreur upload photo :",
+                e
+            )
+
             return (
                 "Impossible d'envoyer la photo.",
                 500
@@ -657,7 +776,11 @@ def signaler():
         )
 
     except Exception as e:
-        print("Erreur création signalement :", e)
+        print(
+            "Erreur création signalement :",
+            e
+        )
+
         return (
             "Impossible de créer le signalement.",
             500
@@ -673,22 +796,36 @@ def signaler():
 
     envoyer_notification_admins(probleme)
 
-    return redirect(url_for("professeur"))
+    return redirect(
+        url_for("professeur")
+    )
 
 
-@app.route("/inscription", methods=["GET", "POST"])
+@app.route(
+    "/inscription",
+    methods=["GET", "POST"]
+)
 def inscription():
     erreur = None
     succes = None
 
     if request.method == "POST":
 
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
+        username = request.form.get(
+            "username",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
         password_confirmation = request.form.get(
             "password_confirmation",
             ""
         )
+
         signup_password = request.form.get(
             "signup_password",
             ""
@@ -700,7 +837,9 @@ def inscription():
             or not password_confirmation
             or not signup_password
         ):
-            erreur = "Tous les champs sont obligatoires."
+            erreur = (
+                "Tous les champs sont obligatoires."
+            )
 
         elif signup_password != PROF_SIGNUP_PASSWORD:
             erreur = (
@@ -732,7 +871,10 @@ def inscription():
                     supabase
                     .table("users")
                     .select("id")
-                    .eq("username", username)
+                    .eq(
+                        "username",
+                        username
+                    )
                     .execute()
                 )
 
@@ -743,8 +885,10 @@ def inscription():
                     )
 
                 else:
-                    password_hash = generate_password_hash(
-                        password
+                    password_hash = (
+                        generate_password_hash(
+                            password
+                        )
                     )
 
                     result = (
@@ -762,13 +906,17 @@ def inscription():
                         erreur = (
                             "Impossible de créer le compte."
                         )
+
                     else:
                         return redirect(
                             url_for("connexion")
                         )
 
             except Exception as e:
-                print("Erreur création compte :", e)
+                print(
+                    "Erreur création compte :",
+                    e
+                )
 
                 erreur = (
                     "Impossible de créer le compte. "
@@ -782,14 +930,24 @@ def inscription():
     )
 
 
-@app.route("/connexion", methods=["GET", "POST"])
+@app.route(
+    "/connexion",
+    methods=["GET", "POST"]
+)
 def connexion():
     erreur = None
 
     if request.method == "POST":
 
-        username = request.form.get("username", "").strip()
-        password = request.form.get("password", "")
+        username = request.form.get(
+            "username",
+            ""
+        ).strip()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
 
         if not username or not password:
             erreur = (
@@ -798,7 +956,9 @@ def connexion():
 
         else:
             try:
-                user = recuperer_utilisateur(username)
+                user = recuperer_utilisateur(
+                    username
+                )
 
                 if not user:
                     erreur = (
@@ -811,9 +971,11 @@ def connexion():
                         ""
                     )
 
-                    password_ok = verifier_mot_de_passe(
-                        stored_password,
-                        password
+                    password_ok = (
+                        verifier_mot_de_passe(
+                            stored_password,
+                            password
+                        )
                     )
 
                     if not password_ok:
@@ -827,8 +989,10 @@ def connexion():
                                 supabase.table(
                                     "users"
                                 ).update({
-                                    "password": generate_password_hash(
-                                        password
+                                    "password": (
+                                        generate_password_hash(
+                                            password
+                                        )
                                     )
                                 }).eq(
                                     "id",
@@ -847,8 +1011,10 @@ def connexion():
                         session["user_id"] = user["id"]
                         session["username"] = user["username"]
                         session["role"] = user["role"]
-                        session["profile_photo_url"] = user.get(
-                            "profile_photo_url"
+                        session["profile_photo_url"] = (
+                            user.get(
+                                "profile_photo_url"
+                            )
                         )
 
                         if user.get("role") == "admin":
@@ -872,7 +1038,10 @@ def connexion():
                         )
 
             except Exception as e:
-                print("Erreur connexion :", e)
+                print(
+                    "Erreur connexion :",
+                    e
+                )
 
                 erreur = (
                     "Erreur lors de la connexion."
@@ -884,7 +1053,10 @@ def connexion():
     )
 
 
-@app.route("/devenir-admin", methods=["GET", "POST"])
+@app.route(
+    "/devenir-admin",
+    methods=["GET", "POST"]
+)
 def devenir_admin():
     erreur = None
     succes = None
@@ -914,7 +1086,9 @@ def devenir_admin():
 
         else:
             try:
-                user = recuperer_utilisateur(username)
+                user = recuperer_utilisateur(
+                    username
+                )
 
                 if not user:
                     erreur = (
@@ -967,8 +1141,10 @@ def devenir_admin():
                             session["user_id"] = user["id"]
                             session["username"] = user["username"]
                             session["role"] = "admin"
-                            session["profile_photo_url"] = user.get(
-                                "profile_photo_url"
+                            session["profile_photo_url"] = (
+                                user.get(
+                                    "profile_photo_url"
+                                )
                             )
 
                             return redirect(
@@ -1031,8 +1207,13 @@ def dashboard():
             users_result = (
                 supabase
                 .table("users")
-                .select("username,profile_photo_url")
-                .in_("username", auteurs)
+                .select(
+                    "username,profile_photo_url"
+                )
+                .in_(
+                    "username",
+                    auteurs
+                )
                 .execute()
             )
 
@@ -1045,17 +1226,17 @@ def dashboard():
                 repr(e)
             )
 
-    urgents = sum(
-        1
-        for p in problemes
-        if p.get("urgence") == "urgente"
-        and p.get("statut") != "resolu"
-    )
-
     en_cours = sum(
         1
         for p in problemes
         if p.get("statut") == "en_cours"
+    )
+
+    urgents = sum(
+        1
+        for p in problemes
+        if p.get("statut") == "en_cours"
+        and p.get("urgence") == "urgente"
     )
 
     resolus = sum(
@@ -1064,13 +1245,29 @@ def dashboard():
         if p.get("statut") == "resolu"
     )
 
+    a_reaffecter = sum(
+        1
+        for p in problemes
+        if p.get("statut") == "nouveau"
+    )
+
+    moyenne_secondes = calculer_duree_moyenne(
+        problemes
+    )
+
+    moyenne_duree = formater_duree_secondes(
+        moyenne_secondes
+    )
+
     return render_template(
         "dashboard.html",
         problemes=problemes,
-        urgents=urgents,
         en_cours=en_cours,
+        urgents=urgents,
         resolus=resolus,
-        profils=profils
+        a_reaffecter=a_reaffecter,
+        profils=profils,
+        moyenne_duree=moyenne_duree
     )
 
 
@@ -1081,7 +1278,10 @@ def probleme(probleme_id):
         supabase
         .table("problemes")
         .select("*")
-        .eq("id", probleme_id)
+        .eq(
+            "id",
+            probleme_id
+        )
         .single()
         .execute()
     )
@@ -1098,7 +1298,9 @@ def probleme(probleme_id):
             auteur_result = (
                 supabase
                 .table("users")
-                .select("username,profile_photo_url")
+                .select(
+                    "username,profile_photo_url"
+                )
                 .eq(
                     "username",
                     probleme_data["auteur"]
@@ -1176,7 +1378,10 @@ def notifications():
     )
 
 
-@app.route("/api/push/subscribe", methods=["POST"])
+@app.route(
+    "/api/push/subscribe",
+    methods=["POST"]
+)
 @admin_required
 def push_subscribe():
     user = get_current_user()
@@ -1187,7 +1392,9 @@ def push_subscribe():
             "error": "Non connecté."
         }), 401
 
-    data = request.get_json(silent=True)
+    data = request.get_json(
+        silent=True
+    )
 
     if not data:
         return jsonify({
@@ -1220,8 +1427,14 @@ def push_subscribe():
             supabase
             .table("push_subscriptions")
             .delete()
-            .eq("endpoint", endpoint)
-            .neq("username", user["username"])
+            .eq(
+                "endpoint",
+                endpoint
+            )
+            .neq(
+                "username",
+                user["username"]
+            )
             .execute()
         )
 
@@ -1247,7 +1460,10 @@ def push_subscribe():
 
             return jsonify({
                 "success": False,
-                "error": "Impossible d'enregistrer l'abonnement."
+                "error": (
+                    "Impossible d'enregistrer "
+                    "l'abonnement."
+                )
             }), 500
 
         print(
@@ -1271,7 +1487,10 @@ def push_subscribe():
         }), 500
 
 
-@app.route("/api/push/unsubscribe", methods=["POST"])
+@app.route(
+    "/api/push/unsubscribe",
+    methods=["POST"]
+)
 @admin_required
 def push_unsubscribe():
     user = get_current_user()
@@ -1281,7 +1500,9 @@ def push_unsubscribe():
             "success": False
         }), 401
 
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(
+        silent=True
+    ) or {}
 
     endpoint = str(
         data.get("endpoint") or ""
@@ -1298,8 +1519,14 @@ def push_unsubscribe():
             supabase
             .table("push_subscriptions")
             .delete()
-            .eq("endpoint", endpoint)
-            .eq("username", user["username"])
+            .eq(
+                "endpoint",
+                endpoint
+            )
+            .eq(
+                "username",
+                user["username"]
+            )
             .execute()
         )
 
@@ -1334,6 +1561,7 @@ def service_worker():
     response.headers["Cache-Control"] = (
         "no-cache, no-store, must-revalidate"
     )
+
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
 

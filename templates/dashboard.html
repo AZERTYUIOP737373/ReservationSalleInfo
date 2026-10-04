@@ -4,702 +4,288 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard — Collège SOS</title>
+    <title>Tableau de bord - Collège SOS</title>
 
     <style>
-        :root {
-            --bg: #f4f7fb;
-            --card: #ffffff;
-            --text: #172033;
-            --muted: #718096;
-            --border: #e5eaf1;
-
-            --blue: #2563eb;
-            --blue-dark: #1d4ed8;
-            --blue-light: #eff6ff;
-
-            --orange: #f59e0b;
-            --orange-light: #fff7e6;
-
-            --green: #16a34a;
-            --green-light: #ecfdf3;
-
-            --red: #dc2626;
-            --red-light: #fef2f2;
-
-            --shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
-            --shadow-hover: 0 14px 35px rgba(15, 23, 42, 0.12);
-
-            --radius: 18px;
-        }
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
         }
 
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        button,
-        select,
-        input {
-            font-family: inherit;
-        }
-
-        .page {
-            min-height: 100vh;
-        }
-
-        .topbar {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            height: 72px;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .topbar-inner {
-            max-width: 1450px;
-            height: 100%;
-            margin: auto;
-            padding: 0 25px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 13px;
-        }
-
-        .brand-logo {
-            width: 43px;
-            height: 43px;
-            border-radius: 13px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            background: linear-gradient(135deg, var(--blue), #60a5fa);
+        header {
+            background: #2563eb;
             color: white;
-            font-size: 21px;
-            font-weight: 900;
-
-            box-shadow: 0 7px 18px rgba(37, 99, 235, 0.25);
-        }
-
-        .brand-text strong {
-            display: block;
-            font-size: 16px;
-            font-weight: 900;
-            letter-spacing: -0.3px;
-        }
-
-        .brand-text span {
-            display: block;
-            margin-top: 2px;
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .topbar-right {
+            padding: 18px 25px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .header-title h1 {
+            margin: 0;
+            font-size: 25px;
+        }
+
+        .header-title p {
+            margin: 4px 0 0;
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .header-buttons {
+            display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .top-button {
-            min-height: 42px;
-            padding: 0 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: white;
-
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-
-            color: #344054;
-            font-size: 13px;
-            font-weight: 800;
-
-            cursor: pointer;
-            transition: 0.2s;
+        .header-buttons a {
+            color: white;
+            text-decoration: none;
+            background: rgba(255,255,255,0.15);
+            padding: 10px 14px;
+            border-radius: 9px;
+            font-weight: bold;
         }
 
-        .top-button:hover {
-            border-color: #cbd5e1;
-            background: #f8fafc;
+        .header-buttons a:hover {
+            background: rgba(255,255,255,0.25);
         }
 
-        .container {
-            width: 100%;
-            max-width: 1450px;
-            margin: auto;
-            padding: 30px 25px 45px;
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 18px 40px;
         }
 
         .welcome {
             margin-bottom: 25px;
-
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 20px;
         }
 
-        .welcome h1 {
-            font-size: 30px;
-            line-height: 1.1;
-            letter-spacing: -1px;
-            font-weight: 900;
+        .welcome h2 {
+            margin: 0 0 6px;
+            font-size: 28px;
         }
 
         .welcome p {
-            margin-top: 8px;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .welcome-date {
-            color: var(--muted);
-            font-size: 13px;
-            font-weight: 700;
-            white-space: nowrap;
+            margin: 0;
+            color: #64748b;
         }
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
             margin-bottom: 25px;
         }
 
         .stat-card {
-            min-height: 155px;
-            padding: 22px;
-
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-
-            box-shadow: var(--shadow);
-
-            transition:
-                transform 0.2s ease,
-                box-shadow 0.2s ease;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
         }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-hover);
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
         }
 
-        .stat-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .stat-title {
-            color: var(--muted);
-            font-size: 13px;
-            font-weight: 800;
-        }
-
-        .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 13px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .stat-card.progress .stat-icon {
-            background: var(--orange-light);
-        }
-
-        .stat-card.success .stat-icon {
-            background: var(--green-light);
-        }
-
-        .stat-card.reassign .stat-icon {
-            background: var(--blue-light);
-        }
-
-        .stat-count-line {
-            display: flex;
-            align-items: baseline;
-            flex-wrap: wrap;
-            gap: 11px;
-            margin-top: 17px;
-        }
-
-        .stat-count-line strong {
+        .stat-number {
             font-size: 34px;
-            line-height: 1;
-            letter-spacing: -1px;
-            font-weight: 900;
+            font-weight: 800;
+            color: #1f2937;
         }
 
-        .urgent-inline {
-            color: var(--red);
-            font-size: 12px;
-            font-weight: 900;
+        .stat-extra {
+            margin-top: 7px;
+            color: #dc2626;
+            font-weight: bold;
+            font-size: 13px;
         }
 
-        .stat-card p {
+        .average-box {
             margin-top: 8px;
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .stat-card.success .stat-count {
-            color: var(--green);
-        }
-
-        .stat-card.reassign .stat-count {
-            color: var(--blue);
-        }
-
-        .panel {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            overflow: hidden;
-        }
-
-        .panel-header {
-            padding: 21px 22px;
-
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-
-            border-bottom: 1px solid var(--border);
-        }
-
-        .panel-title h2 {
-            font-size: 18px;
-            font-weight: 900;
-            letter-spacing: -0.3px;
-        }
-
-        .panel-title p {
-            margin-top: 5px;
-            color: var(--muted);
-            font-size: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.5;
+            color: #2563eb;
         }
 
         .filters {
-            padding: 18px 22px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        }
 
+        .filters-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .filters-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 18px;
-
-            border-bottom: 1px solid var(--border);
-            background: #fbfcfe;
+            gap: 15px;
         }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-        }
-
-        .filter-label {
-            color: #344054;
-            font-size: 12px;
-            font-weight: 900;
+        .filter-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 7px;
         }
 
         .filter-select {
             width: 100%;
-            min-height: 43px;
-
-            padding: 0 13px;
-
-            border: 1px solid var(--border);
-            border-radius: 11px;
-
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
             background: white;
-            color: #344054;
-
-            outline: none;
-
-            font-size: 13px;
-            font-weight: 700;
-
+            font-size: 14px;
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .filter-select:hover {
-            border-color: #cbd5e1;
-        }
-
-        .filter-select:focus {
-            border-color: var(--blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-        }
-
-        .reports {
+        .signalements {
             display: flex;
             flex-direction: column;
+            gap: 15px;
         }
 
-        .report {
-            padding: 18px 22px;
+        .signalement {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        }
 
+        .signalement-header {
             display: flex;
-            align-items: center;
-            gap: 17px;
-
-            border-bottom: 1px solid var(--border);
-
-            transition: background 0.18s ease;
-        }
-
-        .report:last-child {
-            border-bottom: none;
-        }
-
-        .report:hover {
-            background: #fafcff;
-        }
-
-        .report-photo {
-            width: 58px;
-            height: 58px;
-            flex: 0 0 58px;
-
-            border-radius: 14px;
-            overflow: hidden;
-
-            background: #eef2f7;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            color: #94a3b8;
-            font-size: 21px;
-        }
-
-        .report-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .report-main {
-            min-width: 0;
-            flex: 1;
-        }
-
-        .report-top {
-            display: flex;
-            align-items: center;
-            gap: 9px;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
             flex-wrap: wrap;
         }
 
-        .report-title {
-            font-size: 14px;
-            font-weight: 900;
-            color: var(--text);
+        .signalement-title {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .badges {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
         }
 
         .badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-
-            min-height: 24px;
-            padding: 0 8px;
-
-            border-radius: 7px;
-
-            font-size: 9px;
-            font-weight: 900;
-            letter-spacing: 0.25px;
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
         }
 
         .badge-urgent {
-            color: var(--red);
-            background: var(--red-light);
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
-        .badge-reassign {
-            color: #2563eb;
-            background: var(--blue-light);
+        .badge-en-cours {
+            background: #dbeafe;
+            color: #1d4ed8;
         }
 
-        .badge-progress {
-            color: #b45309;
-            background: var(--orange-light);
+        .badge-resolu {
+            background: #dcfce7;
+            color: #15803d;
         }
 
-        .badge-resolved {
-            color: var(--green);
-            background: var(--green-light);
+        .badge-reaffecter {
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        .report-description {
-            margin-top: 5px;
-            max-width: 700px;
-
-            color: #667085;
-            font-size: 12px;
-            line-height: 1.45;
-
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .report-meta {
-            margin-top: 8px;
-
+        .signalement-info {
+            margin-top: 12px;
             display: flex;
-            align-items: center;
-            gap: 12px;
+            gap: 18px;
             flex-wrap: wrap;
-
-            color: #8a96a8;
-            font-size: 10px;
-            font-weight: 700;
+            color: #64748b;
+            font-size: 14px;
         }
 
-        .report-meta span {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+        .signalement-description {
+            margin-top: 12px;
+            line-height: 1.5;
         }
 
-        .report-actions {
-            flex-shrink: 0;
+        .signalement-footer {
+            margin-top: 17px;
+            display: flex;
+            justify-content: flex-end;
         }
 
-        .open-button {
-            min-height: 38px;
-            padding: 0 13px;
-
-            border-radius: 10px;
-            border: 1px solid var(--border);
-
-            background: white;
-            color: #475569;
-
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-
-            font-size: 11px;
-            font-weight: 900;
-
-            transition: 0.2s;
-        }
-
-        .open-button:hover {
+        .btn-detail {
+            background: #2563eb;
             color: white;
-            background: var(--blue);
-            border-color: var(--blue);
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 9px;
+            font-weight: bold;
+        }
+
+        .btn-detail:hover {
+            background: #1d4ed8;
         }
 
         .empty {
-            padding: 70px 25px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
             text-align: center;
+            color: #64748b;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
         }
 
-        .empty-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 15px;
-
-            border-radius: 18px;
-            background: var(--green-light);
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            font-size: 27px;
-        }
-
-        .empty h3 {
-            font-size: 17px;
-            font-weight: 900;
-        }
-
-        .empty p {
-            margin-top: 7px;
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        @media (max-width: 900px) {
+        @media (max-width: 950px) {
             .stats {
                 grid-template-columns: repeat(2, 1fr);
             }
-
-            .filters {
-                grid-template-columns: 1fr;
-            }
-
-            .report-description {
-                max-width: 500px;
-            }
         }
 
-        @media (max-width: 760px) {
-            .topbar {
-                height: auto;
-            }
-
-            .topbar-inner {
-                min-height: 68px;
-                padding: 10px 16px;
-            }
-
-            .brand-text span {
-                display: none;
-            }
-
-            .top-button {
-                padding: 0 11px;
-            }
-
-            .top-button span {
-                display: none;
-            }
-
-            .container {
-                padding: 22px 15px 35px;
-            }
-
-            .welcome {
-                align-items: flex-start;
-                flex-direction: column;
-                gap: 7px;
-            }
-
-            .welcome h1 {
-                font-size: 25px;
-            }
-
-            .welcome-date {
-                white-space: normal;
-            }
-
-            .panel-header {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .report {
-                align-items: flex-start;
-            }
-
-            .report-actions {
-                align-self: center;
-            }
-        }
-
-        @media (max-width: 560px) {
+        @media (max-width: 650px) {
             .stats {
                 grid-template-columns: 1fr;
-                gap: 12px;
             }
 
-            .stat-card {
-                min-height: 135px;
-                padding: 18px;
+            .filters-grid {
+                grid-template-columns: 1fr;
             }
 
-            .report {
-                padding: 16px;
-                gap: 12px;
+            header {
+                padding: 15px;
             }
 
-            .report-photo {
-                width: 48px;
-                height: 48px;
-                flex-basis: 48px;
-                border-radius: 12px;
+            main {
+                margin-top: 20px;
             }
 
-            .report-description {
-                white-space: normal;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-            }
-
-            .open-button {
-                width: 38px;
-                padding: 0;
-                font-size: 0;
-            }
-
-            .open-button::after {
-                content: "→";
-                font-size: 17px;
-            }
-        }
-
-        @media (max-width: 430px) {
-            .brand-logo {
-                width: 39px;
-                height: 39px;
-                border-radius: 11px;
-            }
-
-            .brand-text strong {
-                font-size: 14px;
-            }
-
-            .welcome h1 {
+            .welcome h2 {
                 font-size: 23px;
-            }
-
-            .stat-count-line strong {
-                font-size: 31px;
             }
         }
     </style>
@@ -707,510 +293,382 @@
 
 <body>
 
-<div class="page">
+<header>
+    <div class="header-title">
+        <h1>Collège SOS</h1>
+        <p>Collège Edmond Rostand</p>
+    </div>
 
-    <header class="topbar">
-        <div class="topbar-inner">
+    <div class="header-buttons">
+        <a href="{{ url_for('notifications') }}">
+            🔔 Notifications
+        </a>
 
-            <a href="{{ url_for('dashboard') }}" class="brand">
-                <div class="brand-logo">CS</div>
+        <a href="{{ url_for('index') }}">
+            🏠 Accueil
+        </a>
+    </div>
+</header>
 
-                <div class="brand-text">
-                    <strong>Collège SOS</strong>
-                    <span>Collège Edmond Rostand</span>
+<main>
+
+    <div class="welcome">
+        <h2>Tableau de bord</h2>
+        <p>Gérez les signalements du collège.</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card">
+            <div class="stat-label">
+                EN COURS
+            </div>
+
+            <div class="stat-number">
+                {{ en_cours }}
+            </div>
+
+            <div class="stat-extra">
+                dont {{ urgents }} urgent(s)
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                RÉSOLUS
+            </div>
+
+            <div class="stat-number">
+                {{ resolus }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                À RÉAFFECTER
+            </div>
+
+            <div class="stat-number">
+                {{ a_reaffecter }}
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                ⏱️ DURÉE MOYENNE DE RÉSOLUTION
+            </div>
+
+            {% if resolus > 0 %}
+                <div class="average-box">
+                    {{ moyenne_duree.jours }}
+                    jour{% if moyenne_duree.jours > 1 %}s{% endif %}
+                    ;
+                    {{ moyenne_duree.heures }}
+                    heure{% if moyenne_duree.heures > 1 %}s{% endif %}
+                    ;
+                    {{ moyenne_duree.minutes }} min
                 </div>
-            </a>
+            {% else %}
+                <div class="average-box">
+                    Aucun signalement résolu
+                </div>
+            {% endif %}
+        </div>
 
-            <div class="topbar-right">
+    </div>
 
-                <a href="{{ url_for('notifications') }}" class="top-button">
-                    🔔
-                    <span>Notifications</span>
-                </a>
+    <div class="filters">
 
-                <a href="{{ url_for('index') }}" class="top-button">
-                    🏠
-                    <span>Accueil</span>
-                </a>
+        <div class="filters-title">
+            🔎 Filtrer les signalements
+        </div>
 
+        <div class="filters-grid">
+
+            <div class="filter-group">
+                <label for="urgencyFilter">
+                    🚦 Niveau d'urgence
+                </label>
+
+                <select
+                    id="urgencyFilter"
+                    class="filter-select"
+                    onchange="applyFilters()"
+                >
+                    <option value="all">
+                        Tous les signalements
+                    </option>
+
+                    <option value="urgent">
+                        🔴 Urgents
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="categoryFilter">
+                    🛠️ Catégorie
+                </label>
+
+                <select
+                    id="categoryFilter"
+                    class="filter-select"
+                    onchange="applyFilters()"
+                >
+                    <option value="all">
+                        Toutes les catégories
+                    </option>
+
+                    <option value="Informatique">
+                        💻 Informatique
+                    </option>
+
+                    <option value="Vidéoprojecteur">
+                        📽️ Vidéoprojecteur
+                    </option>
+
+                    <option value="Entretien">
+                        🧰 Entretien
+                    </option>
+
+                    <option value="Électricité">
+                        ⚡ Électricité
+                    </option>
+
+                    <option value="Mobilier">
+                        🪑 Mobilier
+                    </option>
+
+                    <option value="Chauffage">
+                        🔥 Chauffage
+                    </option>
+
+                    <option value="Plomberie">
+                        🚰 Plomberie
+                    </option>
+
+                    <option value="Éclairage">
+                        💡 Éclairage
+                    </option>
+
+                    <option value="Réseau / Internet">
+                        🌐 Réseau / Internet
+                    </option>
+
+                    <option value="Nettoyage">
+                        🧹 Nettoyage
+                    </option>
+
+                    <option value="Bâtiment">
+                        🏫 Bâtiment
+                    </option>
+
+                    <option value="Sécurité">
+                        🔒 Sécurité
+                    </option>
+
+                    <option value="Autre">
+                        🔧 Autre
+                    </option>
+                </select>
             </div>
 
         </div>
-    </header>
 
+    </div>
 
-    <main class="container">
+    <div class="signalements" id="signalements">
 
-        <section class="welcome">
+        {% if problemes %}
 
-            <div>
-                <h1>Tableau de bord</h1>
-                <p>Gérez les signalements du Collège Edmond Rostand.</p>
-            </div>
+            {% for probleme in problemes %}
 
-            <div class="welcome-date">
-                Administration · Collège SOS
-            </div>
+                <article
+                    class="signalement"
+                    data-urgent="{% if probleme.get('urgence') == 'urgente' %}urgent{% else %}normal{% endif %}"
+                    data-category="{{ probleme.get('categorie', '') }}"
+                >
 
-        </section>
+                    <div class="signalement-header">
 
+                        <h3 class="signalement-title">
+                            {{ probleme.get('salle') or 'Salle inconnue' }}
+                            —
+                            {{ probleme.get('categorie') or 'Problème' }}
+                        </h3>
 
-        <section class="stats">
+                        <div class="badges">
 
-            <div class="stat-card progress">
+                            {% if probleme.get('urgence') == 'urgente' %}
+                                <span class="badge badge-urgent">
+                                    🔴 URGENT
+                                </span>
+                            {% endif %}
 
-                <div class="stat-top">
-                    <span class="stat-title">En cours</span>
+                            {% if probleme.get('statut') == 'en_cours' %}
 
-                    <div class="stat-icon">
-                        🔧
-                    </div>
-                </div>
+                                <span class="badge badge-en-cours">
+                                    EN COURS
+                                </span>
 
-                <div class="stat-count-line">
+                            {% elif probleme.get('statut') == 'resolu' %}
 
-                    <strong>{{ en_cours }}</strong>
+                                <span class="badge badge-resolu">
+                                    RÉSOLU
+                                </span>
 
-                    <span class="urgent-inline">
-                        dont {{ urgents }} urgent{% if urgents > 1 %}s{% endif %}
-                    </span>
+                            {% elif probleme.get('statut') == 'nouveau' %}
 
-                </div>
+                                <span class="badge badge-reaffecter">
+                                    À RÉAFFECTER
+                                </span>
 
-                <p>Problèmes en cours de traitement</p>
+                            {% endif %}
 
-            </div>
-
-
-            <div class="stat-card success">
-
-                <div class="stat-top">
-                    <span class="stat-title">Résolus</span>
-
-                    <div class="stat-icon">
-                        ✓
-                    </div>
-                </div>
-
-                <div class="stat-count-line">
-                    <strong class="stat-count">{{ resolus }}</strong>
-                </div>
-
-                <p>Problèmes terminés</p>
-
-            </div>
-
-
-            <div class="stat-card reassign">
-
-                <div class="stat-top">
-                    <span class="stat-title">À réaffecter</span>
-
-                    <div class="stat-icon">
-                        ↻
-                    </div>
-                </div>
-
-                <div class="stat-count-line">
-                    <strong class="stat-count">{{ a_reaffecter }}</strong>
-                </div>
-
-                <p>Signalements à prendre en charge</p>
-
-            </div>
-
-        </section>
-
-
-        <section class="panel">
-
-            <div class="panel-header">
-
-                <div class="panel-title">
-                    <h2>Signalements</h2>
-                    <p>Retrouvez ici tous les problèmes signalés au collège.</p>
-                </div>
-
-            </div>
-
-
-            <div class="filters">
-
-                <div class="filter-group">
-
-                    <label class="filter-label" for="urgencyFilter">
-                        🚦 Niveau d'urgence
-                    </label>
-
-                    <select
-                        id="urgencyFilter"
-                        class="filter-select"
-                        onchange="applyFilters()"
-                    >
-                        <option value="all">
-                            Tous les signalements
-                        </option>
-
-                        <option value="urgent">
-                            🔴 Urgents
-                        </option>
-                    </select>
-
-                </div>
-
-
-                <div class="filter-group">
-
-                    <label class="filter-label" for="categoryFilter">
-                        🛠️ Catégorie
-                    </label>
-
-                    <select
-                        id="categoryFilter"
-                        class="filter-select"
-                        onchange="applyFilters()"
-                    >
-                        <option value="all">
-                            Toutes les catégories
-                        </option>
-
-                        <option value="Informatique">
-                            💻 Informatique
-                        </option>
-
-                        <option value="Vidéoprojecteur">
-                            📽️ Vidéoprojecteur
-                        </option>
-
-                        <option value="Entretien">
-                            🧰 Entretien
-                        </option>
-
-                        <option value="Électricité">
-                            ⚡ Électricité
-                        </option>
-
-                        <option value="Mobilier">
-                            🪑 Mobilier
-                        </option>
-
-                        <option value="Chauffage">
-                            🔥 Chauffage
-                        </option>
-
-                        <option value="Plomberie">
-                            🚰 Plomberie
-                        </option>
-
-                        <option value="Éclairage">
-                            💡 Éclairage
-                        </option>
-
-                        <option value="Réseau / Internet">
-                            🌐 Réseau / Internet
-                        </option>
-
-                        <option value="Nettoyage">
-                            🧹 Nettoyage
-                        </option>
-
-                        <option value="Bâtiment">
-                            🏫 Bâtiment
-                        </option>
-
-                        <option value="Sécurité">
-                            🔒 Sécurité
-                        </option>
-
-                        <option value="Autre">
-                            🔧 Autre
-                        </option>
-
-                    </select>
-
-                </div>
-
-            </div>
-
-
-            <div class="reports" id="reportsList">
-
-                {% if problemes %}
-
-                    {% for probleme in problemes %}
-
-                        {% set statut = probleme.get('statut', 'nouveau') %}
-                        {% set urgence = probleme.get('urgence', '') %}
-                        {% set categorie = probleme.get('categorie', '') %}
-
-                        <article
-                            class="report"
-                            data-urgent="{% if urgence == 'urgente' %}true{% else %}false{% endif %}"
-                            data-category="{{ categorie }}"
-                        >
-
-                            <div class="report-photo">
-
-                                {% if probleme.get('photo_url') %}
-
-                                    <img
-                                        src="{{ probleme.get('photo_url') }}"
-                                        alt="Photo du signalement"
-                                    >
-
-                                {% else %}
-
-                                    📋
-
-                                {% endif %}
-
-                            </div>
-
-
-                            <div class="report-main">
-
-                                <div class="report-top">
-
-                                    <span class="report-title">
-                                        {{ categorie or 'Signalement' }}
-                                    </span>
-
-
-                                    {% if urgence == 'urgente' %}
-
-                                        <span class="badge badge-urgent">
-                                            🔴 URGENT
-                                        </span>
-
-                                    {% endif %}
-
-
-                                    {% if statut == 'nouveau' %}
-
-                                        <span class="badge badge-reassign">
-                                            À RÉAFFECTER
-                                        </span>
-
-                                    {% elif statut == 'en_cours' %}
-
-                                        <span class="badge badge-progress">
-                                            EN COURS
-                                        </span>
-
-                                    {% elif statut == 'resolu' %}
-
-                                        <span class="badge badge-resolved">
-                                            RÉSOLU
-                                        </span>
-
-                                    {% endif %}
-
-                                </div>
-
-
-                                <div class="report-description">
-                                    {{ probleme.get('description') or 'Aucune description.' }}
-                                </div>
-
-
-                                <div class="report-meta">
-
-                                    {% if probleme.get('salle') %}
-                                        <span>
-                                            📍 {{ probleme.get('salle') }}
-                                        </span>
-                                    {% endif %}
-
-
-                                    {% if probleme.get('auteur') %}
-                                        <span>
-                                            👤 {{ probleme.get('auteur') }}
-                                        </span>
-                                    {% endif %}
-
-
-                                    {% if probleme.get('responsable') %}
-                                        <span>
-                                            🛠️ {{ probleme.get('responsable') }}
-                                        </span>
-                                    {% endif %}
-
-
-                                    {% if probleme.get('date_creation') %}
-                                        <span>
-                                            🕐 {{ probleme.get('date_creation')[:16].replace('T', ' ') }}
-                                        </span>
-                                    {% endif %}
-
-                                </div>
-
-                            </div>
-
-
-                            <div class="report-actions">
-
-                                <a
-                                    href="{{ url_for('probleme', probleme_id=probleme.get('id')) }}"
-                                    class="open-button"
-                                >
-                                    Voir
-                                </a>
-
-                            </div>
-
-                        </article>
-
-                    {% endfor %}
-
-                {% else %}
-
-                    <div class="empty" id="emptyInitial">
-
-                        <div class="empty-icon">
-                            ✓
                         </div>
 
-                        <h3>Aucun signalement</h3>
+                    </div>
 
-                        <p>
-                            Aucun problème n'a encore été signalé.
-                        </p>
+                    <div class="signalement-info">
+
+                        <span>
+                            👤
+                            {{ probleme.get('auteur') or 'Inconnu' }}
+                        </span>
+
+                        <span>
+                            📅
+                            <span
+                                class="date-local"
+                                data-date="{{ probleme.get('date_creation') or '' }}"
+                            >
+                                {{ probleme.get('date_creation') or 'Date inconnue' }}
+                            </span>
+                        </span>
+
+                        {% if probleme.get('responsable') %}
+                            <span>
+                                👷
+                                {{ probleme.get('responsable') }}
+                            </span>
+                        {% endif %}
 
                     </div>
 
-                {% endif %}
-
-
-                <div class="empty hidden" id="emptyFiltered">
-
-                    <div class="empty-icon">
-                        🔎
+                    <div class="signalement-description">
+                        {{ probleme.get('description') or 'Aucune description.' }}
                     </div>
 
-                    <h3>Aucun résultat</h3>
+                    <div class="signalement-footer">
 
-                    <p>
-                        Aucun signalement ne correspond aux filtres sélectionnés.
-                    </p>
+                        <a
+                            class="btn-detail"
+                            href="{{ url_for('probleme', probleme_id=probleme.get('id')) }}"
+                        >
+                            Voir le signalement →
+                        </a>
 
-                </div>
+                    </div>
 
+                </article>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                Aucun signalement pour le moment.
             </div>
 
-        </section>
+        {% endif %}
 
-    </main>
+    </div>
 
-</div>
-
+</main>
 
 <script>
-    function applyFilters() {
-
-        const urgencyFilter =
-            document.getElementById("urgencyFilter");
-
-        const categoryFilter =
-            document.getElementById("categoryFilter");
-
-        const selectedUrgency =
-            urgencyFilter
-                ? urgencyFilter.value
-                : "all";
-
-        const selectedCategory =
-            categoryFilter
-                ? categoryFilter.value
-                : "all";
-
-        const reports =
-            document.querySelectorAll(".report");
-
-        let visibleCount = 0;
-
-
-        reports.forEach(function(report) {
-
-            const isUrgent =
-                report.dataset.urgent === "true";
-
-            const category =
-                report.dataset.category || "";
-
-
-            const matchesUrgency =
-                selectedUrgency === "all" ||
-                (
-                    selectedUrgency === "urgent" &&
-                    isUrgent
-                );
-
-
-            const matchesCategory =
-                selectedCategory === "all" ||
-                category === selectedCategory;
-
-
-            if (matchesUrgency && matchesCategory) {
-
-                report.classList.remove("hidden");
-
-                visibleCount++;
-
-            } else {
-
-                report.classList.add("hidden");
-
-            }
-
-        });
-
-
-        const emptyFiltered =
-            document.getElementById("emptyFiltered");
-
-        const emptyInitial =
-            document.getElementById("emptyInitial");
-
-
-        if (emptyFiltered) {
-
-            if (
-                reports.length > 0 &&
-                visibleCount === 0
-            ) {
-
-                emptyFiltered.classList.remove("hidden");
-
-            } else {
-
-                emptyFiltered.classList.add("hidden");
-
-            }
-
-        }
-
-
-        if (emptyInitial) {
-
-            if (reports.length === 0) {
-
-                emptyInitial.classList.remove("hidden");
-
-            } else {
-
-                emptyInitial.classList.add("hidden");
-
-            }
-
-        }
-
+function formaterDate(dateString) {
+    if (!dateString) {
+        return "Date inconnue";
     }
 
+    let date = new Date(dateString);
 
-    document.addEventListener("DOMContentLoaded", function() {
-        applyFilters();
+    if (isNaN(date.getTime())) {
+        return dateString;
+    }
+
+    const jour = String(date.getDate()).padStart(2, "0");
+    const mois = String(date.getMonth() + 1).padStart(2, "0");
+    const annee = date.getFullYear();
+
+    const heures = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+
+    return `${jour}/${mois}/${annee} à ${heures}:${minutes}`;
+}
+
+
+function applyFilters() {
+
+    const urgencyFilter =
+        document.getElementById("urgencyFilter").value;
+
+    const categoryFilter =
+        document.getElementById("categoryFilter").value;
+
+    const signalements =
+        document.querySelectorAll(".signalement");
+
+    signalements.forEach(function(signalement) {
+
+        const urgent =
+            signalement.dataset.urgent;
+
+        const category =
+            signalement.dataset.category;
+
+        let afficher = true;
+
+        if (
+            urgencyFilter === "urgent"
+            && urgent !== "urgent"
+        ) {
+            afficher = false;
+        }
+
+        if (
+            categoryFilter !== "all"
+            && category !== categoryFilter
+        ) {
+            afficher = false;
+        }
+
+        signalement.style.display =
+            afficher ? "" : "none";
     });
+}
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        document
+            .querySelectorAll(".date-local")
+            .forEach(function(element) {
+
+                const date =
+                    element.dataset.date;
+
+                if (date) {
+                    element.textContent =
+                        formaterDate(date);
+                }
+            });
+
+    }
+);
 </script>
 
 </body>

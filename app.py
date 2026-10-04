@@ -763,9 +763,8 @@ def inscription():
                             "Impossible de créer le compte."
                         )
                     else:
-                        succes = (
-                            "Compte professeur créé "
-                            "avec succès."
+                        return redirect(
+                            url_for("connexion")
                         )
 
             except Exception as e:

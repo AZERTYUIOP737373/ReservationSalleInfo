@@ -1,289 +1,374 @@
 ﻿<!DOCTYPE html>
-
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Connexion — Collège SOS</title>
 
-<title>Connexion — Collège SOS</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<style>
-    * {
-        box-sizing: border-box;
-    }
-
-    body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: Inter, Arial, sans-serif;
-        background:
-            radial-gradient(circle at top left, #dce7ff 0, transparent 35%),
-            radial-gradient(circle at bottom right, #e7f5ed 0, transparent 35%),
-            #f4f7fb;
-        color: #172033;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 25px;
-    }
-
-    .card {
-        width: min(440px, 100%);
-        background: white;
-        border: 1px solid #e3e8f0;
-        border-radius: 25px;
-        padding: 38px;
-        box-shadow: 0 25px 70px rgba(24, 37, 62, .10);
-    }
-
-    .icon {
-        width: 62px;
-        height: 62px;
-        border-radius: 18px;
-        background: #172033;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 29px;
-        margin-bottom: 22px;
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 7px 11px;
-        border-radius: 999px;
-        background: #e8eefc;
-        color: #3157a5;
-        font-size: 11px;
-        font-weight: 900;
-        letter-spacing: .07em;
-    }
-
-    h1 {
-        margin: 15px 0 7px;
-        font-size: 34px;
-        letter-spacing: -1px;
-    }
-
-    .subtitle {
-        color: #727c8d;
-        margin: 0 0 28px;
-        line-height: 1.5;
-    }
-
-    .error {
-        background: #fff0f0;
-        border: 1px solid #ffd1d1;
-        color: #b42323;
-        padding: 12px 14px;
-        border-radius: 11px;
-        margin-bottom: 20px;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .field {
-        margin-bottom: 18px;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 7px;
-        font-size: 13px;
-        font-weight: 800;
-    }
-
-    input {
-        width: 100%;
-        padding: 14px;
-        border: 1px solid #d8dee8;
-        border-radius: 12px;
-        background: #fbfcfe;
-        font-size: 15px;
-        outline: none;
-        transition: .15s;
-    }
-
-    input:focus {
-        border-color: #5975b8;
-        box-shadow: 0 0 0 4px #e9effd;
-        background: white;
-    }
-
-    .submit {
-        width: 100%;
-        border: 0;
-        border-radius: 12px;
-        padding: 14px;
-        background: #172033;
-        color: white;
-        font-size: 15px;
-        font-weight: 800;
-        cursor: pointer;
-        margin-top: 5px;
-    }
-
-    .submit:hover {
-        opacity: .9;
-    }
-
-    .separator {
-        height: 1px;
-        background: #edf0f4;
-        margin: 27px 0;
-    }
-
-    .links {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .link {
-        display: block;
-        text-align: center;
-        padding: 12px;
-        border-radius: 11px;
-        border: 1px solid #dfe4ec;
-        color: #39465c;
-        text-decoration: none;
-        font-size: 13px;
-        font-weight: 700;
-    }
-
-    .link:hover {
-        background: #f7f9fc;
-    }
-
-    .footer {
-        text-align: center;
-        margin-top: 28px;
-        padding-top: 18px;
-        border-top: 1px solid #edf0f4;
-        color: #9aa2af;
-        font-size: 12px;
-    }
-
-    .footer strong {
-        color: #697386;
-    }
-
-    @media (max-width: 500px) {
         body {
-            padding: 15px;
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, #dce7ff 0, transparent 35%),
+                radial-gradient(circle at bottom right, #e7f5ed 0, transparent 35%),
+                #f4f7fb;
+            color: #172033;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
         }
 
         .card {
-            padding: 28px 22px;
-            border-radius: 20px;
+            width: min(440px, 100%);
+            background: white;
+            border: 1px solid #e3e8f0;
+            border-radius: 25px;
+            padding: 38px;
+            box-shadow: 0 25px 70px rgba(24, 37, 62, .10);
+        }
+
+        .icon {
+            width: 62px;
+            height: 62px;
+            border-radius: 18px;
+            background: #172033;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 29px;
+            margin-bottom: 22px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: #e8eefc;
+            color: #3157a5;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .07em;
         }
 
         h1 {
-            font-size: 29px;
+            margin: 15px 0 7px;
+            font-size: 34px;
+            letter-spacing: -1px;
         }
-    }
-</style>
 
+        .subtitle {
+            color: #727c8d;
+            margin: 0 0 28px;
+            line-height: 1.5;
+        }
 
+        .error {
+            background: #fff0f0;
+            border: 1px solid #ffd1d1;
+            color: #b42323;
+            padding: 12px 14px;
+            border-radius: 11px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            width: 100%;
+            padding: 14px 48px 14px 14px;
+            border: 1px solid #d8dee8;
+            border-radius: 12px;
+            background: #fbfcfe;
+            font-size: 15px;
+            outline: none;
+            transition: .15s;
+        }
+
+        .password-wrapper input:focus {
+            border-color: #5975b8;
+            box-shadow: 0 0 0 4px #e9effd;
+            background: white;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            padding: 5px;
+            margin: 0;
+            cursor: pointer;
+            font-size: 19px;
+            line-height: 1;
+            color: #697386;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password:hover {
+            color: #172033;
+        }
+
+        input:not(.password-wrapper input) {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #d8dee8;
+            border-radius: 12px;
+            background: #fbfcfe;
+            font-size: 15px;
+            outline: none;
+            transition: .15s;
+        }
+
+        input:not(.password-wrapper input):focus {
+            border-color: #5975b8;
+            box-shadow: 0 0 0 4px #e9effd;
+            background: white;
+        }
+
+        .submit {
+            width: 100%;
+            border: 0;
+            border-radius: 12px;
+            padding: 14px;
+            background: #172033;
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .submit:hover {
+            opacity: .9;
+        }
+
+        .separator {
+            height: 1px;
+            background: #edf0f4;
+            margin: 27px 0;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 11px;
+            border: 1px solid #dfe4ec;
+            color: #39465c;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .link:hover {
+            background: #f7f9fc;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            padding-top: 18px;
+            border-top: 1px solid #edf0f4;
+            color: #9aa2af;
+            font-size: 12px;
+        }
+
+        .footer strong {
+            color: #697386;
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 15px;
+            }
+
+            .card {
+                padding: 28px 22px;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 29px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="card">
 
+    <div class="icon">🔐</div>
 
-<div class="icon">🔐</div>
+    <span class="badge">
+        CONNEXION
+    </span>
 
-<span class="badge">
-    CONNEXION
-</span>
+    <h1>Collège SOS</h1>
 
-<h1>Collège SOS</h1>
+    <p class="subtitle">
+        Connectez-vous pour signaler et suivre les problèmes du collège.
+    </p>
 
-<p class="subtitle">
-    Connectez-vous pour signaler et suivre les problèmes du collège.
-</p>
+    {% if erreur %}
+        <div class="error">
+            ⚠️ {{ erreur }}
+        </div>
+    {% endif %}
 
-{% if erreur %}
-    <div class="error">
-        ⚠️ {{ erreur }}
-    </div>
-{% endif %}
+    <form method="POST">
 
-<form method="POST">
+        <div class="field">
+            <label for="username">
+                Identifiant
+            </label>
 
-    <div class="field">
-        <label for="username">
-            Identifiant
-        </label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                placeholder="Votre identifiant"
+                autocomplete="username"
+                required
+                autofocus
+            >
+        </div>
 
-        <input
-            type="text"
-            id="username"
-            name="username"
-            placeholder="Votre identifiant"
-            autocomplete="username"
-            required
-            autofocus
+        <div class="field">
+            <label for="password">
+                Mot de passe
+            </label>
+
+            <div class="password-wrapper">
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Votre mot de passe"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="toggle-password"
+                    id="togglePassword"
+                    aria-label="Afficher le mot de passe"
+                    title="Afficher le mot de passe"
+                >
+                    👁️
+                </button>
+
+            </div>
+        </div>
+
+        <button type="submit" class="submit">
+            🔐 Se connecter
+        </button>
+
+    </form>
+
+    <div class="separator"></div>
+
+    <div class="links">
+
+        <a
+            href="{{ url_for('inscription') }}"
+            class="link"
         >
-    </div>
+            👨‍🏫 Créer un compte professeur
+        </a>
 
-    <div class="field">
-        <label for="password">
-            Mot de passe
-        </label>
-
-        <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Votre mot de passe"
-            autocomplete="current-password"
-            required
+        <a
+            href="{{ url_for('devenir_admin') }}"
+            class="link"
         >
+            ⚙️ Devenir administrateur
+        </a>
+
+        <a
+            href="{{ url_for('index') }}"
+            class="link"
+        >
+            ← Retour à Collège SOS
+        </a>
+
     </div>
 
-    <button type="submit" class="submit">
-        🔐 Se connecter
-    </button>
-
-</form>
-
-<div class="separator"></div>
-
-<div class="links">
-
-    <a
-        href="{{ url_for('inscription') }}"
-        class="link"
-    >
-        👨‍🏫 Créer un compte professeur
-    </a>
-
-    <a
-        href="{{ url_for('devenir_admin') }}"
-        class="link"
-    >
-        ⚙️ Devenir administrateur
-    </a>
-
-    <a
-        href="{{ url_for('index') }}"
-        class="link"
-    >
-        ← Retour à Collège SOS
-    </a>
-
-</div>
-
-<div class="footer">
+    <div class="footer">
         <strong>Made by Bryon Baptiste</strong>
+    </div>
+
 </div>
 
+<script>
+    const togglePassword = document.getElementById("togglePassword");
+    const password = document.getElementById("password");
 
-</div>
+    togglePassword.addEventListener("click", function () {
+
+        if (password.type === "password") {
+            password.type = "text";
+            togglePassword.textContent = "🙈";
+            togglePassword.setAttribute(
+                "aria-label",
+                "Masquer le mot de passe"
+            );
+            togglePassword.setAttribute(
+                "title",
+                "Masquer le mot de passe"
+            );
+        } else {
+            password.type = "password";
+            togglePassword.textContent = "👁️";
+            togglePassword.setAttribute(
+                "aria-label",
+                "Afficher le mot de passe"
+            );
+            togglePassword.setAttribute(
+                "title",
+                "Afficher le mot de passe"
+            );
+        }
+
+    });
+</script>
 
 </body>
 </html>

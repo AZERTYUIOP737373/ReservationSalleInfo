@@ -7,6 +7,39 @@
     <title>Créer un compte — Collège SOS</title>
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-wrapper input {
+            padding-right: 50px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 0;
+            background: transparent;
+            padding: 5px;
+            margin: 0;
+            cursor: pointer;
+            font-size: 19px;
+            line-height: 1;
+            color: #697386;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password:hover {
+            color: #172033;
+        }
+    </style>
 </head>
 
 <body>
@@ -68,14 +101,28 @@
                     Mot de passe
                 </label>
 
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="8 caractères minimum"
-                    autocomplete="new-password"
-                    required
-                >
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="8 caractères minimum"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        data-target="password"
+                        aria-label="Afficher le mot de passe"
+                        title="Afficher le mot de passe"
+                    >
+                        👁️
+                    </button>
+
+                </div>
 
             </div>
 
@@ -85,14 +132,28 @@
                     Confirmer le mot de passe
                 </label>
 
-                <input
-                    type="password"
-                    id="password_confirmation"
-                    name="password_confirmation"
-                    placeholder="Retapez votre mot de passe"
-                    autocomplete="new-password"
-                    required
-                >
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="password_confirmation"
+                        name="password_confirmation"
+                        placeholder="Retapez votre mot de passe"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        data-target="password_confirmation"
+                        aria-label="Afficher le mot de passe"
+                        title="Afficher le mot de passe"
+                    >
+                        👁️
+                    </button>
+
+                </div>
 
             </div>
 
@@ -102,13 +163,27 @@
                     Mot de passe administrateur
                 </label>
 
-                <input
-                    type="password"
-                    id="signup_password"
-                    name="signup_password"
-                    placeholder="Mot de passe fourni par l'administration"
-                    required
-                >
+                <div class="password-wrapper">
+
+                    <input
+                        type="password"
+                        id="signup_password"
+                        name="signup_password"
+                        placeholder="Mot de passe fourni par l'administration"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="toggle-password"
+                        data-target="signup_password"
+                        aria-label="Afficher le mot de passe administrateur"
+                        title="Afficher le mot de passe administrateur"
+                    >
+                        👁️
+                    </button>
+
+                </div>
 
             </div>
 
@@ -138,6 +213,55 @@
     </div>
 
 </div>
+
+<script>
+    const toggleButtons = document.querySelectorAll(".toggle-password");
+
+    toggleButtons.forEach(function(button) {
+
+        button.addEventListener("click", function() {
+
+            const targetId = button.getAttribute("data-target");
+            const passwordInput = document.getElementById(targetId);
+
+            if (passwordInput.type === "password") {
+
+                passwordInput.type = "text";
+
+                button.textContent = "🙈";
+
+                button.setAttribute(
+                    "aria-label",
+                    "Masquer le mot de passe"
+                );
+
+                button.setAttribute(
+                    "title",
+                    "Masquer le mot de passe"
+                );
+
+            } else {
+
+                passwordInput.type = "password";
+
+                button.textContent = "👁️";
+
+                button.setAttribute(
+                    "aria-label",
+                    "Afficher le mot de passe"
+                );
+
+                button.setAttribute(
+                    "title",
+                    "Afficher le mot de passe"
+                );
+
+            }
+
+        });
+
+    });
+</script>
 
 </body>
 </html>

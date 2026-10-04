@@ -233,6 +233,16 @@
             line-height: 1.5;
         }
 
+        .duree-resolution {
+            margin-top: 14px;
+            padding: 11px 13px;
+            background: #f0fdf4;
+            color: #15803d;
+            border-radius: 9px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
         .signalement-footer {
             margin-top: 17px;
             display: flex;
@@ -359,6 +369,7 @@
             </div>
 
             {% if resolus > 0 %}
+
                 <div class="average-box">
                     {{ moyenne_duree.jours }}
                     jour{% if moyenne_duree.jours > 1 %}s{% endif %}
@@ -368,10 +379,13 @@
                     ;
                     {{ moyenne_duree.minutes }} min
                 </div>
+
             {% else %}
+
                 <div class="average-box">
                     Aucun signalement résolu
                 </div>
+
             {% endif %}
         </div>
 
@@ -386,6 +400,7 @@
         <div class="filters-grid">
 
             <div class="filter-group">
+
                 <label for="urgencyFilter">
                     🚦 Niveau d'urgence
                 </label>
@@ -395,6 +410,7 @@
                     class="filter-select"
                     onchange="applyFilters()"
                 >
+
                     <option value="all">
                         Tous les signalements
                     </option>
@@ -402,10 +418,13 @@
                     <option value="urgent">
                         🔴 Urgents
                     </option>
+
                 </select>
+
             </div>
 
             <div class="filter-group">
+
                 <label for="categoryFilter">
                     🛠️ Catégorie
                 </label>
@@ -415,6 +434,7 @@
                     class="filter-select"
                     onchange="applyFilters()"
                 >
+
                     <option value="all">
                         Toutes les catégories
                     </option>
@@ -470,7 +490,9 @@
                     <option value="Autre">
                         🔧 Autre
                     </option>
+
                 </select>
+
             </div>
 
         </div>
@@ -492,18 +514,25 @@
                     <div class="signalement-header">
 
                         <h3 class="signalement-title">
+
                             {{ probleme.get('salle') or 'Salle inconnue' }}
+
                             —
+
                             {{ probleme.get('categorie') or 'Problème' }}
+
                         </h3>
 
                         <div class="badges">
 
                             {% if probleme.get('urgence') == 'urgente' %}
+
                                 <span class="badge badge-urgent">
                                     🔴 URGENT
                                 </span>
+
                             {% endif %}
+
 
                             {% if probleme.get('statut') == 'en_cours' %}
 
@@ -538,19 +567,23 @@
 
                         <span>
                             📅
+
                             <span
                                 class="date-local"
                                 data-date="{{ probleme.get('date_creation') or '' }}"
                             >
                                 {{ probleme.get('date_creation') or 'Date inconnue' }}
                             </span>
+
                         </span>
 
                         {% if probleme.get('responsable') %}
+
                             <span>
                                 👷
                                 {{ probleme.get('responsable') }}
                             </span>
+
                         {% endif %}
 
                     </div>
@@ -558,6 +591,29 @@
                     <div class="signalement-description">
                         {{ probleme.get('description') or 'Aucune description.' }}
                     </div>
+
+                    {% if probleme.get('statut') == 'resolu' and probleme.get('duree_resolution') %}
+
+                        <div class="duree-resolution">
+
+                            ⏱️ Durée de résolution :
+
+                            {{ probleme.duree_resolution.jours }}
+                            jour{% if probleme.duree_resolution.jours > 1 %}s{% endif %}
+
+                            ;
+
+                            {{ probleme.duree_resolution.heures }}
+                            heure{% if probleme.duree_resolution.heures > 1 %}s{% endif %}
+
+                            ;
+
+                            {{ probleme.duree_resolution.minutes }}
+                            minute{% if probleme.duree_resolution.minutes > 1 %}s{% endif %}
+
+                        </div>
+
+                    {% endif %}
 
                     <div class="signalement-footer">
 
@@ -587,7 +643,9 @@
 </main>
 
 <script>
+
 function formaterDate(dateString) {
+
     if (!dateString) {
         return "Date inconnue";
     }
@@ -598,12 +656,20 @@ function formaterDate(dateString) {
         return dateString;
     }
 
-    const jour = String(date.getDate()).padStart(2, "0");
-    const mois = String(date.getMonth() + 1).padStart(2, "0");
-    const annee = date.getFullYear();
+    const jour =
+        String(date.getDate()).padStart(2, "0");
 
-    const heures = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const mois =
+        String(date.getMonth() + 1).padStart(2, "0");
+
+    const annee =
+        date.getFullYear();
+
+    const heures =
+        String(date.getHours()).padStart(2, "0");
+
+    const minutes =
+        String(date.getMinutes()).padStart(2, "0");
 
     return `${jour}/${mois}/${annee} à ${heures}:${minutes}`;
 }
@@ -646,6 +712,7 @@ function applyFilters() {
 
         signalement.style.display =
             afficher ? "" : "none";
+
     });
 }
 
@@ -662,13 +729,17 @@ document.addEventListener(
                     element.dataset.date;
 
                 if (date) {
+
                     element.textContent =
                         formaterDate(date);
+
                 }
+
             });
 
     }
 );
+
 </script>
 
 </body>

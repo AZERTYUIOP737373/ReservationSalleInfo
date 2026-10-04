@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -371,12 +371,16 @@
             {% if resolus > 0 %}
 
                 <div class="average-box">
-                    {{ moyenne_duree.jours }}
-                    jour{% if moyenne_duree.jours > 1 %}s{% endif %}
-                    ;
-                    {{ moyenne_duree.heures }}
-                    heure{% if moyenne_duree.heures > 1 %}s{% endif %}
-                    ;
+                    {% if moyenne_duree.jours > 0 %}
+                        {{ moyenne_duree.jours }}
+                        jour{% if moyenne_duree.jours > 1 %}s{% endif %}
+                    {% endif %}
+
+                    {% if moyenne_duree.heures > 0 %}
+                        {{ moyenne_duree.heures }}
+                        heure{% if moyenne_duree.heures > 1 %}s{% endif %}
+                    {% endif %}
+
                     {{ moyenne_duree.minutes }} min
                 </div>
 
@@ -387,6 +391,7 @@
                 </div>
 
             {% endif %}
+
         </div>
 
     </div>
@@ -533,7 +538,6 @@
 
                             {% endif %}
 
-
                             {% if probleme.get('statut') == 'en_cours' %}
 
                                 <span class="badge badge-en-cours">
@@ -598,15 +602,19 @@
 
                             ⏱️ Durée de résolution :
 
-                            {{ probleme.duree_resolution.jours }}
-                            jour{% if probleme.duree_resolution.jours > 1 %}s{% endif %}
+                            {% if probleme.duree_resolution.jours > 0 %}
 
-                            ;
+                                {{ probleme.duree_resolution.jours }}
+                                jour{% if probleme.duree_resolution.jours > 1 %}s{% endif %}
 
-                            {{ probleme.duree_resolution.heures }}
-                            heure{% if probleme.duree_resolution.heures > 1 %}s{% endif %}
+                            {% endif %}
 
-                            ;
+                            {% if probleme.duree_resolution.heures > 0 %}
+
+                                {{ probleme.duree_resolution.heures }}
+                                heure{% if probleme.duree_resolution.heures > 1 %}s{% endif %}
+
+                            {% endif %}
 
                             {{ probleme.duree_resolution.minutes }}
                             minute{% if probleme.duree_resolution.minutes > 1 %}s{% endif %}

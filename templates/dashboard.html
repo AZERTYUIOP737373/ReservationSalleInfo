@@ -1,304 +1,317 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Tableau de bord - Collège SOS</title>
+```
+<title>Tableau de bord - Collège SOS</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f7fb;
-            color: #1f2937;
-        }
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f4f7fb;
+        color: #1f2937;
+    }
 
-        header {
-            background: #2563eb;
-            color: white;
-            padding: 18px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
+    header {
+        background: #2563eb;
+        color: white;
+        padding: 18px 25px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
 
-        .header-title h1 {
-            margin: 0;
-            font-size: 25px;
-        }
+    .header-title h1 {
+        margin: 0;
+        font-size: 25px;
+    }
 
-        .header-title p {
-            margin: 4px 0 0;
-            opacity: 0.9;
-            font-size: 14px;
-        }
+    .header-title p {
+        margin: 4px 0 0;
+        opacity: 0.9;
+        font-size: 14px;
+    }
 
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
+    .header-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
 
-        .header-buttons a {
-            color: white;
-            text-decoration: none;
-            background: rgba(255,255,255,0.15);
-            padding: 10px 14px;
-            border-radius: 9px;
-            font-weight: bold;
-        }
+    .header-buttons a {
+        color: white;
+        text-decoration: none;
+        background: rgba(255,255,255,0.15);
+        padding: 10px 14px;
+        border-radius: 9px;
+        font-weight: bold;
+    }
 
-        .header-buttons a:hover {
-            background: rgba(255,255,255,0.25);
-        }
+    .header-buttons a:hover {
+        background: rgba(255,255,255,0.25);
+    }
 
-        main {
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 0 18px 40px;
-        }
+    main {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 18px 40px;
+    }
 
-        .welcome {
-            margin-bottom: 25px;
-        }
+    .welcome {
+        margin-bottom: 25px;
+    }
 
-        .welcome h2 {
-            margin: 0 0 6px;
-            font-size: 28px;
-        }
+    .welcome h2 {
+        margin: 0 0 6px;
+        font-size: 28px;
+    }
 
-        .welcome p {
-            margin: 0;
-            color: #64748b;
-        }
+    .welcome p {
+        margin: 0;
+        color: #64748b;
+    }
 
+    .stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .stat-number {
+        font-size: 34px;
+        font-weight: 800;
+        color: #1f2937;
+    }
+
+    .stat-extra {
+        margin-top: 7px;
+        color: #dc2626;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    .average-box {
+        margin-top: 8px;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.5;
+        color: #2563eb;
+    }
+
+    .filters {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+
+    .filters-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .filter-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: bold;
+        color: #475569;
+        margin-bottom: 7px;
+    }
+
+    .filter-select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cbd5e1;
+        border-radius: 9px;
+        background: white;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .signalements {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .signalement {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+
+    .signalement-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .signalement-title {
+        margin: 0;
+        font-size: 19px;
+    }
+
+    .badges {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .badge-urgent {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .badge-en-cours {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .badge-resolu {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .badge-reaffecter {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .signalement-info {
+        margin-top: 12px;
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .signalement-description {
+        margin-top: 12px;
+        line-height: 1.5;
+    }
+
+    .duree-resolution {
+        margin-top: 14px;
+        padding: 11px 13px;
+        background: #f0fdf4;
+        color: #15803d;
+        border-radius: 9px;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .duree-resolution.en-cours {
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+
+    .compteur-duree {
+        font-variant-numeric: tabular-nums;
+    }
+
+    .signalement-footer {
+        margin-top: 17px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-detail {
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 9px;
+        font-weight: bold;
+    }
+
+    .btn-detail:hover {
+        background: #1d4ed8;
+    }
+
+    .empty {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        color: #64748b;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+
+    @media (max-width: 950px) {
         .stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(2, 1fr);
         }
+    }
 
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-        }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .stat-number {
-            font-size: 34px;
-            font-weight: 800;
-            color: #1f2937;
-        }
-
-        .stat-extra {
-            margin-top: 7px;
-            color: #dc2626;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        .average-box {
-            margin-top: 8px;
-            font-size: 16px;
-            font-weight: 700;
-            line-height: 1.5;
-            color: #2563eb;
-        }
-
-        .filters {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-        }
-
-        .filters-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
+    @media (max-width: 650px) {
+        .stats {
+            grid-template-columns: 1fr;
         }
 
         .filters-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            grid-template-columns: 1fr;
         }
 
-        .filter-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: bold;
-            color: #475569;
-            margin-bottom: 7px;
+        header {
+            padding: 15px;
         }
 
-        .filter-select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 9px;
-            background: white;
-            font-size: 14px;
-            cursor: pointer;
+        main {
+            margin-top: 20px;
         }
 
-        .signalements {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        .welcome h2 {
+            font-size: 23px;
         }
+    }
+</style>
+```
 
-        .signalement {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-        }
-
-        .signalement-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .signalement-title {
-            margin: 0;
-            font-size: 19px;
-        }
-
-        .badges {
-            display: flex;
-            gap: 7px;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 6px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .badge-urgent {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .badge-en-cours {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .badge-resolu {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .badge-reaffecter {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .signalement-info {
-            margin-top: 12px;
-            display: flex;
-            gap: 18px;
-            flex-wrap: wrap;
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .signalement-description {
-            margin-top: 12px;
-            line-height: 1.5;
-        }
-
-        .duree-resolution {
-            margin-top: 14px;
-            padding: 11px 13px;
-            background: #f0fdf4;
-            color: #15803d;
-            border-radius: 9px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .signalement-footer {
-            margin-top: 17px;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .btn-detail {
-            background: #2563eb;
-            color: white;
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 9px;
-            font-weight: bold;
-        }
-
-        .btn-detail:hover {
-            background: #1d4ed8;
-        }
-
-        .empty {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            color: #64748b;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-        }
-
-        @media (max-width: 950px) {
-            .stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 650px) {
-            .stats {
-                grid-template-columns: 1fr;
-            }
-
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
-
-            header {
-                padding: 15px;
-            }
-
-            main {
-                margin-top: 20px;
-            }
-
-            .welcome h2 {
-                font-size: 23px;
-            }
-        }
-    </style>
 </head>
 
 <body>
@@ -309,344 +322,373 @@
         <p>Collège Edmond Rostand</p>
     </div>
 
-    <div class="header-buttons">
-        <a href="{{ url_for('notifications') }}">
-            🔔 Notifications
-        </a>
+```
+<div class="header-buttons">
+    <a href="{{ url_for('notifications') }}">
+        🔔 Notifications
+    </a>
 
-        <a href="{{ url_for('index') }}">
-            🏠 Accueil
-        </a>
-    </div>
+    <a href="{{ url_for('index') }}">
+        🏠 Accueil
+    </a>
+</div>
+```
+
 </header>
 
 <main>
 
-    <div class="welcome">
-        <h2>Tableau de bord</h2>
-        <p>Gérez les signalements du collège.</p>
+```
+<div class="welcome">
+    <h2>Tableau de bord</h2>
+    <p>Gérez les signalements du collège.</p>
+</div>
+
+<div class="stats">
+
+    <div class="stat-card">
+        <div class="stat-label">
+            EN COURS
+        </div>
+
+        <div class="stat-number">
+            {{ en_cours }}
+        </div>
+
+        <div class="stat-extra">
+            dont {{ urgents }} urgent(s)
+        </div>
     </div>
 
-    <div class="stats">
-
-        <div class="stat-card">
-            <div class="stat-label">
-                EN COURS
-            </div>
-
-            <div class="stat-number">
-                {{ en_cours }}
-            </div>
-
-            <div class="stat-extra">
-                dont {{ urgents }} urgent(s)
-            </div>
+    <div class="stat-card">
+        <div class="stat-label">
+            RÉSOLUS
         </div>
 
-        <div class="stat-card">
-            <div class="stat-label">
-                RÉSOLUS
-            </div>
-
-            <div class="stat-number">
-                {{ resolus }}
-            </div>
+        <div class="stat-number">
+            {{ resolus }}
         </div>
-
-        <div class="stat-card">
-            <div class="stat-label">
-                À RÉAFFECTER
-            </div>
-
-            <div class="stat-number">
-                {{ a_reaffecter }}
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="stat-label">
-                ⏱️ DURÉE MOYENNE DE RÉSOLUTION
-            </div>
-
-            {% if resolus > 0 %}
-
-                <div class="average-box">
-                    {% if moyenne_duree.jours > 0 %}
-                        {{ moyenne_duree.jours }}
-                        jour{% if moyenne_duree.jours > 1 %}s{% endif %}
-                    {% endif %}
-
-                    {% if moyenne_duree.heures > 0 %}
-                        {{ moyenne_duree.heures }}
-                        heure{% if moyenne_duree.heures > 1 %}s{% endif %}
-                    {% endif %}
-
-                    {{ moyenne_duree.minutes }} min
-                </div>
-
-            {% else %}
-
-                <div class="average-box">
-                    Aucun signalement résolu
-                </div>
-
-            {% endif %}
-
-        </div>
-
     </div>
 
-    <div class="filters">
-
-        <div class="filters-title">
-            🔎 Filtrer les signalements
+    <div class="stat-card">
+        <div class="stat-label">
+            À RÉAFFECTER
         </div>
 
-        <div class="filters-grid">
+        <div class="stat-number">
+            {{ a_reaffecter }}
+        </div>
+    </div>
 
-            <div class="filter-group">
+    <div class="stat-card">
+        <div class="stat-label">
+            ⏱️ DURÉE MOYENNE DE RÉSOLUTION
+        </div>
 
-                <label for="urgencyFilter">
-                    🚦 Niveau d'urgence
-                </label>
+        {% if resolus > 0 %}
 
-                <select
-                    id="urgencyFilter"
-                    class="filter-select"
-                    onchange="applyFilters()"
-                >
+            <div class="average-box">
 
-                    <option value="all">
-                        Tous les signalements
-                    </option>
+                {% if moyenne_duree.jours > 0 %}
+                    {{ moyenne_duree.jours }}
+                    jour{% if moyenne_duree.jours > 1 %}s{% endif %}
+                {% endif %}
 
-                    <option value="urgent">
-                        🔴 Urgents
-                    </option>
+                {% if moyenne_duree.heures > 0 %}
+                    {{ moyenne_duree.heures }}
+                    heure{% if moyenne_duree.heures > 1 %}s{% endif %}
+                {% endif %}
 
-                </select>
+                {{ moyenne_duree.minutes }}
+                minute{% if moyenne_duree.minutes > 1 %}s{% endif %}
+
+                {{ moyenne_duree.secondes }}
+                seconde{% if moyenne_duree.secondes > 1 %}s{% endif %}
 
             </div>
 
-            <div class="filter-group">
+        {% else %}
 
-                <label for="categoryFilter">
-                    🛠️ Catégorie
-                </label>
-
-                <select
-                    id="categoryFilter"
-                    class="filter-select"
-                    onchange="applyFilters()"
-                >
-
-                    <option value="all">
-                        Toutes les catégories
-                    </option>
-
-                    <option value="Informatique">
-                        💻 Informatique
-                    </option>
-
-                    <option value="Vidéoprojecteur">
-                        📽️ Vidéoprojecteur
-                    </option>
-
-                    <option value="Entretien">
-                        🧰 Entretien
-                    </option>
-
-                    <option value="Électricité">
-                        ⚡ Électricité
-                    </option>
-
-                    <option value="Mobilier">
-                        🪑 Mobilier
-                    </option>
-
-                    <option value="Chauffage">
-                        🔥 Chauffage
-                    </option>
-
-                    <option value="Plomberie">
-                        🚰 Plomberie
-                    </option>
-
-                    <option value="Éclairage">
-                        💡 Éclairage
-                    </option>
-
-                    <option value="Réseau / Internet">
-                        🌐 Réseau / Internet
-                    </option>
-
-                    <option value="Nettoyage">
-                        🧹 Nettoyage
-                    </option>
-
-                    <option value="Bâtiment">
-                        🏫 Bâtiment
-                    </option>
-
-                    <option value="Sécurité">
-                        🔒 Sécurité
-                    </option>
-
-                    <option value="Autre">
-                        🔧 Autre
-                    </option>
-
-                </select>
-
+            <div class="average-box">
+                Aucun signalement résolu
             </div>
 
-        </div>
+        {% endif %}
 
     </div>
 
-    <div class="signalements" id="signalements">
+</div>
 
-        {% if problemes %}
+<div class="filters">
 
-            {% for probleme in problemes %}
+    <div class="filters-title">
+        🔎 Filtrer les signalements
+    </div>
 
-                <article
-                    class="signalement"
-                    data-urgent="{% if probleme.get('urgence') == 'urgente' %}urgent{% else %}normal{% endif %}"
-                    data-category="{{ probleme.get('categorie', '') }}"
-                >
+    <div class="filters-grid">
 
-                    <div class="signalement-header">
+        <div class="filter-group">
 
-                        <h3 class="signalement-title">
+            <label for="urgencyFilter">
+                🚦 Niveau d'urgence
+            </label>
 
-                            {{ probleme.get('salle') or 'Salle inconnue' }}
+            <select
+                id="urgencyFilter"
+                class="filter-select"
+                onchange="applyFilters()"
+            >
 
-                            —
+                <option value="all">
+                    Tous les signalements
+                </option>
 
-                            {{ probleme.get('categorie') or 'Problème' }}
+                <option value="urgent">
+                    🔴 Urgents
+                </option>
 
-                        </h3>
+            </select>
 
-                        <div class="badges">
+        </div>
 
-                            {% if probleme.get('urgence') == 'urgente' %}
+        <div class="filter-group">
 
-                                <span class="badge badge-urgent">
-                                    🔴 URGENT
-                                </span>
+            <label for="categoryFilter">
+                🛠️ Catégorie
+            </label>
 
-                            {% endif %}
+            <select
+                id="categoryFilter"
+                class="filter-select"
+                onchange="applyFilters()"
+            >
 
-                            {% if probleme.get('statut') == 'en_cours' %}
+                <option value="all">
+                    Toutes les catégories
+                </option>
 
-                                <span class="badge badge-en-cours">
-                                    EN COURS
-                                </span>
+                <option value="Informatique">
+                    💻 Informatique
+                </option>
 
-                            {% elif probleme.get('statut') == 'resolu' %}
+                <option value="Vidéoprojecteur">
+                    📽️ Vidéoprojecteur
+                </option>
 
-                                <span class="badge badge-resolu">
-                                    RÉSOLU
-                                </span>
+                <option value="Entretien">
+                    🧰 Entretien
+                </option>
 
-                            {% elif probleme.get('statut') == 'nouveau' %}
+                <option value="Électricité">
+                    ⚡ Électricité
+                </option>
 
-                                <span class="badge badge-reaffecter">
-                                    À RÉAFFECTER
-                                </span>
+                <option value="Mobilier">
+                    🪑 Mobilier
+                </option>
 
-                            {% endif %}
+                <option value="Chauffage">
+                    🔥 Chauffage
+                </option>
 
-                        </div>
+                <option value="Plomberie">
+                    🚰 Plomberie
+                </option>
 
-                    </div>
+                <option value="Éclairage">
+                    💡 Éclairage
+                </option>
 
-                    <div class="signalement-info">
+                <option value="Réseau / Internet">
+                    🌐 Réseau / Internet
+                </option>
 
-                        <span>
-                            👤
-                            {{ probleme.get('auteur') or 'Inconnu' }}
-                        </span>
+                <option value="Nettoyage">
+                    🧹 Nettoyage
+                </option>
 
-                        <span>
-                            📅
+                <option value="Bâtiment">
+                    🏫 Bâtiment
+                </option>
 
-                            <span
-                                class="date-local"
-                                data-date="{{ probleme.get('date_creation') or '' }}"
-                            >
-                                {{ probleme.get('date_creation') or 'Date inconnue' }}
+                <option value="Sécurité">
+                    🔒 Sécurité
+                </option>
+
+                <option value="Autre">
+                    🔧 Autre
+                </option>
+
+            </select>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="signalements" id="signalements">
+
+    {% if problemes %}
+
+        {% for probleme in problemes %}
+
+            <article
+                class="signalement"
+                data-urgent="{% if probleme.get('urgence') == 'urgente' %}urgent{% else %}normal{% endif %}"
+                data-category="{{ probleme.get('categorie', '') }}"
+            >
+
+                <div class="signalement-header">
+
+                    <h3 class="signalement-title">
+
+                        {{ probleme.get('salle') or 'Salle inconnue' }}
+
+                        —
+
+                        {{ probleme.get('categorie') or 'Problème' }}
+
+                    </h3>
+
+                    <div class="badges">
+
+                        {% if probleme.get('urgence') == 'urgente' %}
+
+                            <span class="badge badge-urgent">
+                                🔴 URGENT
                             </span>
 
-                        </span>
+                        {% endif %}
 
-                        {% if probleme.get('responsable') %}
+                        {% if probleme.get('statut') == 'en_cours' %}
 
-                            <span>
-                                👷
-                                {{ probleme.get('responsable') }}
+                            <span class="badge badge-en-cours">
+                                EN COURS
+                            </span>
+
+                        {% elif probleme.get('statut') == 'resolu' %}
+
+                            <span class="badge badge-resolu">
+                                RÉSOLU
+                            </span>
+
+                        {% elif probleme.get('statut') == 'nouveau' %}
+
+                            <span class="badge badge-reaffecter">
+                                À RÉAFFECTER
                             </span>
 
                         {% endif %}
 
                     </div>
 
-                    <div class="signalement-description">
-                        {{ probleme.get('description') or 'Aucune description.' }}
-                    </div>
+                </div>
 
-                    {% if probleme.get('statut') == 'resolu' and probleme.get('duree_resolution') %}
+                <div class="signalement-info">
 
-                        <div class="duree-resolution">
+                    <span>
+                        👤
+                        {{ probleme.get('auteur') or 'Inconnu' }}
+                    </span>
 
-                            ⏱️ Durée de résolution :
+                    <span>
+                        📅
 
-                            {% if probleme.duree_resolution.jours > 0 %}
+                        <span
+                            class="date-local"
+                            data-date="{{ probleme.get('date_creation') or '' }}"
+                        >
+                            {{ probleme.get('date_creation') or 'Date inconnue' }}
+                        </span>
 
-                                {{ probleme.duree_resolution.jours }}
-                                jour{% if probleme.duree_resolution.jours > 1 %}s{% endif %}
+                    </span>
 
-                            {% endif %}
+                    {% if probleme.get('responsable') %}
 
-                            {% if probleme.duree_resolution.heures > 0 %}
-
-                                {{ probleme.duree_resolution.heures }}
-                                heure{% if probleme.duree_resolution.heures > 1 %}s{% endif %}
-
-                            {% endif %}
-
-                            {{ probleme.duree_resolution.minutes }}
-                            minute{% if probleme.duree_resolution.minutes > 1 %}s{% endif %}
-
-                        </div>
+                        <span>
+                            👷
+                            {{ probleme.get('responsable') }}
+                        </span>
 
                     {% endif %}
 
-                    <div class="signalement-footer">
+                </div>
 
-                        <a
-                            class="btn-detail"
-                            href="{{ url_for('probleme', probleme_id=probleme.get('id')) }}"
-                        >
-                            Voir le signalement →
-                        </a>
+                <div class="signalement-description">
+                    {{ probleme.get('description') or 'Aucune description.' }}
+                </div>
+
+                {% if probleme.get('statut') == 'en_cours' %}
+
+                    <div
+                        class="duree-resolution en-cours"
+                        data-start-date="{{ probleme.get('date_creation') or '' }}"
+                    >
+
+                        ⏱️ Durée de résolution :
+
+                        <span class="compteur-duree">
+                            Calcul...
+                        </span>
 
                     </div>
 
-                </article>
+                {% elif probleme.get('statut') == 'resolu' and probleme.get('duree_resolution') %}
 
-            {% endfor %}
+                    <div class="duree-resolution">
 
-        {% else %}
+                        ⏱️ Durée de résolution :
 
-            <div class="empty">
-                Aucun signalement pour le moment.
-            </div>
+                        {% if probleme.duree_resolution.jours > 0 %}
 
-        {% endif %}
+                            {{ probleme.duree_resolution.jours }}
+                            jour{% if probleme.duree_resolution.jours > 1 %}s{% endif %}
 
-    </div>
+                        {% endif %}
+
+                        {% if probleme.duree_resolution.heures > 0 %}
+
+                            {{ probleme.duree_resolution.heures }}
+                            heure{% if probleme.duree_resolution.heures > 1 %}s{% endif %}
+
+                        {% endif %}
+
+                        {{ probleme.duree_resolution.minutes }}
+                        minute{% if probleme.duree_resolution.minutes > 1 %}s{% endif %}
+
+                        {{ probleme.duree_resolution.secondes }}
+                        seconde{% if probleme.duree_resolution.secondes > 1 %}s{% endif %}
+
+                    </div>
+
+                {% endif %}
+
+                <div class="signalement-footer">
+
+                    <a
+                        class="btn-detail"
+                        href="{{ url_for('probleme', probleme_id=probleme.get('id')) }}"
+                    >
+                        Voir le signalement →
+                    </a>
+
+                </div>
+
+            </article>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+            Aucun signalement pour le moment.
+        </div>
+
+    {% endif %}
+
+</div>
+```
 
 </main>
 
@@ -680,6 +722,112 @@ function formaterDate(dateString) {
         String(date.getMinutes()).padStart(2, "0");
 
     return `${jour}/${mois}/${annee} à ${heures}:${minutes}`;
+}
+
+
+function formaterDuree(secondesTotal) {
+
+    secondesTotal =
+        Math.max(0, Math.floor(secondesTotal));
+
+    const jours =
+        Math.floor(secondesTotal / 86400);
+
+    secondesTotal =
+        secondesTotal % 86400;
+
+    const heures =
+        Math.floor(secondesTotal / 3600);
+
+    secondesTotal =
+        secondesTotal % 3600;
+
+    const minutes =
+        Math.floor(secondesTotal / 60);
+
+    const secondes =
+        secondesTotal % 60;
+
+    let texte = "";
+
+    if (jours > 0) {
+        texte +=
+            jours +
+            " jour" +
+            (jours > 1 ? "s" : "") +
+            " ";
+    }
+
+    if (heures > 0 || jours > 0) {
+        texte +=
+            heures +
+            " heure" +
+            (heures > 1 ? "s" : "") +
+            " ";
+    }
+
+    texte +=
+        minutes +
+        " minute" +
+        (minutes > 1 ? "s" : "") +
+        " ";
+
+    texte +=
+        secondes +
+        " seconde" +
+        (secondes > 1 ? "s" : "");
+
+    return texte.trim();
+}
+
+
+function mettreAJourCompteurs() {
+
+    const compteurs =
+        document.querySelectorAll(
+            ".duree-resolution.en-cours"
+        );
+
+    const maintenant =
+        Date.now();
+
+    compteurs.forEach(function(element) {
+
+        const dateDebut =
+            element.dataset.startDate;
+
+        if (!dateDebut) {
+            return;
+        }
+
+        const debut =
+            new Date(dateDebut).getTime();
+
+        if (isNaN(debut)) {
+            element.querySelector(
+                ".compteur-duree"
+            ).textContent =
+                "Date inconnue";
+
+            return;
+        }
+
+        const dureeSecondes =
+            (maintenant - debut) / 1000;
+
+        const compteur =
+            element.querySelector(
+                ".compteur-duree"
+            );
+
+        if (compteur) {
+            compteur.textContent =
+                formaterDuree(
+                    dureeSecondes
+                );
+        }
+
+    });
 }
 
 
@@ -744,6 +892,13 @@ document.addEventListener(
                 }
 
             });
+
+        mettreAJourCompteurs();
+
+        setInterval(
+            mettreAJourCompteurs,
+            1000
+        );
 
     }
 );

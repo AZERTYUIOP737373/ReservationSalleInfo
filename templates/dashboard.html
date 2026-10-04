@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="fr"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-```
 <title>Tableau de bord - Collège SOS</title>
 
 <style>
@@ -310,19 +306,13 @@
         }
     }
 </style>
-```
 
 </head>
 
 <body>
 
-<header>
-    <div class="header-title">
-        <h1>Collège SOS</h1>
-        <p>Collège Edmond Rostand</p>
-    </div>
+<header> <div class="header-title"> <h1>Collège SOS</h1> <p>Collège Edmond Rostand</p> </div>
 
-```
 <div class="header-buttons">
     <a href="{{ url_for('notifications') }}">
         🔔 Notifications
@@ -332,13 +322,11 @@
         🏠 Accueil
     </a>
 </div>
-```
 
 </header>
 
 <main>
 
-```
 <div class="welcome">
     <h2>Tableau de bord</h2>
     <p>Gérez les signalements du collège.</p>
@@ -688,222 +676,9 @@
     {% endif %}
 
 </div>
-```
 
 </main>
 
-<script>
+<script> function formaterDate(dateString) { if (!dateString) { return "Date inconnue"; } let date = new Date(dateString); if (isNaN(date.getTime())) { return dateString; } const jour = String(date.getDate()).padStart(2, "0"); const mois = String(date.getMonth() + 1).padStart(2, "0"); const annee = date.getFullYear(); const heures = String(date.getHours()).padStart(2, "0"); const minutes = String(date.getMinutes()).padStart(2, "0"); return `${jour}/${mois}/${annee} à ${heures}:${minutes}`; } function formaterDuree(secondesTotal) { secondesTotal = Math.max(0, Math.floor(secondesTotal)); const jours = Math.floor(secondesTotal / 86400); secondesTotal = secondesTotal % 86400; const heures = Math.floor(secondesTotal / 3600); secondesTotal = secondesTotal % 3600; const minutes = Math.floor(secondesTotal / 60); const secondes = secondesTotal % 60; let texte = ""; if (jours > 0) { texte += jours + " jour" + (jours > 1 ? "s" : "") + " "; } if (heures > 0 || jours > 0) { texte += heures + " heure" + (heures > 1 ? "s" : "") + " "; } texte += minutes + " minute" + (minutes > 1 ? "s" : "") + " "; texte += secondes + " seconde" + (secondes > 1 ? "s" : ""); return texte.trim(); } function mettreAJourCompteurs() { const compteurs = document.querySelectorAll( ".duree-resolution.en-cours" ); const maintenant = Date.now(); compteurs.forEach(function(element) { const dateDebut = element.dataset.startDate; if (!dateDebut) { return; } const debut = new Date(dateDebut).getTime(); if (isNaN(debut)) { element.querySelector( ".compteur-duree" ).textContent = "Date inconnue"; return; } const dureeSecondes = (maintenant - debut) / 1000; const compteur = element.querySelector( ".compteur-duree" ); if (compteur) { compteur.textContent = formaterDuree( dureeSecondes ); } }); } function applyFilters() { const urgencyFilter = document.getElementById("urgencyFilter").value; const categoryFilter = document.getElementById("categoryFilter").value; const signalements = document.querySelectorAll(".signalement"); signalements.forEach(function(signalement) { const urgent = signalement.dataset.urgent; const category = signalement.dataset.category; let afficher = true; if ( urgencyFilter === "urgent" && urgent !== "urgent" ) { afficher = false; } if ( categoryFilter !== "all" && category !== categoryFilter ) { afficher = false; } signalement.style.display = afficher ? "" : "none"; }); } document.addEventListener( "DOMContentLoaded", function() { document .querySelectorAll(".date-local") .forEach(function(element) { const date = element.dataset.date; if (date) { element.textContent = formaterDate(date); } }); mettreAJourCompteurs(); setInterval( mettreAJourCompteurs, 1000 ); } ); </script>
 
-function formaterDate(dateString) {
-
-    if (!dateString) {
-        return "Date inconnue";
-    }
-
-    let date = new Date(dateString);
-
-    if (isNaN(date.getTime())) {
-        return dateString;
-    }
-
-    const jour =
-        String(date.getDate()).padStart(2, "0");
-
-    const mois =
-        String(date.getMonth() + 1).padStart(2, "0");
-
-    const annee =
-        date.getFullYear();
-
-    const heures =
-        String(date.getHours()).padStart(2, "0");
-
-    const minutes =
-        String(date.getMinutes()).padStart(2, "0");
-
-    return `${jour}/${mois}/${annee} à ${heures}:${minutes}`;
-}
-
-
-function formaterDuree(secondesTotal) {
-
-    secondesTotal =
-        Math.max(0, Math.floor(secondesTotal));
-
-    const jours =
-        Math.floor(secondesTotal / 86400);
-
-    secondesTotal =
-        secondesTotal % 86400;
-
-    const heures =
-        Math.floor(secondesTotal / 3600);
-
-    secondesTotal =
-        secondesTotal % 3600;
-
-    const minutes =
-        Math.floor(secondesTotal / 60);
-
-    const secondes =
-        secondesTotal % 60;
-
-    let texte = "";
-
-    if (jours > 0) {
-        texte +=
-            jours +
-            " jour" +
-            (jours > 1 ? "s" : "") +
-            " ";
-    }
-
-    if (heures > 0 || jours > 0) {
-        texte +=
-            heures +
-            " heure" +
-            (heures > 1 ? "s" : "") +
-            " ";
-    }
-
-    texte +=
-        minutes +
-        " minute" +
-        (minutes > 1 ? "s" : "") +
-        " ";
-
-    texte +=
-        secondes +
-        " seconde" +
-        (secondes > 1 ? "s" : "");
-
-    return texte.trim();
-}
-
-
-function mettreAJourCompteurs() {
-
-    const compteurs =
-        document.querySelectorAll(
-            ".duree-resolution.en-cours"
-        );
-
-    const maintenant =
-        Date.now();
-
-    compteurs.forEach(function(element) {
-
-        const dateDebut =
-            element.dataset.startDate;
-
-        if (!dateDebut) {
-            return;
-        }
-
-        const debut =
-            new Date(dateDebut).getTime();
-
-        if (isNaN(debut)) {
-            element.querySelector(
-                ".compteur-duree"
-            ).textContent =
-                "Date inconnue";
-
-            return;
-        }
-
-        const dureeSecondes =
-            (maintenant - debut) / 1000;
-
-        const compteur =
-            element.querySelector(
-                ".compteur-duree"
-            );
-
-        if (compteur) {
-            compteur.textContent =
-                formaterDuree(
-                    dureeSecondes
-                );
-        }
-
-    });
-}
-
-
-function applyFilters() {
-
-    const urgencyFilter =
-        document.getElementById("urgencyFilter").value;
-
-    const categoryFilter =
-        document.getElementById("categoryFilter").value;
-
-    const signalements =
-        document.querySelectorAll(".signalement");
-
-    signalements.forEach(function(signalement) {
-
-        const urgent =
-            signalement.dataset.urgent;
-
-        const category =
-            signalement.dataset.category;
-
-        let afficher = true;
-
-        if (
-            urgencyFilter === "urgent"
-            && urgent !== "urgent"
-        ) {
-            afficher = false;
-        }
-
-        if (
-            categoryFilter !== "all"
-            && category !== categoryFilter
-        ) {
-            afficher = false;
-        }
-
-        signalement.style.display =
-            afficher ? "" : "none";
-
-    });
-}
-
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        document
-            .querySelectorAll(".date-local")
-            .forEach(function(element) {
-
-                const date =
-                    element.dataset.date;
-
-                if (date) {
-
-                    element.textContent =
-                        formaterDate(date);
-
-                }
-
-            });
-
-        mettreAJourCompteurs();
-
-        setInterval(
-            mettreAJourCompteurs,
-            1000
-        );
-
-    }
-);
-
-</script>
-
-</body>
-</html>
+</body> </html>

@@ -1,4 +1,4 @@
-﻿import os
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -182,34 +182,43 @@ def convertir_date(date_string):
         return None
 
 
+def calculer_duree_secondes(probleme):
+    if probleme.get("statut") != "resolu":
+        return None
+
+    date_creation = convertir_date(
+        probleme.get("date_creation")
+    )
+
+    date_modification = convertir_date(
+        probleme.get("date_modification")
+    )
+
+    if not date_creation or not date_modification:
+        return None
+
+    try:
+        difference = (
+            date_modification - date_creation
+        ).total_seconds()
+
+        if difference < 0:
+            return None
+
+        return difference
+
+    except Exception:
+        return None
+
+
 def calculer_duree_moyenne(problemes):
     durees = []
 
     for probleme in problemes:
-        if probleme.get("statut") != "resolu":
-            continue
+        duree = calculer_duree_secondes(probleme)
 
-        date_creation = convertir_date(
-            probleme.get("date_creation")
-        )
-
-        date_modification = convertir_date(
-            probleme.get("date_modification")
-        )
-
-        if not date_creation or not date_modification:
-            continue
-
-        try:
-            difference = (
-                date_modification - date_creation
-            ).total_seconds()
-
-            if difference >= 0:
-                durees.append(difference)
-
-        except Exception:
-            continue
+        if duree is not None:
+            durees.append(duree)
 
     if not durees:
         return 0
@@ -237,6 +246,22 @@ def formater_duree_secondes(secondes):
         "heures": heures,
         "minutes": minutes
     }
+
+
+def ajouter_durees_resolution(problemes):
+    for probleme in problemes:
+        duree_secondes = calculer_duree_secondes(probleme)
+
+        if duree_secondes is not None:
+            probleme["duree_resolution"] = (
+                formater_duree_secondes(
+                    duree_secondes
+                )
+            )
+        else:
+            probleme["duree_resolution"] = None
+
+    return problemes
 
 
 def supprimer_abonnement_push(endpoint):
@@ -1194,6 +1219,10 @@ def dashboard():
 
     problemes = result.data or []
 
+    problemes = ajouter_durees_resolution(
+        problemes
+    )
+
     auteurs = list({
         p.get("auteur")
         for p in problemes
@@ -1290,6 +1319,19 @@ def probleme(probleme_id):
         abort(404)
 
     probleme_data = result.data
+
+    duree_secondes = calculer_duree_secondes(
+        probleme_data
+    )
+
+    if duree_secondes is not None:
+        probleme_data["duree_resolution"] = (
+            formater_duree_secondes(
+                duree_secondes
+            )
+        )
+    else:
+        probleme_data["duree_resolution"] = None
 
     auteur_user = None
 

@@ -5,7 +5,7 @@ load_dotenv()
 
 import uuid
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import wraps
 
 from flask import (
@@ -176,7 +176,14 @@ def convertir_date(date_string):
         if valeur.endswith("Z"):
             valeur = valeur[:-1] + "+00:00"
 
-        return datetime.fromisoformat(valeur)
+        date_convertie = datetime.fromisoformat(valeur)
+
+        if date_convertie.tzinfo is None:
+            date_convertie = date_convertie.replace(
+                tzinfo=timezone.utc
+            )
+
+        return date_convertie
 
     except Exception:
         return None
@@ -211,6 +218,40 @@ def calculer_duree_secondes(probleme):
         return None
 
 
+def calculer_duree_actuelle_secondes(probleme):
+    if probleme.get("statut") == "resolu":
+        return None
+
+    date_creation = convertir_date(
+        probleme.get("date_creation")
+    )
+
+    if not date_creation:
+        return None
+
+    try:
+        maintenant = datetime.now(timezone.utc)
+
+        difference = (
+            maintenant - date_creation
+        ).total_seconds()
+
+        if difference < 0:
+            return 0
+
+        return difference
+
+    except Exception:
+        return None
+
+
+def calculer_duree_affichage_secondes(probleme):
+    if probleme.get("statut") == "resolu":
+        return calculer_duree_secondes(probleme)
+
+    return calculer_duree_actuelle_secondes(probleme)
+
+
 def calculer_duree_moyenne(problemes):
     durees = []
 
@@ -235,31 +276,48 @@ def formater_duree_secondes(secondes):
     if secondes < 0:
         secondes = 0
 
-    total_minutes = secondes // 60
+    jours = secondes // 86400
+    reste = secondes % 86400
 
-    jours = total_minutes // 1440
-    heures = (total_minutes % 1440) // 60
-    minutes = total_minutes % 60
+    heures = reste // 3600
+    reste = reste % 3600
+
+    minutes = reste // 60
+    secondes_finales = reste % 60
 
     return {
         "jours": jours,
         "heures": heures,
-        "minutes": minutes
+        "minutes": minutes,
+        "secondes": secondes_finales
     }
 
 
 def ajouter_durees_resolution(problemes):
     for probleme in problemes:
-        duree_secondes = calculer_duree_secondes(probleme)
+        duree_secondes = calculer_duree_affichage_secondes(
+            probleme
+        )
 
         if duree_secondes is not None:
+            probleme["duree_resolution_secondes"] = int(
+                duree_secondes
+            )
+
             probleme["duree_resolution"] = (
                 formater_duree_secondes(
                     duree_secondes
                 )
             )
         else:
-            probleme["duree_resolution"] = None
+            probleme["duree_resolution_secondes"] = 0
+
+            probleme["duree_resolution"] = {
+                "jours": 0,
+                "heures": 0,
+                "minutes": 0,
+                "secondes": 0
+            }
 
     return problemes
 
@@ -277,7 +335,10 @@ def supprimer_abonnement_push(endpoint):
             .execute()
         )
 
-        print("[PUSH] Abonnement supprimé :", endpoint[:80])
+        print(
+            "[PUSH] Abonnement supprimé :",
+            endpoint[:80]
+        )
 
     except Exception as e:
         print(
@@ -312,10 +373,15 @@ def envoyer_notification_admins(probleme):
             if admin.get("username")
         ]
 
-        print("[PUSH] Administrateurs :", noms_admins)
+        print(
+            "[PUSH] Administrateurs :",
+            noms_admins
+        )
 
         if not noms_admins:
-            print("[PUSH] Aucun nom administrateur valide.")
+            print(
+                "[PUSH] Aucun nom administrateur valide."
+            )
             return
 
         subscriptions_result = (
@@ -340,10 +406,26 @@ def envoyer_notification_admins(probleme):
             )
             return
 
-        urgence = probleme.get("urgence", "normale")
-        salle = probleme.get("salle", "Salle inconnue")
-        categorie = probleme.get("categorie", "Problème")
-        description = probleme.get("description", "")
+        urgence = probleme.get(
+            "urgence",
+            "normale"
+        )
+
+        salle = probleme.get(
+            "salle",
+            "Salle inconnue"
+        )
+
+        categorie = probleme.get(
+            "categorie",
+            "Problème"
+        )
+
+        description = probleme.get(
+            "description",
+            ""
+        )
+
         probleme_id = probleme.get("id")
 
         if len(description) > 140:
@@ -383,7 +465,6 @@ def envoyer_notification_admins(probleme):
         echecs = 0
 
         for subscription in subscriptions:
-
             username = subscription.get("username")
             endpoint = subscription.get("endpoint")
             p256dh = subscription.get("p256dh")
@@ -392,10 +473,17 @@ def envoyer_notification_admins(probleme):
             print(
                 "[PUSH] ----------------------------------------"
             )
-            print("[PUSH] Utilisateur :", username)
+
+            print(
+                "[PUSH] Utilisateur :",
+                username
+            )
+
             print(
                 "[PUSH] Endpoint :",
-                endpoint[:100] if endpoint else "ABSENT"
+                endpoint[:100]
+                if endpoint
+                else "ABSENT"
             )
 
             if not endpoint or not p256dh or not auth:
@@ -404,6 +492,7 @@ def envoyer_notification_admins(probleme):
                 )
 
                 supprimer_abonnement_push(endpoint)
+
                 echecs += 1
                 continue
 
@@ -432,7 +521,8 @@ def envoyer_notification_admins(probleme):
                 succes += 1
 
                 print(
-                    "[PUSH] ✓ Notification acceptée par le service Push"
+                    "[PUSH] ✓ Notification acceptée "
+                    "par le service Push"
                 )
 
                 if response is not None:
@@ -476,14 +566,17 @@ def envoyer_notification_admins(probleme):
                 print(
                     "[PUSH] ✗ WebPushException"
                 )
+
                 print(
                     "[PUSH] Utilisateur :",
                     username
                 )
+
                 print(
                     "[PUSH] Status HTTP :",
                     status_code
                 )
+
                 print(
                     "[PUSH] Erreur :",
                     repr(e)
@@ -513,12 +606,18 @@ def envoyer_notification_admins(probleme):
                     repr(e)
                 )
 
-        print("[PUSH] ========================================")
+        print(
+            "[PUSH] ========================================"
+        )
+
         print(
             f"[PUSH] Résultat : {succes} accepté(s), "
             f"{echecs} échec(s)"
         )
-        print("[PUSH] ========================================")
+
+        print(
+            "[PUSH] ========================================"
+        )
 
     except Exception as e:
         print(
@@ -533,10 +632,17 @@ def index():
 
     if user:
         if user.get("role") == "admin":
-            return redirect(url_for("dashboard"))
+            return redirect(
+                url_for("dashboard")
+            )
 
-        if user.get("role") in ("prof", "professeur"):
-            return redirect(url_for("professeur"))
+        if user.get("role") in (
+            "prof",
+            "professeur"
+        ):
+            return redirect(
+                url_for("professeur")
+            )
 
     return render_template(
         "index.html",
@@ -551,7 +657,9 @@ def index():
 def professeur():
     user = get_current_user()
 
-    profil = recuperer_utilisateur(user["username"])
+    profil = recuperer_utilisateur(
+        user["username"]
+    )
 
     if profil:
         user["profile_photo_url"] = profil.get(
@@ -569,8 +677,14 @@ def professeur():
             supabase
             .table("problemes")
             .select("*")
-            .eq("auteur", user["username"])
-            .order("date_creation", desc=True)
+            .eq(
+                "auteur",
+                user["username"]
+            )
+            .order(
+                "date_creation",
+                desc=True
+            )
             .execute()
         )
 
@@ -598,10 +712,14 @@ def professeur():
 def modifier_photo_profil():
     user = get_current_user()
 
-    photo = request.files.get("profile_photo")
+    photo = request.files.get(
+        "profile_photo"
+    )
 
     if not photo or not photo.filename:
-        return redirect(url_for("professeur"))
+        return redirect(
+            url_for("professeur")
+        )
 
     mime = photo.mimetype
 
@@ -694,7 +812,9 @@ def signaler():
     user = get_current_user()
 
     if not user:
-        return redirect(url_for("connexion"))
+        return redirect(
+            url_for("connexion")
+        )
 
     auteur = user["username"]
 
@@ -719,7 +839,10 @@ def signaler():
     ).strip()
 
     if not salle or not categorie or not description:
-        return "Informations manquantes.", 400
+        return (
+            "Informations manquantes.",
+            400
+        )
 
     photo_url = None
 
@@ -819,7 +942,9 @@ def signaler():
 
     probleme = result.data[0]
 
-    envoyer_notification_admins(probleme)
+    envoyer_notification_admins(
+        probleme
+    )
 
     return redirect(
         url_for("professeur")
@@ -835,7 +960,6 @@ def inscription():
     succes = None
 
     if request.method == "POST":
-
         username = request.form.get(
             "username",
             ""
@@ -963,7 +1087,6 @@ def connexion():
     erreur = None
 
     if request.method == "POST":
-
         username = request.form.get(
             "username",
             ""
@@ -1011,18 +1134,22 @@ def connexion():
                     else:
                         if stored_password == password:
                             try:
-                                supabase.table(
-                                    "users"
-                                ).update({
-                                    "password": (
-                                        generate_password_hash(
-                                            password
+                                (
+                                    supabase
+                                    .table("users")
+                                    .update({
+                                        "password": (
+                                            generate_password_hash(
+                                                password
+                                            )
                                         )
+                                    })
+                                    .eq(
+                                        "id",
+                                        user["id"]
                                     )
-                                }).eq(
-                                    "id",
-                                    user["id"]
-                                ).execute()
+                                    .execute()
+                                )
 
                             except Exception as e:
                                 print(
@@ -1087,7 +1214,6 @@ def devenir_admin():
     succes = None
 
     if request.method == "POST":
-
         username = request.form.get(
             "username",
             ""
@@ -1103,11 +1229,19 @@ def devenir_admin():
             ""
         )
 
-        if not username or not password or not admin_password:
-            erreur = "Tous les champs sont obligatoires."
+        if (
+            not username
+            or not password
+            or not admin_password
+        ):
+            erreur = (
+                "Tous les champs sont obligatoires."
+            )
 
         elif admin_password != ADMIN_PROMOTION_PASSWORD:
-            erreur = "Le code administrateur est incorrect."
+            erreur = (
+                "Le code administrateur est incorrect."
+            )
 
         else:
             try:
@@ -1247,7 +1381,9 @@ def dashboard():
             )
 
             for profil in users_result.data or []:
-                profils[profil.get("username")] = profil
+                profils[
+                    profil.get("username")
+                ] = profil
 
         except Exception as e:
             print(
@@ -1320,18 +1456,29 @@ def probleme(probleme_id):
 
     probleme_data = result.data
 
-    duree_secondes = calculer_duree_secondes(
+    duree_secondes = calculer_duree_affichage_secondes(
         probleme_data
     )
 
     if duree_secondes is not None:
+        probleme_data["duree_resolution_secondes"] = int(
+            duree_secondes
+        )
+
         probleme_data["duree_resolution"] = (
             formater_duree_secondes(
                 duree_secondes
             )
         )
     else:
-        probleme_data["duree_resolution"] = None
+        probleme_data["duree_resolution_secondes"] = 0
+
+        probleme_data["duree_resolution"] = {
+            "jours": 0,
+            "heures": 0,
+            "minutes": 0,
+            "secondes": 0
+        }
 
     auteur_user = None
 
@@ -1390,18 +1537,25 @@ def modifier_statut(probleme_id):
     }
 
     if statut not in statuts_autorises:
-        return "Statut invalide.", 400
+        return (
+            "Statut invalide.",
+            400
+        )
 
-    supabase.table(
-        "problemes"
-    ).update({
-        "statut": statut,
-        "responsable": responsable,
-        "date_modification": "now()"
-    }).eq(
-        "id",
-        probleme_id
-    ).execute()
+    (
+        supabase
+        .table("problemes")
+        .update({
+            "statut": statut,
+            "responsable": responsable,
+            "date_modification": "now()"
+        })
+        .eq(
+            "id",
+            probleme_id
+        )
+        .execute()
+    )
 
     return redirect(
         url_for(

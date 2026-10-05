@@ -1,964 +1,1087 @@
-<!DOCTYPE html> 
- 
-<html lang="fr"> 
-<head> 
-    <meta charset="UTF-8"> 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
- 
- 
-<title>Tableau de bord - Collège SOS</title> 
- 
-<style> 
-    * { 
-        box-sizing: border-box; 
-    } 
- 
-    body { 
-        margin: 0; 
-        font-family: Arial, sans-serif; 
-        background: #f4f7fb; 
-        color: #1f2937; 
-    } 
- 
-    header { 
-        background: linear-gradient(135deg, #2563eb, #1d4ed8); 
-        color: white; 
-        padding: 18px 25px; 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        gap: 15px; 
-        flex-wrap: wrap; 
-        box-shadow: 0 4px 18px rgba(37, 99, 235, 0.22); 
-    } 
- 
-    .header-title h1 { 
-        margin: 0; 
-        font-size: 25px; 
-        letter-spacing: -0.3px; 
-    } 
- 
-    .header-title p { 
-        margin: 4px 0 0; 
-        opacity: 0.9; 
-        font-size: 14px; 
-    } 
- 
-    .header-buttons { 
-        display: flex; 
-        gap: 10px; 
-        flex-wrap: wrap; 
-    } 
- 
-    .header-buttons a { 
-        color: white; 
-        text-decoration: none; 
-        background: rgba(255,255,255,0.15); 
-        padding: 10px 14px; 
-        border-radius: 9px; 
-        font-weight: bold; 
-        transition: 0.2s ease; 
-        border: 1px solid rgba(255,255,255,0.12); 
-    } 
- 
-    .header-buttons a:hover { 
-        background: rgba(255,255,255,0.25); 
-        transform: translateY(-1px); 
-    } 
- 
-    main { 
-        max-width: 1200px; 
-        margin: 30px auto; 
-        padding: 0 18px 40px; 
-    } 
- 
-    .welcome { 
-        margin-bottom: 25px; 
-    } 
- 
-    .welcome h2 { 
-        margin: 0 0 6px; 
-        font-size: 28px; 
-        letter-spacing: -0.5px; 
-    } 
- 
-    .welcome p { 
-        margin: 0; 
-        color: #64748b; 
-    } 
- 
-    .stats { 
-        display: grid; 
-        grid-template-columns: repeat(4, 1fr); 
-        gap: 16px; 
-        margin-bottom: 25px; 
-    } 
- 
-    .stat-card { 
-        background: white; 
-        border-radius: 15px; 
-        padding: 20px; 
-        box-shadow: 0 4px 16px rgba(0,0,0,0.07); 
-        border: 1px solid #eef2f7; 
-        transition: transform 0.2s ease, box-shadow 0.2s ease; 
-    } 
- 
-    .stat-card:hover { 
-        transform: translateY(-3px); 
-        box-shadow: 0 8px 24px rgba(0,0,0,0.09); 
-    } 
- 
-    .stat-label { 
-        color: #64748b; 
-        font-size: 14px; 
-        font-weight: bold; 
-        margin-bottom: 10px; 
-    } 
- 
-    .stat-number { 
-        font-size: 34px; 
-        font-weight: 800; 
-        color: #1f2937; 
-    } 
- 
-    .stat-extra { 
-        margin-top: 7px; 
-        color: #dc2626; 
-        font-weight: bold; 
-        font-size: 13px; 
-    } 
- 
-    .average-box { 
-        margin-top: 8px; 
-        font-size: 16px; 
-        font-weight: 700; 
-        line-height: 1.5; 
-        color: #2563eb; 
-    } 
- 
-    .filters { 
-        background: white; 
-        border-radius: 15px; 
-        padding: 20px; 
-        margin-bottom: 20px; 
-        box-shadow: 0 4px 16px rgba(0,0,0,0.07); 
-        border: 1px solid #eef2f7; 
-    } 
- 
-    .filters-title { 
-        font-size: 18px; 
-        font-weight: bold; 
-        margin-bottom: 15px; 
-    } 
- 
-    .filters-grid { 
-        display: grid; 
-        grid-template-columns: 1fr 1fr; 
-        gap: 15px; 
-    } 
- 
-    .filter-group label { 
-        display: block; 
-        font-size: 13px; 
-        font-weight: bold; 
-        color: #475569; 
-        margin-bottom: 7px; 
-    } 
- 
-    .filter-select { 
-        width: 100%; 
-        padding: 12px; 
-        border: 1px solid #cbd5e1; 
-        border-radius: 9px; 
-        background: white; 
-        font-size: 14px; 
-        cursor: pointer; 
-        transition: border-color 0.2s ease, box-shadow 0.2s ease; 
-    } 
- 
-    .filter-select:focus { 
-        outline: none; 
-        border-color: #2563eb; 
-        box-shadow: 0 0 0 3px rgba(37,99,235,0.10); 
-    } 
- 
-    .signalements { 
-        display: flex; 
-        flex-direction: column; 
-        gap: 15px; 
-    } 
- 
-    .signalement { 
-        background: white; 
-        border-radius: 15px; 
-        padding: 20px; 
-        box-shadow: 0 4px 16px rgba(0,0,0,0.07); 
-        border: 1px solid #eef2f7; 
-        transition: transform 0.2s ease, box-shadow 0.2s ease; 
-    } 
- 
-    .signalement:hover { 
-        transform: translateY(-2px); 
-        box-shadow: 0 8px 24px rgba(0,0,0,0.09); 
-    } 
- 
-    .signalement-header { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: flex-start; 
-        gap: 15px; 
-        flex-wrap: wrap; 
-    } 
- 
-    .signalement-title { 
-        margin: 0; 
-        font-size: 19px; 
-    } 
- 
-    .badges { 
-        display: flex; 
-        gap: 7px; 
-        flex-wrap: wrap; 
-    } 
- 
-    .badge { 
-        display: inline-flex; 
-        align-items: center; 
-        gap: 5px; 
-        padding: 7px 11px; 
-        border-radius: 20px; 
-        font-size: 12px; 
-        font-weight: bold; 
-        letter-spacing: 0.2px; 
-        transition: transform 0.2s ease; 
-    } 
- 
-    .badge:hover { 
-        transform: scale(1.03); 
-    } 
- 
-    .badge-urgent { 
-        background: #fee2e2; 
-        color: #b91c1c; 
-        border: 1px solid #fecaca; 
-    } 
- 
-    .badge-en-cours { 
-        background: #ffedd5; 
-        color: #c2410c; 
-        border: 1px solid #fed7aa; 
-    } 
- 
-    .badge-resolu { 
-        background: #dcfce7; 
-        color: #15803d; 
-        border: 1px solid #bbf7d0; 
-    } 
- 
-    .badge-reaffecter { 
-        background: #dbeafe; 
-        color: #2563eb; 
-        border: 1px solid #bfdbfe; 
-    } 
- 
-    .signalement-info { 
-        margin-top: 12px; 
-        display: flex; 
-        gap: 18px; 
-        flex-wrap: wrap; 
-        color: #64748b; 
-        font-size: 14px; 
-    } 
- 
-    .signalement-description { 
-        margin-top: 12px; 
-        line-height: 1.5; 
-        color: #334155; 
-    } 
- 
-    .duree-resolution { 
-        margin-top: 14px; 
-        padding: 11px 13px; 
-        background: #f0fdf4; 
-        color: #15803d; 
-        border-radius: 9px; 
-        font-weight: bold; 
-        font-size: 14px; 
-        border: 1px solid #dcfce7; 
-    } 
- 
-    .duree-resolution.en-cours { 
-        background: #fff7ed; 
-        color: #c2410c; 
-        border-color: #fed7aa; 
-    } 
- 
-    .compteur-duree { 
-        font-variant-numeric: tabular-nums; 
-    } 
- 
-    .signalement-footer { 
-        margin-top: 17px; 
-        display: flex; 
-        justify-content: flex-end; 
-    } 
- 
-    .btn-detail { 
-        background: #2563eb; 
-        color: white; 
-        text-decoration: none; 
-        padding: 10px 15px; 
-        border-radius: 9px; 
-        font-weight: bold; 
-        transition: 0.2s ease; 
-        box-shadow: 0 2px 6px rgba(37,99,235,0.18); 
-    } 
- 
-    .btn-detail:hover { 
-        background: #1d4ed8; 
-        transform: translateY(-1px); 
-        box-shadow: 0 4px 10px rgba(37,99,235,0.22); 
-    } 
- 
-    .empty { 
-        background: white; 
-        padding: 30px; 
-        border-radius: 15px; 
-        text-align: center; 
-        color: #64748b; 
-        box-shadow: 0 4px 16px rgba(0,0,0,0.07); 
-        border: 1px solid #eef2f7; 
-    } 
- 
-    @media (max-width: 950px) { 
-        .stats { 
-            grid-template-columns: repeat(2, 1fr); 
-        } 
-    } 
- 
-    @media (max-width: 650px) { 
-        .stats { 
-            grid-template-columns: 1fr; 
-        } 
- 
-        .filters-grid { 
-            grid-template-columns: 1fr; 
-        } 
- 
-        header { 
-            padding: 15px; 
-        } 
- 
-        main { 
-            margin-top: 20px; 
-        } 
- 
-        .welcome h2 { 
-            font-size: 23px; 
-        } 
-    } 
-</style> 
- 
- 
-</head> 
- 
-<body> 
- 
-<header> 
- 
- 
-<div class="header-title"> 
-    <h1>Collège SOS</h1> 
-    <p>Collège Edmond Rostand</p> 
-</div> 
- 
-<div class="header-buttons"> 
- 
-    <a href="{{ url_for('notifications') }}"> 
-        🔔 Notifications 
-    </a> 
- 
-    <a href="{{ url_for('index') }}"> 
-        🏠 Accueil 
-    </a> 
- 
-</div> 
- 
- 
-</header> 
- 
-<main> 
- 
- 
-<div class="welcome"> 
-    <h2>Tableau de bord</h2> 
-    <p>Gérez les signalements du collège.</p> 
-</div> 
- 
-<div class="stats"> 
- 
-    <div class="stat-card"> 
-        <div class="stat-label"> 
-            EN COURS 
-        </div> 
- 
-        <div class="stat-number"> 
-            {{ en_cours }} 
-        </div> 
- 
-        <div class="stat-extra"> 
-            dont {{ urgents }} urgent(s) 
-        </div> 
-    </div> 
- 
-    <div class="stat-card"> 
-        <div class="stat-label"> 
-            RÉSOLUS 
-        </div> 
- 
-        <div class="stat-number"> 
-            {{ resolus }} 
-        </div> 
-    </div> 
- 
-    <div class="stat-card"> 
-        <div class="stat-label"> 
-            À RÉAFFECTER 
-        </div> 
- 
-        <div class="stat-number"> 
-            {{ a_reaffecter }} 
-        </div> 
-    </div> 
- 
-    <div class="stat-card"> 
-        <div class="stat-label"> 
-            ⏱️ DURÉE MOYENNE DE RÉSOLUTION 
-        </div> 
- 
-        {% if resolus > 0 %} 
- 
-            <div class="average-box"> 
- 
-                {% if moyenne_duree.jours > 0 %} 
-                    {{ moyenne_duree.jours }} 
-                    jour{% if moyenne_duree.jours > 1 %}s{% endif %} 
-                {% endif %} 
- 
-                {% if moyenne_duree.heures > 0 %} 
-                    {{ moyenne_duree.heures }} 
-                    heure{% if moyenne_duree.heures > 1 %}s{% endif %} 
-                {% endif %} 
- 
-                {{ moyenne_duree.minutes }} 
-                minute{% if moyenne_duree.minutes > 1 %}s{% endif %} 
- 
-                {{ moyenne_duree.secondes }} 
-                seconde{% if moyenne_duree.secondes > 1 %}s{% endif %} 
- 
-            </div> 
- 
-        {% else %} 
- 
-            <div class="average-box"> 
-                Aucun signalement résolu 
-            </div> 
- 
-        {% endif %} 
- 
-    </div> 
- 
-</div> 
- 
-<div class="filters"> 
- 
-    <div class="filters-title"> 
-        🔎 Filtrer les signalements 
-    </div> 
- 
-    <div class="filters-grid"> 
- 
-        <div class="filter-group"> 
- 
-            <label for="urgencyFilter"> 
-                🚦 Niveau d'urgence 
-            </label> 
- 
-            <select 
-                id="urgencyFilter" 
-                class="filter-select" 
-                onchange="applyFilters()" 
-            > 
- 
-                <option value="all"> 
-                    Tous les signalements 
-                </option> 
- 
-                <option value="urgent"> 
-                    🔴 Urgents 
-                </option> 
- 
-            </select> 
- 
-        </div> 
- 
-        <div class="filter-group"> 
- 
-            <label for="categoryFilter"> 
-                🛠️ Catégorie 
-            </label> 
- 
-            <select 
-                id="categoryFilter" 
-                class="filter-select" 
-                onchange="applyFilters()" 
-            > 
- 
-                <option value="all"> 
-                    Toutes les catégories 
-                </option> 
- 
-                <option value="Informatique"> 
-                    💻 Informatique 
-                </option> 
- 
-                <option value="Vidéoprojecteur"> 
-                    📽️ Vidéoprojecteur 
-                </option> 
- 
-                <option value="Entretien"> 
-                    🧰 Entretien 
-                </option> 
- 
-                <option value="Électricité"> 
-                    ⚡ Électricité 
-                </option> 
- 
-                <option value="Mobilier"> 
-                    🪑 Mobilier 
-                </option> 
- 
-                <option value="Chauffage"> 
-                    🔥 Chauffage 
-                </option> 
- 
-                <option value="Plomberie"> 
-                    🚰 Plomberie 
-                </option> 
- 
-                <option value="Éclairage"> 
-                    💡 Éclairage 
-                </option> 
- 
-                <option value="Réseau / Internet"> 
-                    🌐 Réseau / Internet 
-                </option> 
- 
-                <option value="Nettoyage"> 
-                    🧹 Nettoyage 
-                </option> 
- 
-                <option value="Bâtiment"> 
-                    🏫 Bâtiment 
-                </option> 
- 
-                <option value="Sécurité"> 
-                    🔒 Sécurité 
-                </option> 
- 
-                <option value="Autre"> 
-                    🔧 Autre 
-                </option> 
- 
-            </select> 
- 
-        </div> 
- 
-    </div> 
- 
-</div> 
- 
-<div class="signalements" id="signalements"> 
- 
-    {% if problemes %} 
- 
-        {% for probleme in problemes %} 
- 
-            <article 
-                class="signalement" 
-                data-urgent="{% if probleme.get('urgence') == 'urgente' %}urgent{% else %}normal{% endif %}" 
-                data-category="{{ probleme.get('categorie', '') }}" 
-            > 
- 
-                <div class="signalement-header"> 
- 
-                    <h3 class="signalement-title"> 
- 
-                        {{ probleme.get('salle') or 'Salle inconnue' }} 
- 
-                        — 
- 
-                        {{ probleme.get('categorie') or 'Problème' }} 
- 
-                    </h3> 
- 
-                    <div class="badges"> 
- 
-                        {% if probleme.get('urgence') == 'urgente' %} 
- 
-                            <span class="badge badge-urgent"> 
-                                🔴 URGENT 
-                            </span> 
- 
-                        {% endif %} 
- 
-                        {% if probleme.get('statut') == 'en_cours' %} 
- 
-                            <span class="badge badge-en-cours"> 
-                                🟠 EN COURS 
-                            </span> 
- 
-                        {% elif probleme.get('statut') == 'resolu' %} 
- 
-                            <span class="badge badge-resolu"> 
-                                🟢 RÉSOLU 
-                            </span> 
- 
-                        {% elif probleme.get('statut') == 'nouveau' %} 
- 
-                            <span class="badge badge-reaffecter"> 
-                                🔵 À RÉAFFECTER 
-                            </span> 
- 
-                        {% endif %} 
- 
-                    </div> 
- 
-                </div> 
- 
-                <div class="signalement-info"> 
- 
-                    <span> 
-                        👤 
-                        {{ probleme.get('auteur') or 'Inconnu' }} 
-                    </span> 
- 
-                    <span> 
-                        📅 
- 
-                        <span 
-                            class="date-local" 
-                            data-date="{{ probleme.get('date_creation') or '' }}" 
-                        > 
-                            {{ probleme.get('date_creation') or 'Date inconnue' }} 
-                        </span> 
- 
-                    </span> 
- 
-                    {% if probleme.get('responsable') %} 
- 
-                        <span> 
-                            👷 
-                            {{ probleme.get('responsable') }} 
-                        </span> 
- 
-                    {% endif %} 
- 
-                </div> 
- 
-                <div class="signalement-description"> 
-                    {{ probleme.get('description') or 'Aucune description.' }} 
-                </div> 
- 
-                {% if probleme.get('statut') == 'en_cours' %} 
- 
-                    <div 
-                        class="duree-resolution en-cours" 
-                        data-start-date="{{ probleme.get('date_creation') or '' }}" 
-                    > 
- 
-                        ⏱️ Durée de résolution : 
- 
-                        <span class="compteur-duree"> 
-                            Calcul... 
-                        </span> 
- 
-                    </div> 
- 
-                {% elif probleme.get('statut') == 'resolu' and probleme.get('duree_resolution') %} 
- 
-                    <div class="duree-resolution"> 
- 
-                        ⏱️ Durée de résolution : 
- 
-                        {% if probleme.duree_resolution.jours > 0 %} 
- 
-                            {{ probleme.duree_resolution.jours }} 
-                            jour{% if probleme.duree_resolution.jours > 1 %}s{% endif %} 
- 
-                        {% endif %} 
- 
-                        {% if probleme.duree_resolution.heures > 0 %} 
- 
-                            {{ probleme.duree_resolution.heures }} 
-                            heure{% if probleme.duree_resolution.heures > 1 %}s{% endif %} 
- 
-                        {% endif %} 
- 
-                        {{ probleme.duree_resolution.minutes }} 
-                        minute{% if probleme.duree_resolution.minutes > 1 %}s{% endif %} 
- 
-                        {{ probleme.duree_resolution.secondes }} 
-                        seconde{% if probleme.duree_resolution.secondes > 1 %}s{% endif %} 
- 
-                    </div> 
- 
-                {% endif %} 
- 
-                <div class="signalement-footer"> 
- 
-                    <a 
-                        class="btn-detail" 
-                        href="{{ url_for('probleme', probleme_id=probleme.get('id')) }}" 
-                    > 
-                        Voir le signalement → 
-                    </a> 
- 
-                </div> 
- 
-            </article> 
- 
-        {% endfor %} 
- 
-    {% else %} 
- 
-        <div class="empty"> 
-            Aucun signalement pour le moment. 
-        </div> 
- 
-    {% endif %} 
- 
-</div> 
- 
- 
-</main> 
- 
-<script> 
-    function formaterDate(dateString) { 
- 
-        if (!dateString) { 
-            return "Date inconnue"; 
-        } 
- 
-        let date = new Date(dateString); 
- 
-        if (isNaN(date.getTime())) { 
-            return dateString; 
-        } 
- 
-        const jour = String(date.getDate()).padStart(2, "0"); 
-        const mois = String(date.getMonth() + 1).padStart(2, "0"); 
-        const annee = date.getFullYear(); 
-        const heures = String(date.getHours()).padStart(2, "0"); 
-        const minutes = String(date.getMinutes()).padStart(2, "0"); 
- 
-        return `${jour}/${mois}/${annee} à ${heures}:${minutes}`; 
-    } 
- 
-    function formaterDuree(secondesTotal) { 
- 
-        secondesTotal = Math.max( 
-            0, 
-            Math.floor(secondesTotal) 
-        ); 
- 
-        const jours = Math.floor( 
-            secondesTotal / 86400 
-        ); 
- 
-        secondesTotal = 
-            secondesTotal % 86400; 
- 
-        const heures = Math.floor( 
-            secondesTotal / 3600 
-        ); 
- 
-        secondesTotal = 
-            secondesTotal % 3600; 
- 
-        const minutes = Math.floor( 
-            secondesTotal / 60 
-        ); 
- 
-        const secondes = 
-            secondesTotal % 60; 
- 
-        let texte = ""; 
- 
-        if (jours > 0) { 
- 
-            texte += 
-                jours + 
-                " jour" + 
-                (jours > 1 ? "s" : "") + 
-                " "; 
-        } 
- 
-        if (heures > 0 || jours > 0) { 
- 
-            texte += 
-                heures + 
-                " heure" + 
-                (heures > 1 ? "s" : "") + 
-                " "; 
-        } 
- 
-        texte += 
-            minutes + 
-            " minute" + 
-            (minutes > 1 ? "s" : "") + 
-            " "; 
- 
-        texte += 
-            secondes + 
-            " seconde" + 
-            (secondes > 1 ? "s" : ""); 
- 
-        return texte.trim(); 
-    } 
- 
-    function mettreAJourCompteurs() { 
- 
-        const compteurs = 
-            document.querySelectorAll( 
-                ".duree-resolution.en-cours" 
-            ); 
- 
-        const maintenant = 
-            Date.now(); 
- 
-        compteurs.forEach( 
-            function(element) { 
- 
-                const dateDebut = 
-                    element.dataset.startDate; 
- 
-                if (!dateDebut) { 
-                    return; 
-                } 
- 
-                const debut = 
-                    new Date(dateDebut).getTime(); 
- 
-                if (isNaN(debut)) { 
- 
-                    element.querySelector( 
-                        ".compteur-duree" 
-                    ).textContent = 
-                        "Date inconnue"; 
- 
-                    return; 
-                } 
- 
-                const dureeSecondes = 
-                    (maintenant - debut) / 1000; 
- 
-                const compteur = 
-                    element.querySelector( 
-                        ".compteur-duree" 
-                    ); 
- 
-                if (compteur) { 
- 
-                    compteur.textContent = 
-                        formaterDuree( 
-                            dureeSecondes 
-                        ); 
-                } 
- 
-            } 
-        ); 
-    } 
- 
-    function applyFilters() { 
- 
-        const urgencyFilter = 
-            document.getElementById( 
-                "urgencyFilter" 
-            ).value; 
- 
-        const categoryFilter = 
-            document.getElementById( 
-                "categoryFilter" 
-            ).value; 
- 
-        const signalements = 
-            document.querySelectorAll( 
-                ".signalement" 
-            ); 
- 
-        signalements.forEach( 
-            function(signalement) { 
- 
-                const urgent = 
-                    signalement.dataset.urgent; 
- 
-                const category = 
-                    signalement.dataset.category; 
- 
-                let afficher = true; 
- 
-                if ( 
-                    urgencyFilter === "urgent" && 
-                    urgent !== "urgent" 
-                ) { 
-                    afficher = false; 
-                } 
- 
-                if ( 
-                    categoryFilter !== "all" && 
-                    category !== categoryFilter 
-                ) { 
-                    afficher = false; 
-                } 
- 
-                signalement.style.display = 
-                    afficher ? "" : "none"; 
-            } 
-        ); 
-    } 
- 
-    document.addEventListener( 
-        "DOMContentLoaded", 
-        function() { 
- 
-            document 
-                .querySelectorAll(".date-local") 
-                .forEach( 
-                    function(element) { 
- 
-                        const date = 
-                            element.dataset.date; 
- 
-                        if (date) { 
- 
-                            element.textContent = 
-                                formaterDate(date); 
-                        } 
- 
-                    } 
-                ); 
- 
-            mettreAJourCompteurs(); 
- 
-            setInterval( 
-                mettreAJourCompteurs, 
-                1000 
-            ); 
- 
-        } 
-    ); 
-</script> 
- 
-</body> 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tableau de bord - Collège SOS</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .top-space {
+            height: 8px;
+            background: #2563eb;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 18px 45px;
+        }
+
+        .page-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 27px;
+            color: #111827;
+            letter-spacing: -0.6px;
+        }
+
+        .brand p {
+            margin: 6px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .navigation {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .navigation a {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            color: #334155;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+            transition: 0.2s ease;
+        }
+
+        .navigation a:hover {
+            transform: translateY(-2px);
+            border-color: #bfdbfe;
+            color: #2563eb;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        }
+
+        .welcome {
+            margin-bottom: 22px;
+        }
+
+        .welcome h2 {
+            margin: 0 0 5px;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+            color: #111827;
+        }
+
+        .welcome p {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            position: relative;
+            overflow: hidden;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 19px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.055);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.09);
+        }
+
+        .stat-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .stat-card.orange::before {
+            background: #f97316;
+        }
+
+        .stat-card.green::before {
+            background: #16a34a;
+        }
+
+        .stat-card.blue::before {
+            background: #2563eb;
+        }
+
+        .stat-card.gray::before {
+            background: #64748b;
+        }
+
+        .stat-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            min-width: 9px;
+            border-radius: 50%;
+        }
+
+        .dot-orange {
+            background: #f97316;
+        }
+
+        .dot-green {
+            background: #16a34a;
+        }
+
+        .dot-blue {
+            background: #2563eb;
+        }
+
+        .dot-gray {
+            background: #64748b;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1.1;
+        }
+
+        .stat-extra {
+            margin-top: 7px;
+            color: #dc2626;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .average-box {
+            margin-top: 5px;
+            color: #2563eb;
+            font-size: 15px;
+            font-weight: 800;
+            line-height: 1.45;
+        }
+
+        .filters {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.055);
+        }
+
+        .filters-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 17px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 16px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 7px;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .filter-select {
+            width: 100%;
+            padding: 12px 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #334155;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .filter-select:hover {
+            border-color: #94a3b8;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        .signalements {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .signalement {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.055);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .signalement:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.09);
+        }
+
+        .signalement-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .signalement-title {
+            margin: 0;
+            color: #111827;
+            font-size: 19px;
+            line-height: 1.4;
+        }
+
+        .badges {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.1px;
+        }
+
+        .badge-urgent {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .badge-en-cours {
+            background: #ffedd5;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+        }
+
+        .badge-resolu {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-reaffecter {
+            background: #dbeafe;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+
+        .signalement-info {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .signalement-info span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .signalement-description {
+            margin-top: 13px;
+            color: #334155;
+            line-height: 1.55;
+            font-size: 15px;
+        }
+
+        .duree-resolution {
+            margin-top: 14px;
+            padding: 11px 13px;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #dcfce7;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .duree-resolution.en-cours {
+            background: #fff7ed;
+            color: #c2410c;
+            border-color: #fed7aa;
+        }
+
+        .compteur-duree {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .signalement-footer {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 17px;
+        }
+
+        .btn-detail {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #2563eb;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.18);
+            transition: 0.2s ease;
+        }
+
+        .btn-detail:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(37, 99, 235, 0.24);
+        }
+
+        .empty {
+            background: #ffffff;
+            padding: 35px 25px;
+            border-radius: 15px;
+            text-align: center;
+            color: #64748b;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.055);
+        }
+
+        @media (max-width: 950px) {
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .top-space {
+                height: 5px;
+            }
+
+            main {
+                padding: 20px 13px 35px;
+            }
+
+            .page-top {
+                align-items: flex-start;
+                margin-bottom: 22px;
+            }
+
+            .brand h1 {
+                font-size: 24px;
+            }
+
+            .navigation {
+                width: 100%;
+            }
+
+            .navigation a {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome h2 {
+                font-size: 23px;
+            }
+
+            .signalement {
+                padding: 17px;
+            }
+
+            .signalement-title {
+                font-size: 17px;
+            }
+
+            .signalement-footer {
+                justify-content: stretch;
+            }
+
+            .btn-detail {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="top-space"></div>
+
+<main>
+
+    <div class="page-top">
+
+        <div class="brand">
+            <h1>Collège SOS</h1>
+            <p>Collège Edmond Rostand</p>
+        </div>
+
+        <nav class="navigation">
+
+            <a href="{{ url_for('notifications') }}">
+                🔔 Notifications
+            </a>
+
+            <a href="{{ url_for('index') }}">
+                🏠 Accueil
+            </a>
+
+        </nav>
+
+    </div>
+
+    <div class="welcome">
+        <h2>Tableau de bord</h2>
+        <p>Gérez les signalements du collège.</p>
+    </div>
+
+    <div class="stats">
+
+        <div class="stat-card orange">
+
+            <div class="stat-label">
+                <span class="status-dot dot-orange"></span>
+                EN COURS
+            </div>
+
+            <div class="stat-number">
+                {{ en_cours }}
+            </div>
+
+            <div class="stat-extra">
+                dont {{ urgents }} urgent(s)
+            </div>
+
+        </div>
+
+        <div class="stat-card green">
+
+            <div class="stat-label">
+                <span class="status-dot dot-green"></span>
+                RÉSOLUS
+            </div>
+
+            <div class="stat-number">
+                {{ resolus }}
+            </div>
+
+        </div>
+
+        <div class="stat-card blue">
+
+            <div class="stat-label">
+                <span class="status-dot dot-blue"></span>
+                À RÉAFFECTER
+            </div>
+
+            <div class="stat-number">
+                {{ a_reaffecter }}
+            </div>
+
+        </div>
+
+        <div class="stat-card gray">
+
+            <div class="stat-label">
+                <span class="status-dot dot-gray"></span>
+                ⏱️ DURÉE MOYENNE DE RÉSOLUTION
+            </div>
+
+            {% if resolus > 0 %}
+
+                <div class="average-box">
+
+                    {% if moyenne_duree.jours > 0 %}
+                        {{ moyenne_duree.jours }}
+                        jour{% if moyenne_duree.jours > 1 %}s{% endif %}
+                    {% endif %}
+
+                    {% if moyenne_duree.heures > 0 %}
+                        {{ moyenne_duree.heures }}
+                        heure{% if moyenne_duree.heures > 1 %}s{% endif %}
+                    {% endif %}
+
+                    {{ moyenne_duree.minutes }}
+                    minute{% if moyenne_duree.minutes > 1 %}s{% endif %}
+
+                    {{ moyenne_duree.secondes }}
+                    seconde{% if moyenne_duree.secondes > 1 %}s{% endif %}
+
+                </div>
+
+            {% else %}
+
+                <div class="average-box">
+                    Aucun signalement résolu
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="filters">
+
+        <div class="filters-title">
+            🔎 Filtrer les signalements
+        </div>
+
+        <div class="filters-grid">
+
+            <div class="filter-group">
+
+                <label for="urgencyFilter">
+                    🚦 Niveau d'urgence
+                </label>
+
+                <select
+                    id="urgencyFilter"
+                    class="filter-select"
+                    onchange="applyFilters()"
+                >
+
+                    <option value="all">
+                        Tous les signalements
+                    </option>
+
+                    <option value="urgent">
+                        🔴 Urgents
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="filter-group">
+
+                <label for="categoryFilter">
+                    🛠️ Catégorie
+                </label>
+
+                <select
+                    id="categoryFilter"
+                    class="filter-select"
+                    onchange="applyFilters()"
+                >
+
+                    <option value="all">
+                        Toutes les catégories
+                    </option>
+
+                    <option value="Informatique">
+                        💻 Informatique
+                    </option>
+
+                    <option value="Vidéoprojecteur">
+                        📽️ Vidéoprojecteur
+                    </option>
+
+                    <option value="Entretien">
+                        🧰 Entretien
+                    </option>
+
+                    <option value="Électricité">
+                        ⚡ Électricité
+                    </option>
+
+                    <option value="Mobilier">
+                        🪑 Mobilier
+                    </option>
+
+                    <option value="Chauffage">
+                        🔥 Chauffage
+                    </option>
+
+                    <option value="Plomberie">
+                        🚰 Plomberie
+                    </option>
+
+                    <option value="Éclairage">
+                        💡 Éclairage
+                    </option>
+
+                    <option value="Réseau / Internet">
+                        🌐 Réseau / Internet
+                    </option>
+
+                    <option value="Nettoyage">
+                        🧹 Nettoyage
+                    </option>
+
+                    <option value="Bâtiment">
+                        🏫 Bâtiment
+                    </option>
+
+                    <option value="Sécurité">
+                        🔒 Sécurité
+                    </option>
+
+                    <option value="Autre">
+                        🔧 Autre
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="signalements" id="signalements">
+
+        {% if problemes %}
+
+            {% for probleme in problemes %}
+
+                <article
+                    class="signalement"
+                    data-urgent="{% if probleme.get('urgence') == 'urgente' %}urgent{% else %}normal{% endif %}"
+                    data-category="{{ probleme.get('categorie', '') }}"
+                >
+
+                    <div class="signalement-header">
+
+                        <h3 class="signalement-title">
+
+                            {{ probleme.get('salle') or 'Salle inconnue' }}
+
+                            —
+
+                            {{ probleme.get('categorie') or 'Problème' }}
+
+                        </h3>
+
+                        <div class="badges">
+
+                            {% if probleme.get('urgence') == 'urgente' %}
+
+                                <span class="badge badge-urgent">
+                                    🔴 URGENT
+                                </span>
+
+                            {% endif %}
+
+                            {% if probleme.get('statut') == 'en_cours' %}
+
+                                <span class="badge badge-en-cours">
+                                    🟠 EN COURS
+                                </span>
+
+                            {% elif probleme.get('statut') == 'resolu' %}
+
+                                <span class="badge badge-resolu">
+                                    🟢 RÉSOLU
+                                </span>
+
+                            {% elif probleme.get('statut') == 'nouveau' %}
+
+                                <span class="badge badge-reaffecter">
+                                    🔵 À RÉAFFECTER
+                                </span>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="signalement-info">
+
+                        <span>
+                            👤
+                            {{ probleme.get('auteur') or 'Inconnu' }}
+                        </span>
+
+                        <span>
+
+                            📅
+
+                            <span
+                                class="date-local"
+                                data-date="{{ probleme.get('date_creation') or '' }}"
+                            >
+                                {{ probleme.get('date_creation') or 'Date inconnue' }}
+                            </span>
+
+                        </span>
+
+                        {% if probleme.get('responsable') %}
+
+                            <span>
+                                👷
+                                {{ probleme.get('responsable') }}
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="signalement-description">
+                        {{ probleme.get('description') or 'Aucune description.' }}
+                    </div>
+
+                    {% if probleme.get('statut') == 'en_cours' %}
+
+                        <div
+                            class="duree-resolution en-cours"
+                            data-start-date="{{ probleme.get('date_creation') or '' }}"
+                        >
+
+                            ⏱️ Durée de résolution :
+
+                            <span class="compteur-duree">
+                                Calcul...
+                            </span>
+
+                        </div>
+
+                    {% elif probleme.get('statut') == 'resolu' and probleme.get('duree_resolution') %}
+
+                        <div class="duree-resolution">
+
+                            ⏱️ Durée de résolution :
+
+                            {% if probleme.duree_resolution.jours > 0 %}
+
+                                {{ probleme.duree_resolution.jours }}
+                                jour{% if probleme.duree_resolution.jours > 1 %}s{% endif %}
+
+                            {% endif %}
+
+                            {% if probleme.duree_resolution.heures > 0 %}
+
+                                {{ probleme.duree_resolution.heures }}
+                                heure{% if probleme.duree_resolution.heures > 1 %}s{% endif %}
+
+                            {% endif %}
+
+                            {{ probleme.duree_resolution.minutes }}
+                            minute{% if probleme.duree_resolution.minutes > 1 %}s{% endif %}
+
+                            {{ probleme.duree_resolution.secondes }}
+                            seconde{% if probleme.duree_resolution.secondes > 1 %}s{% endif %}
+
+                        </div>
+
+                    {% endif %}
+
+                    <div class="signalement-footer">
+
+                        <a
+                            class="btn-detail"
+                            href="{{ url_for('probleme', probleme_id=probleme.get('id')) }}"
+                        >
+                            Voir le signalement →
+                        </a>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="empty">
+                Aucun signalement pour le moment.
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</main>
+
+<script>
+    function formaterDate(dateString) {
+
+        if (!dateString) {
+            return "Date inconnue";
+        }
+
+        let date = new Date(dateString);
+
+        if (isNaN(date.getTime())) {
+            return dateString;
+        }
+
+        const jour = String(date.getDate()).padStart(2, "0");
+        const mois = String(date.getMonth() + 1).padStart(2, "0");
+        const annee = date.getFullYear();
+        const heures = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+
+        return `${jour}/${mois}/${annee} à ${heures}:${minutes}`;
+    }
+
+    function formaterDuree(secondesTotal) {
+
+        secondesTotal = Math.max(
+            0,
+            Math.floor(secondesTotal)
+        );
+
+        const jours = Math.floor(
+            secondesTotal / 86400
+        );
+
+        secondesTotal =
+            secondesTotal % 86400;
+
+        const heures = Math.floor(
+            secondesTotal / 3600
+        );
+
+        secondesTotal =
+            secondesTotal % 3600;
+
+        const minutes = Math.floor(
+            secondesTotal / 60
+        );
+
+        const secondes =
+            secondesTotal % 60;
+
+        let texte = "";
+
+        if (jours > 0) {
+
+            texte +=
+                jours +
+                " jour" +
+                (jours > 1 ? "s" : "") +
+                " ";
+        }
+
+        if (heures > 0 || jours > 0) {
+
+            texte +=
+                heures +
+                " heure" +
+                (heures > 1 ? "s" : "") +
+                " ";
+        }
+
+        texte +=
+            minutes +
+            " minute" +
+            (minutes > 1 ? "s" : "") +
+            " ";
+
+        texte +=
+            secondes +
+            " seconde" +
+            (secondes > 1 ? "s" : "");
+
+        return texte.trim();
+    }
+
+    function mettreAJourCompteurs() {
+
+        const compteurs =
+            document.querySelectorAll(
+                ".duree-resolution.en-cours"
+            );
+
+        const maintenant =
+            Date.now();
+
+        compteurs.forEach(
+            function(element) {
+
+                const dateDebut =
+                    element.dataset.startDate;
+
+                if (!dateDebut) {
+                    return;
+                }
+
+                const debut =
+                    new Date(dateDebut).getTime();
+
+                if (isNaN(debut)) {
+
+                    element.querySelector(
+                        ".compteur-duree"
+                    ).textContent =
+                        "Date inconnue";
+
+                    return;
+                }
+
+                const dureeSecondes =
+                    (maintenant - debut) / 1000;
+
+                const compteur =
+                    element.querySelector(
+                        ".compteur-duree"
+                    );
+
+                if (compteur) {
+
+                    compteur.textContent =
+                        formaterDuree(
+                            dureeSecondes
+                        );
+                }
+
+            }
+        );
+    }
+
+    function applyFilters() {
+
+        const urgencyFilter =
+            document.getElementById(
+                "urgencyFilter"
+            ).value;
+
+        const categoryFilter =
+            document.getElementById(
+                "categoryFilter"
+            ).value;
+
+        const signalements =
+            document.querySelectorAll(
+                ".signalement"
+            );
+
+        signalements.forEach(
+            function(signalement) {
+
+                const urgent =
+                    signalement.dataset.urgent;
+
+                const category =
+                    signalement.dataset.category;
+
+                let afficher = true;
+
+                if (
+                    urgencyFilter === "urgent" &&
+                    urgent !== "urgent"
+                ) {
+                    afficher = false;
+                }
+
+                if (
+                    categoryFilter !== "all" &&
+                    category !== categoryFilter
+                ) {
+                    afficher = false;
+                }
+
+                signalement.style.display =
+                    afficher ? "" : "none";
+            }
+        );
+    }
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            document
+                .querySelectorAll(".date-local")
+                .forEach(
+                    function(element) {
+
+                        const date =
+                            element.dataset.date;
+
+                        if (date) {
+
+                            element.textContent =
+                                formaterDate(date);
+                        }
+
+                    }
+                );
+
+            mettreAJourCompteurs();
+
+            setInterval(
+                mettreAJourCompteurs,
+                1000
+            );
+
+        }
+    );
+</script>
+
+</body>
 </html>

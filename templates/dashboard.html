@@ -60,6 +60,7 @@
             height: 4px;
             background: #d1d5db;
         }
+
         .topbar {
             background: #ffffff;
             border-bottom: 1px solid #e5e7eb;
@@ -1101,7 +1102,35 @@
                         <div class="signalement-main-title">
 
                             <div class="room-icon">
-                                🏫
+
+                                {% if probleme.get('categorie') == 'Informatique' %}
+                                    💻
+                                {% elif probleme.get('categorie') == 'Vidéoprojecteur' %}
+                                    📽️
+                                {% elif probleme.get('categorie') == 'Entretien' %}
+                                    🧰
+                                {% elif probleme.get('categorie') == 'Électricité' %}
+                                    ⚡
+                                {% elif probleme.get('categorie') == 'Mobilier' %}
+                                    🪑
+                                {% elif probleme.get('categorie') == 'Chauffage' %}
+                                    🔥
+                                {% elif probleme.get('categorie') == 'Plomberie' %}
+                                    🚰
+                                {% elif probleme.get('categorie') == 'Éclairage' %}
+                                    💡
+                                {% elif probleme.get('categorie') == 'Réseau / Internet' %}
+                                    🌐
+                                {% elif probleme.get('categorie') == 'Nettoyage' %}
+                                    🧹
+                                {% elif probleme.get('categorie') == 'Bâtiment' %}
+                                    🏫
+                                {% elif probleme.get('categorie') == 'Sécurité' %}
+                                    🔒
+                                {% else %}
+                                    🔧
+                                {% endif %}
+
                             </div>
 
                             <div>

@@ -14,13 +14,34 @@
         body {
             margin: 0;
             font-family: Arial, Helvetica, sans-serif;
-            background: linear-gradient(
-                135deg,
-                #f8fafc 0%,
-                #eef0f3 45%,
-                #d9dde2 100%
-            );
+
+            background:
+                radial-gradient(
+                    circle at 15% 0%,
+                    rgba(71, 85, 105, 0.28) 0%,
+                    rgba(71, 85, 105, 0.10) 28%,
+                    transparent 55%
+                ),
+                radial-gradient(
+                    circle at 90% 100%,
+                    rgba(51, 65, 85, 0.25) 0%,
+                    rgba(51, 65, 85, 0.08) 30%,
+                    transparent 58%
+                ),
+                linear-gradient(
+                    135deg,
+                    #0b0d10 0%,
+                    #111418 35%,
+                    #171b20 65%,
+                    #0c0f12 100%
+                );
+
             background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-size: cover;
+
+            min-height: 100vh;
+
             color: #172033;
         }
 

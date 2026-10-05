@@ -21,7 +21,7 @@
     }
 
     header {
-        background: #2563eb;
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
         color: white;
         padding: 18px 25px;
         display: flex;
@@ -29,11 +29,13 @@
         align-items: center;
         gap: 15px;
         flex-wrap: wrap;
+        box-shadow: 0 4px 18px rgba(37, 99, 235, 0.22);
     }
 
     .header-title h1 {
         margin: 0;
         font-size: 25px;
+        letter-spacing: -0.3px;
     }
 
     .header-title p {
@@ -55,10 +57,13 @@
         padding: 10px 14px;
         border-radius: 9px;
         font-weight: bold;
+        transition: 0.2s ease;
+        border: 1px solid rgba(255,255,255,0.12);
     }
 
     .header-buttons a:hover {
         background: rgba(255,255,255,0.25);
+        transform: translateY(-1px);
     }
 
     main {
@@ -74,6 +79,7 @@
     .welcome h2 {
         margin: 0 0 6px;
         font-size: 28px;
+        letter-spacing: -0.5px;
     }
 
     .welcome p {
@@ -93,6 +99,13 @@
         border-radius: 15px;
         padding: 20px;
         box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        border: 1px solid #eef2f7;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.09);
     }
 
     .stat-label {
@@ -129,6 +142,7 @@
         padding: 20px;
         margin-bottom: 20px;
         box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        border: 1px solid #eef2f7;
     }
 
     .filters-title {
@@ -159,6 +173,13 @@
         background: white;
         font-size: 14px;
         cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .filter-select:focus {
+        outline: none;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.10);
     }
 
     .signalements {
@@ -172,6 +193,13 @@
         border-radius: 15px;
         padding: 20px;
         box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        border: 1px solid #eef2f7;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .signalement:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.09);
     }
 
     .signalement-header {
@@ -194,33 +222,39 @@
     }
 
     .badge {
-        display: inline-block;
-        padding: 6px 10px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 11px;
         border-radius: 20px;
         font-size: 12px;
         font-weight: bold;
+        letter-spacing: 0.2px;
+        transition: transform 0.2s ease;
+    }
+
+    .badge:hover {
+        transform: scale(1.03);
     }
 
     .badge-urgent {
         background: #fee2e2;
         color: #b91c1c;
+        border: 1px solid #fecaca;
     }
 
-    /* EN COURS : orange */
     .badge-en-cours {
         background: #ffedd5;
         color: #c2410c;
         border: 1px solid #fed7aa;
     }
 
-    /* RÉSOLU : vert */
     .badge-resolu {
         background: #dcfce7;
         color: #15803d;
         border: 1px solid #bbf7d0;
     }
 
-    /* À RÉAFFECTER : bleu clair */
     .badge-reaffecter {
         background: #dbeafe;
         color: #2563eb;
@@ -239,6 +273,7 @@
     .signalement-description {
         margin-top: 12px;
         line-height: 1.5;
+        color: #334155;
     }
 
     .duree-resolution {
@@ -249,11 +284,13 @@
         border-radius: 9px;
         font-weight: bold;
         font-size: 14px;
+        border: 1px solid #dcfce7;
     }
 
     .duree-resolution.en-cours {
         background: #fff7ed;
         color: #c2410c;
+        border-color: #fed7aa;
     }
 
     .compteur-duree {
@@ -273,10 +310,14 @@
         padding: 10px 15px;
         border-radius: 9px;
         font-weight: bold;
+        transition: 0.2s ease;
+        box-shadow: 0 2px 6px rgba(37,99,235,0.18);
     }
 
     .btn-detail:hover {
         background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(37,99,235,0.22);
     }
 
     .empty {
@@ -286,6 +327,7 @@
         text-align: center;
         color: #64748b;
         box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+        border: 1px solid #eef2f7;
     }
 
     @media (max-width: 950px) {
@@ -323,13 +365,15 @@
 <body>
 
 <header>
-    <div class="header-title">
-        <h1>Collège SOS</h1>
-        <p>Collège Edmond Rostand</p>
-    </div>
 
+
+<div class="header-title">
+    <h1>Collège SOS</h1>
+    <p>Collège Edmond Rostand</p>
+</div>
 
 <div class="header-buttons">
+
     <a href="{{ url_for('notifications') }}">
         🔔 Notifications
     </a>
@@ -337,6 +381,7 @@
     <a href="{{ url_for('index') }}">
         🏠 Accueil
     </a>
+
 </div>
 
 
@@ -700,6 +745,7 @@
 
 <script>
     function formaterDate(dateString) {
+
         if (!dateString) {
             return "Date inconnue";
         }
@@ -720,115 +766,166 @@
     }
 
     function formaterDuree(secondesTotal) {
-        secondesTotal = Math.max(0, Math.floor(secondesTotal));
 
-        const jours = Math.floor(secondesTotal / 86400);
+        secondesTotal = Math.max(
+            0,
+            Math.floor(secondesTotal)
+        );
 
-        secondesTotal = secondesTotal % 86400;
+        const jours = Math.floor(
+            secondesTotal / 86400
+        );
 
-        const heures = Math.floor(secondesTotal / 3600);
+        secondesTotal =
+            secondesTotal % 86400;
 
-        secondesTotal = secondesTotal % 3600;
+        const heures = Math.floor(
+            secondesTotal / 3600
+        );
 
-        const minutes = Math.floor(secondesTotal / 60);
+        secondesTotal =
+            secondesTotal % 3600;
 
-        const secondes = secondesTotal % 60;
+        const minutes = Math.floor(
+            secondesTotal / 60
+        );
+
+        const secondes =
+            secondesTotal % 60;
 
         let texte = "";
 
         if (jours > 0) {
-            texte += jours + " jour" + (jours > 1 ? "s" : "") + " ";
+
+            texte +=
+                jours +
+                " jour" +
+                (jours > 1 ? "s" : "") +
+                " ";
         }
 
         if (heures > 0 || jours > 0) {
-            texte += heures + " heure" + (heures > 1 ? "s" : "") + " ";
+
+            texte +=
+                heures +
+                " heure" +
+                (heures > 1 ? "s" : "") +
+                " ";
         }
 
-        texte += minutes + " minute" + (minutes > 1 ? "s" : "") + " ";
+        texte +=
+            minutes +
+            " minute" +
+            (minutes > 1 ? "s" : "") +
+            " ";
 
-        texte += secondes + " seconde" + (secondes > 1 ? "s" : "");
+        texte +=
+            secondes +
+            " seconde" +
+            (secondes > 1 ? "s" : "");
 
         return texte.trim();
     }
 
     function mettreAJourCompteurs() {
-        const compteurs = document.querySelectorAll(
-            ".duree-resolution.en-cours"
-        );
 
-        const maintenant = Date.now();
-
-        compteurs.forEach(function(element) {
-
-            const dateDebut = element.dataset.startDate;
-
-            if (!dateDebut) {
-                return;
-            }
-
-            const debut = new Date(dateDebut).getTime();
-
-            if (isNaN(debut)) {
-                element.querySelector(
-                    ".compteur-duree"
-                ).textContent = "Date inconnue";
-
-                return;
-            }
-
-            const dureeSecondes = (maintenant - debut) / 1000;
-
-            const compteur = element.querySelector(
-                ".compteur-duree"
+        const compteurs =
+            document.querySelectorAll(
+                ".duree-resolution.en-cours"
             );
 
-            if (compteur) {
-                compteur.textContent = formaterDuree(
-                    dureeSecondes
-                );
-            }
+        const maintenant =
+            Date.now();
 
-        });
+        compteurs.forEach(
+            function(element) {
+
+                const dateDebut =
+                    element.dataset.startDate;
+
+                if (!dateDebut) {
+                    return;
+                }
+
+                const debut =
+                    new Date(dateDebut).getTime();
+
+                if (isNaN(debut)) {
+
+                    element.querySelector(
+                        ".compteur-duree"
+                    ).textContent =
+                        "Date inconnue";
+
+                    return;
+                }
+
+                const dureeSecondes =
+                    (maintenant - debut) / 1000;
+
+                const compteur =
+                    element.querySelector(
+                        ".compteur-duree"
+                    );
+
+                if (compteur) {
+
+                    compteur.textContent =
+                        formaterDuree(
+                            dureeSecondes
+                        );
+                }
+
+            }
+        );
     }
 
     function applyFilters() {
 
         const urgencyFilter =
-            document.getElementById("urgencyFilter").value;
+            document.getElementById(
+                "urgencyFilter"
+            ).value;
 
         const categoryFilter =
-            document.getElementById("categoryFilter").value;
+            document.getElementById(
+                "categoryFilter"
+            ).value;
 
         const signalements =
-            document.querySelectorAll(".signalement");
+            document.querySelectorAll(
+                ".signalement"
+            );
 
-        signalements.forEach(function(signalement) {
+        signalements.forEach(
+            function(signalement) {
 
-            const urgent =
-                signalement.dataset.urgent;
+                const urgent =
+                    signalement.dataset.urgent;
 
-            const category =
-                signalement.dataset.category;
+                const category =
+                    signalement.dataset.category;
 
-            let afficher = true;
+                let afficher = true;
 
-            if (
-                urgencyFilter === "urgent" &&
-                urgent !== "urgent"
-            ) {
-                afficher = false;
+                if (
+                    urgencyFilter === "urgent" &&
+                    urgent !== "urgent"
+                ) {
+                    afficher = false;
+                }
+
+                if (
+                    categoryFilter !== "all" &&
+                    category !== categoryFilter
+                ) {
+                    afficher = false;
+                }
+
+                signalement.style.display =
+                    afficher ? "" : "none";
             }
-
-            if (
-                categoryFilter !== "all" &&
-                category !== categoryFilter
-            ) {
-                afficher = false;
-            }
-
-            signalement.style.display =
-                afficher ? "" : "none";
-        });
+        );
     }
 
     document.addEventListener(
@@ -837,17 +934,20 @@
 
             document
                 .querySelectorAll(".date-local")
-                .forEach(function(element) {
+                .forEach(
+                    function(element) {
 
-                    const date =
-                        element.dataset.date;
+                        const date =
+                            element.dataset.date;
 
-                    if (date) {
-                        element.textContent =
-                            formaterDate(date);
+                        if (date) {
+
+                            element.textContent =
+                                formaterDate(date);
+                        }
+
                     }
-
-                });
+                );
 
             mettreAJourCompteurs();
 

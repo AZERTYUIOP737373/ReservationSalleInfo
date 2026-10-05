@@ -50,19 +50,51 @@
         }
 
         .logo-cs {
-            width: 46px;
-            height: 46px;
-            border-radius: 13px;
-            background: #e5e7eb;
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, #f3f4f6, #d1d5db);
             color: #4b5563;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 17px;
-            font-weight: 900;
-            letter-spacing: -1px;
-            border: 1px solid #d1d5db;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+            font-weight: 950;
+            letter-spacing: -1.8px;
+            border: 1px solid #cbd5e1;
+            box-shadow:
+                0 4px 10px rgba(15, 23, 42, 0.10),
+                inset 0 1px 1px rgba(255, 255, 255, 0.95),
+                inset 0 -2px 4px rgba(100, 116, 139, 0.12);
+            overflow: hidden;
+        }
+
+        .logo-cs::before {
+            content: "";
+            position: absolute;
+            top: -18px;
+            left: -18px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.55);
+            filter: blur(2px);
+        }
+
+        .logo-cs::after {
+            content: "";
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            bottom: 6px;
+            height: 2px;
+            border-radius: 50%;
+            background: rgba(75, 85, 99, 0.12);
+        }
+
+        .logo-cs {
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
         }
 
         .brand-text h1 {

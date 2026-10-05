@@ -50,23 +50,54 @@
         .brand {
             display: flex;
             align-items: center;
-            gap: 13px;
+            gap: 14px;
         }
 
         .brand-logo {
-            width: 46px;
-            height: 46px;
-            border-radius: 13px;
-            background: #e5e7eb;
-            border: 1px solid #d1d5db;
-            color: #6b7280;
+            position: relative;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(145deg, #30343b, #111318);
+            border: 1px solid #080a0d;
+            color: #f5f5f5;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            font-weight: 900;
-            letter-spacing: -1px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+            font-size: 15px;
+            font-weight: 950;
+            letter-spacing: -1.5px;
+            box-shadow:
+                0 5px 12px rgba(0, 0, 0, 0.18),
+                inset 0 1px 0 rgba(255, 255, 255, 0.16);
+            overflow: hidden;
+        }
+
+        .brand-logo::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .brand-logo::after {
+            content: "";
+            position: absolute;
+            left: 8px;
+            right: 8px;
+            bottom: 6px;
+            height: 2px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.22);
+        }
+
+        .brand-logo span {
+            position: relative;
+            z-index: 2;
         }
 
         .brand-text {
@@ -509,36 +540,6 @@
             transform: translateY(-1px);
         }
 
-        .side-info {
-            padding: 18px 20px;
-        }
-
-        .side-info-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-            padding: 10px 0;
-            border-bottom: 1px solid #f0f1f3;
-        }
-
-        .side-info-row:last-child {
-            border-bottom: 0;
-        }
-
-        .side-info-label {
-            color: #8a93a3;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .side-info-value {
-            color: #303846;
-            font-size: 12px;
-            font-weight: 800;
-            text-align: right;
-        }
-
         .modal {
             position: fixed;
             inset: 0;
@@ -682,6 +683,7 @@
             .brand-logo {
                 width: 42px;
                 height: 42px;
+                border-radius: 12px;
             }
 
             .brand-title {
@@ -757,7 +759,9 @@
 
 <header class="page-header">
     <div class="brand">
-        <div class="brand-logo">CS</div>
+        <div class="brand-logo">
+            <span>CS</span>
+        </div>
 
         <div class="brand-text">
             <div class="brand-title">Collège SOS</div>
@@ -1112,46 +1116,6 @@
                     </button>
 
                 </form>
-
-            </div>
-
-            <div class="card side-info">
-
-                <div class="side-info-row">
-
-                    <span class="side-info-label">
-                        Identifiant
-                    </span>
-
-                    <span class="side-info-value">
-                        #{{ probleme.id }}
-                    </span>
-
-                </div>
-
-                <div class="side-info-row">
-
-                    <span class="side-info-label">
-                        Créé le
-                    </span>
-
-                    <span class="side-info-value">
-                        {{ probleme.date_creation or "Non renseigné" }}
-                    </span>
-
-                </div>
-
-                <div class="side-info-row">
-
-                    <span class="side-info-label">
-                        Modifié le
-                    </span>
-
-                    <span class="side-info-value">
-                        {{ probleme.date_modification or "Non renseigné" }}
-                    </span>
-
-                </div>
 
             </div>
 

@@ -1474,7 +1474,10 @@ def probleme(probleme_id):
     if user.get("role") == "admin":
         pass
 
-    elif user.get("role") in ("prof", "professeur"):
+    elif user.get("role") in (
+        "prof",
+        "professeur"
+    ):
         if probleme_data.get("auteur") != user.get("username"):
             abort(403)
 
@@ -1639,27 +1642,30 @@ def ajouter_commentaire(probleme_id):
             if probleme_cible.get("auteur") != user.get("username"):
                 abort(403)
 
-        result = (
-            supabase
-            .table("commentaires")
-            .insert({
-                "probleme_id": probleme_id,
-                "auteur_id": user["id"],
-                "auteur_nom": user["username"],
-                "contenu": contenu
-            })
-            .execute()
+        commentaire_data = {
+            "probleme_id": probleme_id,
+            "auteur_id": user["id"],
+            "auteur_nom": user["username"],
+            "contenu": contenu
+        }
+
+        print(
+            "[COMMENTAIRE] Tentative d'ajout :",
+            commentaire_data
         )
 
-        if not result.data:
-            return (
-                "Impossible d'ajouter le commentaire.",
-                500
-            )
+        supabase \
+            .table("commentaires") \
+            .insert(commentaire_data) \
+            .execute()
+
+        print(
+            "[COMMENTAIRE] Commentaire ajouté avec succès."
+        )
 
     except Exception as e:
         print(
-            "Erreur ajout commentaire :",
+            "[COMMENTAIRE] ERREUR AJOUT :",
             repr(e)
         )
 
@@ -1937,3 +1943,4 @@ if __name__ == "__main__":
         port=5000,
         debug=True
     )
+

@@ -1446,8 +1446,14 @@ def dashboard():
 
 
 @app.route("/probleme/<int:probleme_id>")
-@admin_required
 def probleme(probleme_id):
+    user = get_current_user()
+
+    if not user:
+        return redirect(
+            url_for("connexion")
+        )
+
     result = (
         supabase
         .table("problemes")
@@ -1456,14 +1462,27 @@ def probleme(probleme_id):
             "id",
             probleme_id
         )
-        .single()
+        .limit(1)
         .execute()
     )
 
     if not result.data:
         abort(404)
 
-    probleme_data = result.data
+    probleme_data = result.data[0]
+
+    if user.get("role") == "admin":
+        pass
+
+    elif user.get("role") in ("prof", "professeur"):
+        if probleme_data.get("auteur") != user.get("username"):
+            abort(403)
+
+    else:
+        session.clear()
+        return redirect(
+            url_for("connexion")
+        )
 
     duree_secondes = calculer_duree_affichage_secondes(
         probleme_data
@@ -1546,7 +1565,8 @@ def probleme(probleme_id):
         "probleme.html",
         probleme=probleme_data,
         auteur_user=auteur_user,
-        commentaires=commentaires
+        commentaires=commentaires,
+        current_user=user
     )
 
 
@@ -1554,11 +1574,20 @@ def probleme(probleme_id):
     "/probleme/<int:probleme_id>/commentaire",
     methods=["POST"]
 )
-@admin_required
 def ajouter_commentaire(probleme_id):
     user = get_current_user()
 
     if not user:
+        return redirect(
+            url_for("connexion")
+        )
+
+    if user.get("role") not in (
+        "admin",
+        "prof",
+        "professeur"
+    ):
+        session.clear()
         return redirect(
             url_for("connexion")
         )
@@ -1587,7 +1616,9 @@ def ajouter_commentaire(probleme_id):
         probleme_result = (
             supabase
             .table("problemes")
-            .select("id")
+            .select(
+                "id,auteur"
+            )
             .eq(
                 "id",
                 probleme_id
@@ -1598,6 +1629,15 @@ def ajouter_commentaire(probleme_id):
 
         if not probleme_result.data:
             abort(404)
+
+        probleme_cible = probleme_result.data[0]
+
+        if user.get("role") in (
+            "prof",
+            "professeur"
+        ):
+            if probleme_cible.get("auteur") != user.get("username"):
+                abort(403)
 
         result = (
             supabase

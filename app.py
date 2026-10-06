@@ -1516,10 +1516,123 @@ def probleme(probleme_id):
                 repr(e)
             )
 
+    commentaires = []
+
+    try:
+        commentaires_result = (
+            supabase
+            .table("commentaires")
+            .select("*")
+            .eq(
+                "probleme_id",
+                probleme_id
+            )
+            .order(
+                "date_creation",
+                desc=False
+            )
+            .execute()
+        )
+
+        commentaires = commentaires_result.data or []
+
+    except Exception as e:
+        print(
+            "Erreur récupération commentaires :",
+            repr(e)
+        )
+
     return render_template(
         "probleme.html",
         probleme=probleme_data,
-        auteur_user=auteur_user
+        auteur_user=auteur_user,
+        commentaires=commentaires
+    )
+
+
+@app.route(
+    "/probleme/<int:probleme_id>/commentaire",
+    methods=["POST"]
+)
+@admin_required
+def ajouter_commentaire(probleme_id):
+    user = get_current_user()
+
+    if not user:
+        return redirect(
+            url_for("connexion")
+        )
+
+    contenu = request.form.get(
+        "contenu",
+        ""
+    ).strip()
+
+    if not contenu:
+        return redirect(
+            url_for(
+                "probleme",
+                probleme_id=probleme_id
+            )
+        )
+
+    if len(contenu) > 2000:
+        return (
+            "Le commentaire est trop long. "
+            "Maximum : 2000 caractères.",
+            400
+        )
+
+    try:
+        probleme_result = (
+            supabase
+            .table("problemes")
+            .select("id")
+            .eq(
+                "id",
+                probleme_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if not probleme_result.data:
+            abort(404)
+
+        result = (
+            supabase
+            .table("commentaires")
+            .insert({
+                "probleme_id": probleme_id,
+                "auteur_id": user["id"],
+                "auteur_nom": user["username"],
+                "contenu": contenu
+            })
+            .execute()
+        )
+
+        if not result.data:
+            return (
+                "Impossible d'ajouter le commentaire.",
+                500
+            )
+
+    except Exception as e:
+        print(
+            "Erreur ajout commentaire :",
+            repr(e)
+        )
+
+        return (
+            "Impossible d'ajouter le commentaire.",
+            500
+        )
+
+    return redirect(
+        url_for(
+            "probleme",
+            probleme_id=probleme_id
+        )
     )
 
 

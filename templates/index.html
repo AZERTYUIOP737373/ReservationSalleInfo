@@ -1,832 +1,877 @@
-﻿<!DOCTYPE html> 
-<html lang="fr"> 
-<head> 
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
- 
-    <title>Collège SOS</title> 
- 
-    <style> 
-        * { 
-            box-sizing: border-box; 
-        } 
- 
-        body { 
-            margin: 0; 
-            font-family: Inter, Arial, sans-serif; 
-            background: 
-                radial-gradient(circle at top left, #dce7ff 0, transparent 35%), 
-                #f4f7fb; 
-            color: #172033; 
-        } 
- 
-        .page { 
-            width: min(720px, 92%); 
-            margin: 45px auto 60px; 
-        } 
- 
-        .card { 
-            background: white; 
-            border: 1px solid #e3e8f0; 
-            border-radius: 25px; 
-            padding: 35px; 
-            box-shadow: 0 20px 60px rgba(24, 37, 62, .08); 
-        } 
- 
-        .top-bar { 
-            display: flex; 
-            align-items: flex-start; 
-            justify-content: flex-end; 
-            margin-bottom: 20px; 
-        } 
- 
-        .profile-form { 
-            margin: 0; 
-        } 
- 
-        .profile-avatar-label { 
-            position: relative; 
-            display: block; 
-            width: 66px; 
-            height: 66px; 
-            border-radius: 50%; 
-            cursor: pointer; 
-            overflow: visible; 
-            background: linear-gradient(135deg, #172033, #40557f); 
-            box-shadow: 
-                0 8px 25px rgba(23, 32, 51, .20), 
-                0 0 0 4px white; 
-            transition: transform .2s, box-shadow .2s; 
-        } 
- 
-        .profile-avatar-label:hover { 
-            transform: scale(1.05); 
-            box-shadow: 
-                0 10px 30px rgba(23, 32, 51, .25), 
-                0 0 0 4px #e8eefc; 
-        } 
- 
-        .profile-avatar { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            display: block; 
-            border-radius: 50%; 
-        } 
- 
-        .profile-placeholder { 
-            width: 100%; 
-            height: 100%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            font-size: 30px; 
-            border-radius: 50%; 
-        } 
- 
-        .camera-badge { 
-            position: absolute; 
-            right: -2px; 
-            bottom: -2px; 
-            width: 25px; 
-            height: 25px; 
-            border-radius: 50%; 
-            background: #172033; 
-            border: 2px solid white; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 12px; 
-        } 
- 
-        .profile-input { 
-            display: none; 
-        } 
- 
-        .profile-hint { 
-            position: absolute; 
-            right: 0; 
-            top: 74px; 
-            width: 150px; 
-            padding: 8px 10px; 
-            border-radius: 9px; 
-            background: #172033; 
-            color: white; 
-            font-size: 10px; 
-            line-height: 1.3; 
-            text-align: center; 
-            opacity: 0; 
-            pointer-events: none; 
-            transform: translateY(-4px); 
-            transition: .2s; 
-            z-index: 10; 
-        } 
- 
-        .profile-form:hover .profile-hint { 
-            opacity: 1; 
-            transform: translateY(0); 
-        } 
- 
-        .badge { 
-            display: inline-block; 
-            padding: 7px 11px; 
-            border-radius: 999px; 
-            background: #e8eefc; 
-            color: #3157a5; 
-            font-size: 10px; 
-            font-weight: 900; 
-            letter-spacing: .08em; 
-        } 
- 
-        h1 { 
-            margin: 14px 0 7px; 
-            font-size: clamp(30px, 6vw, 42px); 
-            letter-spacing: -1.5px; 
-        } 
- 
-        .subtitle { 
-            color: #70798a; 
-            line-height: 1.55; 
-            margin: 0; 
-        } 
- 
-        .intro { 
-            margin-top: 25px; 
-            padding: 19px; 
-            background: #f5f7fa; 
-            border-radius: 15px; 
-        } 
- 
-        .intro strong { 
-            display: block; 
-            font-size: 17px; 
-            margin-bottom: 5px; 
-        } 
- 
-        .intro p { 
-            margin: 0; 
-            color: #737d8e; 
-            font-size: 13px; 
-        } 
- 
-        .field { 
-            margin-top: 20px; 
-        } 
- 
-        label { 
-            display: block; 
-            margin-bottom: 7px; 
-            font-size: 13px; 
-            font-weight: 800; 
-        } 
- 
-        input, 
-        select, 
-        textarea { 
-            width: 100%; 
-            border: 1px solid #d8dee8; 
-            border-radius: 12px; 
-            background: #fbfcfe; 
-            padding: 14px; 
-            font-family: inherit; 
-            font-size: 15px; 
-            outline: none; 
-            transition: .15s; 
-        } 
- 
-        input:focus, 
-        select:focus, 
-        textarea:focus { 
-            border-color: #5975b8; 
-            box-shadow: 0 0 0 4px #e9effd; 
-            background: white; 
-        } 
- 
-        textarea { 
-            min-height: 130px; 
-            resize: vertical; 
-        } 
- 
-        .help { 
-            margin: 6px 0 0; 
-            color: #8b94a3; 
-            font-size: 12px; 
-        } 
- 
-        .urgent-checkbox { 
-            width: auto; 
-            margin: 0; 
-            padding: 0; 
-            accent-color: #c52c2c; 
-        } 
- 
-        .urgent-label { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            cursor: pointer; 
-            margin: 0; 
-            font-size: 14px; 
-            font-weight: 800; 
-        } 
- 
-        .submit { 
-            width: 100%; 
-            margin-top: 25px; 
-            padding: 15px; 
-            border: 0; 
-            border-radius: 12px; 
-            background: #172033; 
-            color: white; 
-            font-size: 15px; 
-            font-weight: 800; 
-            cursor: pointer; 
-        } 
- 
-        .submit:hover { 
-            opacity: .9; 
-        } 
- 
-        .section { 
-            margin-top: 38px; 
-            padding-top: 28px; 
-            border-top: 1px solid #e8ecf2; 
-        } 
- 
-        .section h2 { 
-            margin: 0 0 6px; 
-            font-size: 21px; 
-        } 
- 
-        .section-description { 
-            margin: 0 0 20px; 
-            color: #788292; 
-            font-size: 13px; 
-        } 
- 
-        .report { 
-            border: 1px solid #e3e8f0; 
-            border-radius: 15px; 
-            padding: 17px; 
-            margin-bottom: 12px; 
-            background: #fff; 
-        } 
- 
-        .report-top { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            gap: 10px; 
-            flex-wrap: wrap; 
-        } 
- 
-        .report-location { 
-            font-weight: 800; 
-        } 
- 
-        .report-category { 
-            margin: 9px 0 4px; 
-            font-size: 13px; 
-            font-weight: 800; 
-            color: #43506a; 
-        } 
- 
-        .report-description { 
-            margin: 0; 
-            color: #6d7788; 
-            font-size: 13px; 
-            line-height: 1.5; 
-        } 
- 
-        .status { 
-            padding: 6px 10px; 
-            border-radius: 999px; 
-            font-size: 10px; 
-            font-weight: 900; 
-        } 
- 
-        .status.new { 
-            background: #e8f0ff; 
-            color: #315db8; 
-        } 
- 
-        .status.progress { 
-            background: #fff1cc; 
-            color: #9b6800; 
-        } 
- 
-        .status.done { 
-            background: #ddf7e8; 
-            color: #16794c; 
-        } 
- 
-        .urgent { 
-            margin: 10px 0 0; 
-            color: #c52c2c; 
-            font-size: 12px; 
-            font-weight: 800; 
-        } 
- 
-        .empty { 
-            padding: 20px; 
-            border-radius: 14px; 
-            background: #f6f8fa; 
-            color: #7b8493; 
-            text-align: center; 
-            font-size: 13px; 
-        } 
- 
-        .bottom-links { 
-            margin-top: 30px; 
-            display: grid; 
-            gap: 10px; 
-        } 
- 
-        .link { 
-            display: block; 
-            text-align: center; 
-            padding: 13px; 
-            border: 1px solid #dfe4ec; 
-            border-radius: 11px; 
-            color: #465268; 
-            text-decoration: none; 
-            font-size: 13px; 
-            font-weight: 700; 
-        } 
- 
-        .link:hover { 
-            background: #f7f9fc; 
-        } 
- 
-        .public-actions { 
-            margin-top: 30px; 
-            display: grid; 
-            gap: 12px; 
-        } 
- 
-        .public-primary { 
-            display: block; 
-            text-align: center; 
-            text-decoration: none; 
-            padding: 15px; 
-            border-radius: 12px; 
-            background: #172033; 
-            color: white; 
-            font-weight: 800; 
-        } 
- 
-        .public-secondary { 
-            display: block; 
-            text-align: center; 
-            text-decoration: none; 
-            padding: 14px; 
-            border-radius: 12px; 
-            border: 1px solid #dfe4ec; 
-            color: #465268; 
-            font-weight: 700; 
-        } 
- 
-        .footer { 
-            text-align: center; 
-            margin-top: 25px; 
-            color: #9aa2af; 
-            font-size: 12px; 
-        } 
- 
-        @media (max-width: 600px) { 
-            .page { 
-                width: 94%; 
-                margin-top: 20px; 
-            } 
- 
-            .card { 
-                padding: 25px 20px; 
-                border-radius: 20px; 
-            } 
- 
-            .profile-avatar-label { 
-                width: 58px; 
-                height: 58px; 
-            } 
-        } 
-    </style> 
-</head> 
- 
-<body> 
- 
-<div class="page"> 
- 
-<div class="card"> 
- 
-{% if user %} 
- 
-    <div class="top-bar"> 
- 
-        <form 
-            method="POST" 
-            action="{{ url_for('modifier_photo_profil') }}" 
-            enctype="multipart/form-data" 
-            class="profile-form" 
-            id="profilePhotoForm" 
-        > 
- 
-            <label 
-                for="profile_photo" 
-                class="profile-avatar-label" 
-                title="Changer la photo de profil" 
-            > 
- 
-                {% if user.profile_photo_url %} 
- 
-                    <img 
-                        src="{{ user.profile_photo_url }}" 
-                        alt="Photo de profil" 
-                        class="profile-avatar" 
-                    > 
- 
-                {% else %} 
- 
-                    <span class="profile-placeholder"> 
-                        👤 
-                    </span> 
- 
-                {% endif %} 
- 
-                <span class="camera-badge"> 
-                    📷 
-                </span> 
- 
-            </label> 
- 
-            <input 
-                type="file" 
-                id="profile_photo" 
-                name="profile_photo" 
-                class="profile-input" 
-                accept="image/jpeg,image/png,image/webp" 
-            > 
- 
-            <div class="profile-hint"> 
-                Cliquer pour changer la photo 
-            </div> 
- 
-        </form> 
- 
-    </div> 
- 
-    <span class="badge"> 
-        COLLÈGE EDMOND ROSTAND 
-    </span> 
- 
-    <h1>Collège SOS</h1> 
- 
-    <p class="subtitle"> 
-        Bonjour {{ user.username }} 👋<br> 
-        Signalez rapidement un problème dans le collège. 
-    </p> 
- 
-    <div class="intro"> 
-        <strong>🛠️ Signaler un problème</strong> 
-        <p> 
-            Donnez-nous l'emplacement, la catégorie et une description du problème. 
-        </p> 
-    </div> 
- 
-    <form 
-        method="POST" 
-        action="{{ url_for('signaler') }}" 
-        enctype="multipart/form-data" 
-    > 
- 
-        <div class="field"> 
- 
-            <label for="salle"> 
-                📍 Salle / emplacement 
-            </label> 
- 
-            <input 
-                type="text" 
-                id="salle" 
-                name="salle" 
-                placeholder="Ex. Salle 23, CDI, couloir..." 
-                required 
-            > 
- 
-        </div> 
- 
-        <div class="field"> 
- 
-            <label for="categorie"> 
-                🛠️ Catégorie 
-            </label> 
- 
-            <select 
-                id="categorie" 
-                name="categorie" 
-                required 
-            > 
- 
-                <option value=""> 
-                    Choisir une catégorie 
-                </option> 
- 
-                <option value="Informatique"> 
-                    💻 Informatique 
-                </option> 
- 
-                <option value="Vidéoprojecteur"> 
-                    📽️ Vidéoprojecteur 
-                </option> 
- 
-                <option value="Entretien"> 
-                    🧰 Entretien 
-                </option> 
- 
-                <option value="Électricité"> 
-                    ⚡ Électricité 
-                </option> 
- 
-                <option value="Mobilier"> 
-                    🪑 Mobilier 
-                </option> 
- 
-                <option value="Chauffage"> 
-                    🔥 Chauffage 
-                </option> 
- 
-                <option value="Plomberie"> 
-                    🚰 Plomberie 
-                </option> 
- 
-                <option value="Éclairage"> 
-                    💡 Éclairage 
-                </option> 
- 
-                <option value="Réseau / Internet"> 
-                    🌐 Réseau / Internet 
-                </option> 
- 
-                <option value="Nettoyage"> 
-                    🧹 Nettoyage 
-                </option> 
- 
-                <option value="Bâtiment"> 
-                    🏫 Bâtiment 
-                </option> 
- 
-                <option value="Sécurité"> 
-                    🔒 Sécurité 
-                </option> 
- 
-                <option value="Autre"> 
-                    🔧 Autre 
-                </option> 
- 
-            </select> 
- 
-        </div> 
- 
-        <div class="field"> 
- 
-            <label for="description"> 
-                📝 Description du problème 
-            </label> 
- 
-            <textarea 
-                id="description" 
-                name="description" 
-                placeholder="Expliquez ce qui ne fonctionne pas..." 
-                required 
-            ></textarea> 
- 
-        </div> 
- 
-        <div class="field"> 
- 
-            <label> 
-                🚦 Est-ce Urgent ? 
-            </label> 
- 
-            <label class="urgent-label"> 
- 
-                <input 
-                    type="checkbox" 
-                    id="urgence" 
-                    name="urgence" 
-                    value="urgente" 
-                    class="urgent-checkbox" 
-                > 
- 
-                🔴 Urgent 
- 
-            </label> 
- 
-        </div> 
- 
-        <div class="field"> 
- 
-            <label for="photo"> 
-                📷 Photo <span style="font-weight:400;color:#8b94a3;">(facultatif)</span> 
-            </label> 
- 
-            <input 
-                type="file" 
-                id="photo" 
-                name="photo" 
-                accept="image/jpeg,image/png,image/webp" 
-            > 
- 
-            <p class="help"> 
-                JPG, PNG ou WEBP — maximum 8 Mo. 
-            </p> 
- 
-        </div> 
- 
-        <button 
-            type="submit" 
-            class="submit" 
-        > 
-            🚨 Envoyer le signalement 
-        </button> 
- 
-    </form> 
- 
-    <section class="section"> 
- 
-        <h2>📋 Mes signalements</h2> 
- 
-        <p class="section-description"> 
-            Retrouvez ici les problèmes que vous avez signalés et leur état d'avancement. 
-        </p> 
- 
-        {% if mes_signalements %} 
- 
-            {% for probleme in mes_signalements %} 
- 
-                <div class="report"> 
- 
-                    <div class="report-top"> 
- 
-                        <div class="report-location"> 
-                            📍 {{ probleme.salle }} 
-                        </div> 
- 
-                        {% if probleme.statut == "nouveau" %} 
- 
-                            <span class="status new"> 
-                                🟠 À RÉAFFECTER 
-                            </span> 
- 
-                        {% elif probleme.statut == "en_cours" %} 
- 
-                            <span class="status progress"> 
-                                🟠 EN COURS 
-                            </span> 
- 
-                        {% elif probleme.statut == "resolu" %} 
- 
-                            <span class="status done"> 
-                                🟢 RÉSOLU 
-                            </span> 
- 
-                        {% endif %} 
- 
-                    </div> 
- 
-                    <div class="report-category"> 
-                        {{ probleme.categorie }} 
-                    </div> 
- 
-                    <p class="report-description"> 
-                        {{ probleme.description }} 
-                    </p> 
- 
-                    {% if probleme.urgence == "urgente" %} 
- 
-                        <p class="urgent"> 
-                            🔴 Signalement urgent 
-                        </p> 
- 
-                    {% endif %} 
- 
-                </div> 
- 
-            {% endfor %} 
- 
-        {% else %} 
- 
-            <div class="empty"> 
-                Vous n'avez encore envoyé aucun signalement. 
-            </div> 
- 
-        {% endif %} 
- 
-    </section> 
- 
-    <div class="bottom-links"> 
- 
-        <a 
-            href="{{ url_for('devenir_admin') }}" 
-            class="link" 
-        > 
-            ⚙️ Devenir administrateur 
-        </a> 
- 
-        <a 
-            href="{{ url_for('deconnexion') }}" 
-            class="link" 
-        > 
-            🚪 Se déconnecter 
-        </a> 
- 
-    </div> 
- 
-{% else %} 
- 
-    <div class="icon">🛠️</div> 
- 
-    <span class="badge"> 
-        COLLÈGE EDMOND ROSTAND 
-    </span> 
- 
-    <h1>Collège SOS</h1> 
- 
-    <p class="subtitle"> 
-        Un problème au collège ?<br> 
-        Signalez-le en quelques secondes. 
-    </p> 
- 
-    <div class="public-actions"> 
- 
-        <a 
-            href="{{ url_for('connexion') }}" 
-            class="public-primary" 
-        > 
-            🔐 Se connecter 
-        </a> 
- 
-        <a 
-            href="{{ url_for('inscription') }}" 
-            class="public-secondary" 
-        > 
-            👨‍🏫 Créer un compte professeur 
-        </a> 
- 
-        <a 
-            href="{{ url_for('devenir_admin') }}" 
-            class="public-secondary" 
-        > 
-            ⚙️ Devenir administrateur 
-        </a> 
- 
-    </div> 
- 
-    <p class="footer"> 
-        Les professeurs doivent disposer du mot de passe fourni par l'administration pour créer leur compte. 
-    </p> 
- 
-{% endif %} 
- 
-</div> 
- 
-</div> 
- 
-<script> 
-    const profileInput = document.getElementById("profile_photo"); 
-    const profileForm = document.getElementById("profilePhotoForm"); 
- 
-    if (profileInput && profileForm) { 
-        profileInput.addEventListener("change", function () { 
-            if (!this.files || !this.files.length) { 
-                return; 
-            } 
- 
-            const file = this.files[0]; 
- 
-            const allowedTypes = [ 
-                "image/jpeg", 
-                "image/png", 
-                "image/webp" 
-            ]; 
- 
-            if (!allowedTypes.includes(file.type)) { 
-                alert("Format non autorisé. Utilisez JPG, PNG ou WEBP."); 
-                this.value = ""; 
-                return; 
-            } 
- 
-            if (file.size > 8 * 1024 * 1024) { 
-                alert("La photo est trop volumineuse. Maximum : 8 Mo."); 
-                this.value = ""; 
-                return; 
-            } 
- 
-            profileForm.submit(); 
-        }); 
-    } 
-</script> 
- 
-</body> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<title>Collège SOS</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background:
+            radial-gradient(circle at top left, #dce7ff 0, transparent 35%),
+            #f4f7fb;
+        color: #172033;
+    }
+
+    .page {
+        width: min(720px, 92%);
+        margin: 45px auto 60px;
+    }
+
+    .card {
+        background: white;
+        border: 1px solid #e3e8f0;
+        border-radius: 25px;
+        padding: 35px;
+        box-shadow: 0 20px 60px rgba(24, 37, 62, .08);
+    }
+
+    .top-bar {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .profile-form {
+        margin: 0;
+    }
+
+    .profile-avatar-label {
+        position: relative;
+        display: block;
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        cursor: pointer;
+        overflow: visible;
+        background: linear-gradient(135deg, #172033, #40557f);
+        box-shadow:
+            0 8px 25px rgba(23, 32, 51, .20),
+            0 0 0 4px white;
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .profile-avatar-label:hover {
+        transform: scale(1.05);
+        box-shadow:
+            0 10px 30px rgba(23, 32, 51, .25),
+            0 0 0 4px #e8eefc;
+    }
+
+    .profile-avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 50%;
+    }
+
+    .profile-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 30px;
+        border-radius: 50%;
+    }
+
+    .camera-badge {
+        position: absolute;
+        right: -2px;
+        bottom: -2px;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: #172033;
+        border: 2px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+
+    .profile-input {
+        display: none;
+    }
+
+    .profile-hint {
+        position: absolute;
+        right: 0;
+        top: 74px;
+        width: 150px;
+        padding: 8px 10px;
+        border-radius: 9px;
+        background: #172033;
+        color: white;
+        font-size: 10px;
+        line-height: 1.3;
+        text-align: center;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-4px);
+        transition: .2s;
+        z-index: 10;
+    }
+
+    .profile-form:hover .profile-hint {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 7px 11px;
+        border-radius: 999px;
+        background: #e8eefc;
+        color: #3157a5;
+        font-size: 10px;
+        font-weight: 900;
+        letter-spacing: .08em;
+    }
+
+    h1 {
+        margin: 14px 0 7px;
+        font-size: clamp(30px, 6vw, 42px);
+        letter-spacing: -1.5px;
+    }
+
+    .subtitle {
+        color: #70798a;
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    .intro {
+        margin-top: 25px;
+        padding: 19px;
+        background: #f5f7fa;
+        border-radius: 15px;
+    }
+
+    .intro strong {
+        display: block;
+        font-size: 17px;
+        margin-bottom: 5px;
+    }
+
+    .intro p {
+        margin: 0;
+        color: #737d8e;
+        font-size: 13px;
+    }
+
+    .field {
+        margin-top: 20px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    input,
+    select,
+    textarea {
+        width: 100%;
+        border: 1px solid #d8dee8;
+        border-radius: 12px;
+        background: #fbfcfe;
+        padding: 14px;
+        font-family: inherit;
+        font-size: 15px;
+        outline: none;
+        transition: .15s;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+        border-color: #5975b8;
+        box-shadow: 0 0 0 4px #e9effd;
+        background: white;
+    }
+
+    textarea {
+        min-height: 130px;
+        resize: vertical;
+    }
+
+    .help {
+        margin: 6px 0 0;
+        color: #8b94a3;
+        font-size: 12px;
+    }
+
+    .urgent-checkbox {
+        width: auto;
+        margin: 0;
+        padding: 0;
+        accent-color: #c52c2c;
+    }
+
+    .urgent-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        margin: 0;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .submit {
+        width: 100%;
+        margin-top: 25px;
+        padding: 15px;
+        border: 0;
+        border-radius: 12px;
+        background: #172033;
+        color: white;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    .submit:hover {
+        opacity: .9;
+    }
+
+    .section {
+        margin-top: 38px;
+        padding-top: 28px;
+        border-top: 1px solid #e8ecf2;
+    }
+
+    .section h2 {
+        margin: 0 0 6px;
+        font-size: 21px;
+    }
+
+    .section-description {
+        margin: 0 0 20px;
+        color: #788292;
+        font-size: 13px;
+    }
+
+    .report {
+        display: block;
+        border: 1px solid #e3e8f0;
+        border-radius: 15px;
+        padding: 17px;
+        margin-bottom: 12px;
+        background: #fff;
+        text-decoration: none;
+        color: inherit;
+        cursor: pointer;
+        transition:
+            transform .15s,
+            box-shadow .15s,
+            border-color .15s,
+            background .15s;
+    }
+
+    .report:hover {
+        transform: translateY(-2px);
+        border-color: #cbd5e7;
+        box-shadow: 0 8px 25px rgba(24, 37, 62, .08);
+        background: #fcfdff;
+    }
+
+    .report:active {
+        transform: translateY(0);
+    }
+
+    .report-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .report-location {
+        font-weight: 800;
+    }
+
+    .report-category {
+        margin: 9px 0 4px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #43506a;
+    }
+
+    .report-description {
+        margin: 0;
+        color: #6d7788;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .status {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 900;
+    }
+
+    .status.new {
+        background: #e8f0ff;
+        color: #315db8;
+    }
+
+    .status.progress {
+        background: #fff1cc;
+        color: #9b6800;
+    }
+
+    .status.done {
+        background: #ddf7e8;
+        color: #16794c;
+    }
+
+    .urgent {
+        margin: 10px 0 0;
+        color: #c52c2c;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .report-open {
+        margin-top: 13px;
+        padding-top: 11px;
+        border-top: 1px solid #edf0f4;
+        color: #3157a5;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .empty {
+        padding: 20px;
+        border-radius: 14px;
+        background: #f6f8fa;
+        color: #7b8493;
+        text-align: center;
+        font-size: 13px;
+    }
+
+    .bottom-links {
+        margin-top: 30px;
+        display: grid;
+        gap: 10px;
+    }
+
+    .link {
+        display: block;
+        text-align: center;
+        padding: 13px;
+        border: 1px solid #dfe4ec;
+        border-radius: 11px;
+        color: #465268;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .link:hover {
+        background: #f7f9fc;
+    }
+
+    .public-actions {
+        margin-top: 30px;
+        display: grid;
+        gap: 12px;
+    }
+
+    .public-primary {
+        display: block;
+        text-align: center;
+        text-decoration: none;
+        padding: 15px;
+        border-radius: 12px;
+        background: #172033;
+        color: white;
+        font-weight: 800;
+    }
+
+    .public-secondary {
+        display: block;
+        text-align: center;
+        text-decoration: none;
+        padding: 14px;
+        border-radius: 12px;
+        border: 1px solid #dfe4ec;
+        color: #465268;
+        font-weight: 700;
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 25px;
+        color: #9aa2af;
+        font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+        .page {
+            width: 94%;
+            margin-top: 20px;
+        }
+
+        .card {
+            padding: 25px 20px;
+            border-radius: 20px;
+        }
+
+        .profile-avatar-label {
+            width: 58px;
+            height: 58px;
+        }
+    }
+</style>
+
+
+</head>
+
+<body>
+
+<div class="page">
+
+<div class="card">
+
+{% if user %}
+
+
+<div class="top-bar">
+
+    <form
+        method="POST"
+        action="{{ url_for('modifier_photo_profil') }}"
+        enctype="multipart/form-data"
+        class="profile-form"
+        id="profilePhotoForm"
+    >
+
+        <label
+            for="profile_photo"
+            class="profile-avatar-label"
+            title="Changer la photo de profil"
+        >
+
+            {% if user.profile_photo_url %}
+
+                <img
+                    src="{{ user.profile_photo_url }}"
+                    alt="Photo de profil"
+                    class="profile-avatar"
+                >
+
+            {% else %}
+
+                <span class="profile-placeholder">
+                    👤
+                </span>
+
+            {% endif %}
+
+            <span class="camera-badge">
+                📷
+            </span>
+
+        </label>
+
+        <input
+            type="file"
+            id="profile_photo"
+            name="profile_photo"
+            class="profile-input"
+            accept="image/jpeg,image/png,image/webp"
+        >
+
+        <div class="profile-hint">
+            Cliquer pour changer la photo
+        </div>
+
+    </form>
+
+</div>
+
+<span class="badge">
+    COLLÈGE EDMOND ROSTAND
+</span>
+
+<h1>Collège SOS</h1>
+
+<p class="subtitle">
+    Bonjour {{ user.username }} 👋<br>
+    Signalez rapidement un problème dans le collège.
+</p>
+
+<div class="intro">
+    <strong>🛠️ Signaler un problème</strong>
+    <p>
+        Donnez-nous l'emplacement, la catégorie et une description du problème.
+    </p>
+</div>
+
+<form
+    method="POST"
+    action="{{ url_for('signaler') }}"
+    enctype="multipart/form-data"
+>
+
+    <div class="field">
+
+        <label for="salle">
+            📍 Salle / emplacement
+        </label>
+
+        <input
+            type="text"
+            id="salle"
+            name="salle"
+            placeholder="Ex. Salle 23, CDI, couloir..."
+            required
+        >
+
+    </div>
+
+    <div class="field">
+
+        <label for="categorie">
+            🛠️ Catégorie
+        </label>
+
+        <select
+            id="categorie"
+            name="categorie"
+            required
+        >
+
+            <option value="">
+                Choisir une catégorie
+            </option>
+
+            <option value="Informatique">
+                💻 Informatique
+            </option>
+
+            <option value="Vidéoprojecteur">
+                📽️ Vidéoprojecteur
+            </option>
+
+            <option value="Entretien">
+                🧰 Entretien
+            </option>
+
+            <option value="Électricité">
+                ⚡ Électricité
+            </option>
+
+            <option value="Mobilier">
+                🪑 Mobilier
+            </option>
+
+            <option value="Chauffage">
+                🔥 Chauffage
+            </option>
+
+            <option value="Plomberie">
+                🚰 Plomberie
+            </option>
+
+            <option value="Éclairage">
+                💡 Éclairage
+            </option>
+
+            <option value="Réseau / Internet">
+                🌐 Réseau / Internet
+            </option>
+
+            <option value="Nettoyage">
+                🧹 Nettoyage
+            </option>
+
+            <option value="Bâtiment">
+                🏫 Bâtiment
+            </option>
+
+            <option value="Sécurité">
+                🔒 Sécurité
+            </option>
+
+            <option value="Autre">
+                🔧 Autre
+            </option>
+
+        </select>
+
+    </div>
+
+    <div class="field">
+
+        <label for="description">
+            📝 Description du problème
+        </label>
+
+        <textarea
+            id="description"
+            name="description"
+            placeholder="Expliquez ce qui ne fonctionne pas..."
+            required
+        ></textarea>
+
+    </div>
+
+    <div class="field">
+
+        <label>
+            🚦 Est-ce Urgent ?
+        </label>
+
+        <label class="urgent-label">
+
+            <input
+                type="checkbox"
+                id="urgence"
+                name="urgence"
+                value="urgente"
+                class="urgent-checkbox"
+            >
+
+            🔴 Urgent
+
+        </label>
+
+    </div>
+
+    <div class="field">
+
+        <label for="photo">
+            📷 Photo <span style="font-weight:400;color:#8b94a3;">(facultatif)</span>
+        </label>
+
+        <input
+            type="file"
+            id="photo"
+            name="photo"
+            accept="image/jpeg,image/png,image/webp"
+        >
+
+        <p class="help">
+            JPG, PNG ou WEBP — maximum 8 Mo.
+        </p>
+
+    </div>
+
+    <button
+        type="submit"
+        class="submit"
+    >
+        🚨 Envoyer le signalement
+    </button>
+
+</form>
+
+<section class="section">
+
+    <h2>📋 Mes signalements</h2>
+
+    <p class="section-description">
+        Retrouvez ici les problèmes que vous avez signalés et leur état d'avancement.
+        Cliquez sur un signalement pour voir les détails et discuter avec l'administration.
+    </p>
+
+    {% if mes_signalements %}
+
+        {% for probleme in mes_signalements %}
+
+            <a
+                href="{{ url_for('probleme', probleme_id=probleme.id) }}"
+                class="report"
+            >
+
+                <div class="report-top">
+
+                    <div class="report-location">
+                        📍 {{ probleme.salle }}
+                    </div>
+
+                    {% if probleme.statut == "nouveau" %}
+
+                        <span class="status new">
+                            🟠 À RÉAFFECTER
+                        </span>
+
+                    {% elif probleme.statut == "en_cours" %}
+
+                        <span class="status progress">
+                            🟠 EN COURS
+                        </span>
+
+                    {% elif probleme.statut == "resolu" %}
+
+                        <span class="status done">
+                            🟢 RÉSOLU
+                        </span>
+
+                    {% endif %}
+
+                </div>
+
+                <div class="report-category">
+                    {{ probleme.categorie }}
+                </div>
+
+                <p class="report-description">
+                    {{ probleme.description }}
+                </p>
+
+                {% if probleme.urgence == "urgente" %}
+
+                    <p class="urgent">
+                        🔴 Signalement urgent
+                    </p>
+
+                {% endif %}
+
+                <div class="report-open">
+                    💬 Voir les détails et la discussion →
+                </div>
+
+            </a>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="empty">
+            Vous n'avez encore envoyé aucun signalement.
+        </div>
+
+    {% endif %}
+
+</section>
+
+<div class="bottom-links">
+
+    <a
+        href="{{ url_for('devenir_admin') }}"
+        class="link"
+    >
+        ⚙️ Devenir administrateur
+    </a>
+
+    <a
+        href="{{ url_for('deconnexion') }}"
+        class="link"
+    >
+        🚪 Se déconnecter
+    </a>
+
+</div>
+
+
+{% else %}
+
+
+<div class="icon">🛠️</div>
+
+<span class="badge">
+    COLLÈGE EDMOND ROSTAND
+</span>
+
+<h1>Collège SOS</h1>
+
+<p class="subtitle">
+    Un problème au collège ?<br>
+    Signalez-le en quelques secondes.
+</p>
+
+<div class="public-actions">
+
+    <a
+        href="{{ url_for('connexion') }}"
+        class="public-primary"
+    >
+        🔐 Se connecter
+    </a>
+
+    <a
+        href="{{ url_for('inscription') }}"
+        class="public-secondary"
+    >
+        👨‍🏫 Créer un compte professeur
+    </a>
+
+    <a
+        href="{{ url_for('devenir_admin') }}"
+        class="public-secondary"
+    >
+        ⚙️ Devenir administrateur
+    </a>
+
+</div>
+
+<p class="footer">
+    Les professeurs doivent disposer du mot de passe fourni par l'administration pour créer leur compte.
+</p>
+
+
+{% endif %}
+
+</div>
+
+</div>
+
+<script>
+    const profileInput = document.getElementById("profile_photo");
+    const profileForm = document.getElementById("profilePhotoForm");
+
+    if (profileInput && profileForm) {
+        profileInput.addEventListener("change", function () {
+            if (!this.files || !this.files.length) {
+                return;
+            }
+
+            const file = this.files[0];
+
+            const allowedTypes = [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                alert("Format non autorisé. Utilisez JPG, PNG ou WEBP.");
+                this.value = "";
+                return;
+            }
+
+            if (file.size > 8 * 1024 * 1024) {
+                alert("La photo est trop volumineuse. Maximum : 8 Mo.");
+                this.value = "";
+                return;
+            }
+
+            profileForm.submit();
+        });
+    }
+</script>
+
+</body>
 </html>

@@ -59,7 +59,8 @@
 
         button,
         input,
-        select {
+        select,
+        textarea {
             font: inherit;
         }
 
@@ -442,6 +443,171 @@
             white-space: pre-wrap;
         }
 
+        .comments-section {
+            margin-top: 24px;
+        }
+
+        .comments-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .comments-count {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 24px;
+            padding: 0 8px;
+            border-radius: 999px;
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .comment-form {
+            background: #f8f9fb;
+            border: 1px solid #e8ebef;
+            border-radius: 14px;
+            padding: 15px;
+        }
+
+        .comment-textarea {
+            display: block;
+            width: 100%;
+            min-height: 100px;
+            resize: vertical;
+            padding: 13px 14px;
+            border-radius: 11px;
+            border: 1px solid #dfe3e8;
+            background: #fff;
+            color: #202733;
+            outline: none;
+            font-size: 13px;
+            line-height: 1.6;
+            transition: 0.18s ease;
+        }
+
+        .comment-textarea::placeholder {
+            color: #a0a7b2;
+        }
+
+        .comment-textarea:focus {
+            border-color: #9ca3af;
+            box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.14);
+        }
+
+        .comment-form-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .comment-help {
+            color: #9aa2af;
+            font-size: 11px;
+        }
+
+        .comment-button {
+            min-height: 40px;
+            padding: 0 15px;
+            border: 0;
+            border-radius: 10px;
+            background: #202733;
+            color: #fff;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 800;
+            transition: 0.18s ease;
+        }
+
+        .comment-button:hover {
+            background: #111827;
+            transform: translateY(-1px);
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .comment-card {
+            background: #fff;
+            border: 1px solid #e8ebef;
+            border-radius: 14px;
+            padding: 14px 15px;
+        }
+
+        .comment-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .comment-author-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .comment-avatar {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            border-radius: 50%;
+            background: #eef0f3;
+            border: 1px solid #dde1e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #626b79;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .comment-author {
+            color: #202733;
+            font-size: 13px;
+            font-weight: 850;
+        }
+
+        .comment-date {
+            color: #9aa2af;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .comment-content {
+            margin-top: 10px;
+            color: #4b5563;
+            font-size: 13px;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .no-comments {
+            padding: 18px;
+            border-radius: 14px;
+            border: 1px dashed #dfe3e8;
+            background: #fafafa;
+            color: #929aa7;
+            text-align: center;
+            font-size: 12px;
+        }
+
         .photo-section {
             margin-top: 24px;
         }
@@ -779,6 +945,24 @@
                 padding: 18px;
             }
 
+            .comment-form-bottom {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .comment-button {
+                width: 100%;
+            }
+
+            .comment-top {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .comment-date {
+                margin-left: 44px;
+            }
+
             .modal {
                 padding: 14px;
             }
@@ -990,6 +1174,102 @@
                     <div class="description-box">
                         {{ probleme.description or "Aucune description renseignée." }}
                     </div>
+
+                </div>
+
+                <div class="comments-section">
+
+                    <div class="comments-header">
+
+                        <h2 class="section-title" style="margin-bottom: 0;">
+                            💬 Commentaires
+                        </h2>
+
+                        <span class="comments-count">
+                            {{ commentaires|length }}
+                        </span>
+
+                    </div>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('ajouter_commentaire', probleme_id=probleme.id) }}"
+                        class="comment-form"
+                    >
+
+                        <textarea
+                            class="comment-textarea"
+                            name="contenu"
+                            maxlength="2000"
+                            placeholder="Écrire un commentaire sur ce signalement..."
+                            required
+                        ></textarea>
+
+                        <div class="comment-form-bottom">
+
+                            <span class="comment-help">
+                                Maximum 2000 caractères
+                            </span>
+
+                            <button
+                                type="submit"
+                                class="comment-button"
+                            >
+                                💬 Ajouter le commentaire
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                    {% if commentaires %}
+
+                        <div class="comments-list">
+
+                            {% for commentaire in commentaires %}
+
+                                <div class="comment-card">
+
+                                    <div class="comment-top">
+
+                                        <div class="comment-author-wrapper">
+
+                                            <div class="comment-avatar">
+                                                {{ (commentaire.auteur_nom or "?")[:1]|upper }}
+                                            </div>
+
+                                            <div class="comment-author">
+                                                {{ commentaire.auteur_nom or "Administrateur" }}
+                                            </div>
+
+                                        </div>
+
+                                        <div
+                                            class="comment-date"
+                                            data-date="{{ commentaire.date_creation }}"
+                                        >
+                                            {{ commentaire.date_creation }}
+                                        </div>
+
+                                    </div>
+
+                                    <div class="comment-content">
+                                        {{ commentaire.contenu }}
+                                    </div>
+
+                                </div>
+
+                            {% endfor %}
+
+                        </div>
+
+                    {% else %}
+
+                        <div class="no-comments">
+                            Aucun commentaire pour le moment.
+                        </div>
+
+                    {% endif %}
 
                 </div>
 
@@ -1357,6 +1637,35 @@
         element.textContent = formaterDuree(secondes);
     }
 
+    function formaterDatesCommentaires() {
+        const dates = document.querySelectorAll(".comment-date");
+
+        dates.forEach(function(element) {
+            const date = element.dataset.date;
+
+            if (!date) {
+                return;
+            }
+
+            const dateObjet = new Date(date);
+
+            if (isNaN(dateObjet.getTime())) {
+                return;
+            }
+
+            element.textContent = dateObjet.toLocaleString(
+                "fr-FR",
+                {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
+        });
+    }
+
     document.addEventListener("keydown", function(event) {
         if (event.key === "Escape") {
             fermerProfil();
@@ -1366,6 +1675,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         mettreAJourDuree();
+        formaterDatesCommentaires();
 
         setInterval(
             mettreAJourDuree,

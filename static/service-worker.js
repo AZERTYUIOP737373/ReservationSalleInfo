@@ -2,7 +2,6 @@ console.log("[Collège SOS] Service Worker chargé");
 
 self.addEventListener("install", function (event) {
     console.log("[Collège SOS] Service Worker installé");
-
     self.skipWaiting();
 });
 
@@ -88,8 +87,6 @@ self.addEventListener("push", function (event) {
                 "[Collège SOS] ERREUR showNotification :",
                 error
             );
-
-            throw error;
         })
     );
 });
@@ -105,29 +102,11 @@ self.addEventListener("notificationclick", function (event) {
     const targetUrl =
         notificationData.url || "/dashboard";
 
-    let finalUrl;
-
-    try {
-        const url = new URL(
+    const finalUrl =
+        new URL(
             targetUrl,
-            "https://reservation-salle-info.onrender.com"
-        );
-
-        finalUrl =
-            "https://reservation-salle-info.onrender.com" +
-            url.pathname +
-            url.search +
-            url.hash;
-
-    } catch (error) {
-        console.error(
-            "[Collège SOS] URL invalide :",
-            error
-        );
-
-        finalUrl =
-            "https://reservation-salle-info.onrender.com/dashboard";
-    }
+            "https://sos-college.onrender.com"
+        ).href;
 
     event.waitUntil(
         clients.matchAll({

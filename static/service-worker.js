@@ -1,11 +1,11 @@
-console.log("[Collège SOS] Service Worker chargé");
+const CACHE_NAME = "college-sos-v2";
 
-self.addEventListener("install", function (event) {
+self.addEventListener("install", event => {
     console.log("[Collège SOS] Service Worker installé");
     self.skipWaiting();
 });
 
-self.addEventListener("activate", function (event) {
+self.addEventListener("activate", event => {
     console.log("[Collège SOS] Service Worker activé");
 
     event.waitUntil(
@@ -13,7 +13,7 @@ self.addEventListener("activate", function (event) {
     );
 });
 
-self.addEventListener("push", function (event) {
+self.addEventListener("push", event => {
     console.log("[Collège SOS] PUSH REÇU");
 
     let data = {
@@ -27,21 +27,15 @@ self.addEventListener("push", function (event) {
         try {
             const json = event.data.json();
 
-            console.log(
-                "[Collège SOS] Données reçues :",
-                json
-            );
+            data.title = json.title || data.title;
+            data.body = json.body || data.body;
+            data.url = json.url || data.url;
+            data.tag = json.tag || data.tag;
 
-            data = {
-                title: json.title || "Collège SOS",
-                body: json.body || "Nouveau signalement",
-                url: json.url || "/dashboard",
-                tag: json.tag || "college-sos"
-            };
-
+            console.log("[Collège SOS] Données Push :", json);
         } catch (error) {
             console.error(
-                "[Collège SOS] Impossible de lire le JSON :",
+                "[Collège SOS] Erreur lecture Push :",
                 error
             );
 
@@ -49,14 +43,14 @@ self.addEventListener("push", function (event) {
                 data.body = event.data.text();
             } catch (textError) {
                 console.error(
-                    "[Collège SOS] Impossible de lire le texte :",
+                    "[Collège SOS] Impossible de lire le message",
                     textError
                 );
             }
         }
     }
 
-    const notificationOptions = {
+    const options = {
         body: data.body,
         tag: data.tag,
         renotify: true,
@@ -68,61 +62,37 @@ self.addEventListener("push", function (event) {
         }
     };
 
-    console.log(
-        "[Collège SOS] Affichage notification :",
-        data.title,
-        data.body
-    );
-
     event.waitUntil(
         self.registration.showNotification(
             data.title,
-            notificationOptions
-        ).then(function () {
-            console.log(
-                "[Collège SOS] Notification affichée"
-            );
-        }).catch(function (error) {
-            console.error(
-                "[Collège SOS] ERREUR showNotification :",
-                error
-            );
-        })
+            options
+        )
     );
 });
 
-self.addEventListener("notificationclick", function (event) {
-    console.log("[Collège SOS] Notification cliquée");
-
+self.addEventListener("notificationclick", event => {
     event.notification.close();
 
-    const notificationData =
-        event.notification.data || {};
-
-    const targetUrl =
-        notificationData.url || "/dashboard";
-
-    const finalUrl =
-        new URL(
-            targetUrl,
-            "https://sos-college.onrender.com"
-        ).href;
+    const url = event.notification.data?.url || "/dashboard";
 
     event.waitUntil(
         clients.matchAll({
             type: "window",
             includeUncontrolled: true
-        }).then(function (clientList) {
+        }).then(clientList => {
 
             for (const client of clientList) {
                 if ("focus" in client) {
-                    client.navigate(finalUrl);
-                    return client.focus();
+                    return client.focus().then(() => {
+                        if ("navigate" in client) {
+                            return client.navigate(url);
+                        }
+                    });
                 }
             }
 
             if (clients.openWindow) {
-                return clients.openWindow(finalUrl);
+                return clients.openWindow(url);
             }
         })
     );

@@ -6,8 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}">
 
-
-<title>Signalement #{{ probleme.id }} — Collège SOS</title>
+    <title>Signalement #{{ probleme.id }} — Collège SOS</title>
 
 <style>
     * {
@@ -1056,538 +1055,563 @@
     }
 </style>
 
-
 </head>
 
 <body>
 
 <header class="page-header">
+
     <div class="brand">
+
         <div class="brand-logo">
             <span>CS</span>
         </div>
 
+        <div class="brand-text">
+            <div class="brand-title">
+                Collège SOS
+            </div>
 
-    <div class="brand-text">
-        <div class="brand-title">Collège SOS</div>
-        <div class="brand-subtitle">Administration · Collège Edmond Rostand</div>
+            <div class="brand-subtitle">
+                Administration · Collège Edmond Rostand
+            </div>
+        </div>
+
     </div>
-</div>
 
-{% if current_user and current_user.role in ("prof", "professeur") %}
+    {% if current_user and current_user.role in ("prof", "professeur") %}
 
-    <a
-        href="{{ url_for('professeur') }}"
-        class="back-button"
-    >
-        ← Mes signalements
-    </a>
+        <a
+            href="{{ url_for('professeur') }}"
+            class="back-button"
+        >
+            ← Mes signalements
+        </a>
 
-{% else %}
+    {% else %}
 
-    <a
-        href="{{ url_for('dashboard') }}"
-        class="back-button"
-    >
-        ← Dashboard
-    </a>
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="back-button"
+        >
+            ← Dashboard
+        </a>
 
-{% endif %}
-
+    {% endif %}
 
 </header>
 
 <main class="page">
 
+    <div class="top-line">
 
-<div class="top-line">
-    <div class="eyebrow">
-        <span class="eyebrow-dot"></span>
-        Détail du signalement
-    </div>
-
-    <div class="signalement-number">
-        #{{ probleme.id }}
-    </div>
-</div>
-
-<div class="main-grid">
-
-    <section class="card main-card">
-
-        <div class="hero">
-
-            <div class="hero-top">
-
-                <div>
-                    <h1>
-                        {{ probleme.categorie }}
-                    </h1>
-
-                    <div class="hero-category">
-                        Signalement dans {{ probleme.salle }}
-                    </div>
-                </div>
-
-                <div class="status-container">
-
-                    {% if probleme.statut == "en_cours" %}
-
-                        <span class="status-badge status-course">
-                            En cours
-                        </span>
-
-                    {% elif probleme.statut == "resolu" %}
-
-                        <span class="status-badge status-resolu">
-                            Résolu
-                        </span>
-
-                    {% else %}
-
-                        <span class="status-badge status-nouveau">
-                            À réaffecter
-                        </span>
-
-                    {% endif %}
-
-                    {% if probleme.urgence == "urgente" %}
-
-                        <span class="status-badge urgent-badge">
-                            Urgent
-                        </span>
-
-                    {% else %}
-
-                        <span class="status-badge normal-badge">
-                            Normale
-                        </span>
-
-                    {% endif %}
-
-                </div>
-
-            </div>
-
+        <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            Détail du signalement
         </div>
 
-        <div class="details">
+        <div class="signalement-number">
+            #{{ probleme.id }}
+        </div>
 
-            <div class="details-grid">
+    </div>
 
-                <div class="info-box">
+    <div class="main-grid">
 
-                    <span class="info-label">
-                        Salle
-                    </span>
+        <section class="card main-card">
 
-                    <span class="info-value">
-                        {{ probleme.salle or "Non renseignée" }}
-                    </span>
+            <div class="hero">
 
-                </div>
+                <div class="hero-top">
 
-                <div class="info-box">
+                    <div>
 
-                    <span class="info-label">
-                        Catégorie
-                    </span>
+                        <h1>
+                            {{ probleme.categorie }}
+                        </h1>
 
-                    <span class="info-value">
-                        {{ probleme.categorie or "Non renseignée" }}
-                    </span>
+                        <div class="hero-category">
+                            Signalement dans {{ probleme.salle }}
+                        </div>
 
-                </div>
+                    </div>
 
-                <div class="info-box">
+                    <div class="status-container">
 
-                    <span class="info-label">
-                        Auteur
-                    </span>
+                        {% if probleme.statut == "en_cours" %}
 
-                    {% if probleme.auteur %}
-
-                        <button
-                            type="button"
-                            class="author-button"
-                            onclick="ouvrirProfil()"
-                        >
-
-                            {% if auteur_user and auteur_user.profile_photo_url %}
-
-                                <img
-                                    src="{{ auteur_user.profile_photo_url }}"
-                                    alt="Photo de {{ probleme.auteur }}"
-                                    class="author-avatar"
-                                >
-
-                            {% else %}
-
-                                <div class="author-avatar">
-                                    {{ probleme.auteur[:1]|upper }}
-                                </div>
-
-                            {% endif %}
-
-                            <span class="author-text">
-
-                                <span class="author-name">
-                                    {{ probleme.auteur }}
-                                </span>
-
-                                <span class="author-hint">
-                                    Cliquer pour voir le profil
-                                </span>
-
+                            <span class="status-badge status-course">
+                                En cours
                             </span>
 
-                        </button>
+                        {% elif probleme.statut == "resolu" %}
 
-                    {% else %}
-
-                        <span class="info-value">
-                            Non renseigné
-                        </span>
-
-                    {% endif %}
-
-                </div>
-
-                <div class="info-box">
-
-                    <span class="info-label">
-                        Responsable
-                    </span>
-
-                    <span class="info-value">
-                        {{ probleme.responsable or "Aucun responsable" }}
-                    </span>
-
-                </div>
-
-            </div>
-
-            <div class="description-section">
-
-                <h2 class="section-title">
-                    Description du problème
-                </h2>
-
-                <div class="description-box">
-                    {{ probleme.description or "Aucune description renseignée." }}
-                </div>
-
-            </div>
-
-            <div class="comments-section">
-
-                <div class="comments-header">
-
-                    <div class="comments-title-wrapper">
-
-                        {% if current_user and current_user.role in ("prof", "professeur") %}
-
-                            <h2 class="comments-title">
-                                💬 Discussion avec l'administration
-                            </h2>
-
-                            <p class="comments-subtitle">
-                                Échangez avec l'administration à propos de ce signalement.
-                            </p>
+                            <span class="status-badge status-resolu">
+                                Résolu
+                            </span>
 
                         {% else %}
 
-                            <h2 class="comments-title">
-                                💬 Discussion avec le professeur
-                            </h2>
+                            <span class="status-badge status-nouveau">
+                                À réaffecter
+                            </span>
 
-                            <p class="comments-subtitle">
-                                Échangez avec le professeur à propos de ce signalement.
-                            </p>
+                        {% endif %}
+
+                        {% if probleme.urgence == "urgente" %}
+
+                            <span class="status-badge urgent-badge">
+                                Urgent
+                            </span>
+
+                        {% else %}
+
+                            <span class="status-badge normal-badge">
+                                Normale
+                            </span>
 
                         {% endif %}
 
                     </div>
 
-                    <span class="comments-count">
-                        {{ commentaires|length }}
-                    </span>
+                </div>
+
+            </div>
+
+            <div class="details">
+
+                <div class="details-grid">
+
+                    <div class="info-box">
+
+                        <span class="info-label">
+                            Salle
+                        </span>
+
+                        <span class="info-value">
+                            {{ probleme.salle or "Non renseignée" }}
+                        </span>
+
+                    </div>
+
+                    <div class="info-box">
+
+                        <span class="info-label">
+                            Catégorie
+                        </span>
+
+                        <span class="info-value">
+                            {{ probleme.categorie or "Non renseignée" }}
+                        </span>
+
+                    </div>
+
+                    <div class="info-box">
+
+                        <span class="info-label">
+                            Auteur
+                        </span>
+
+                        {% if probleme.auteur %}
+
+                            <button
+                                type="button"
+                                class="author-button"
+                                onclick="ouvrirProfil()"
+                            >
+
+                                {% if auteur_user and auteur_user.profile_photo_url %}
+
+                                    <img
+                                        src="{{ auteur_user.profile_photo_url }}"
+                                        alt="Photo de {{ probleme.auteur }}"
+                                        class="author-avatar"
+                                    >
+
+                                {% else %}
+
+                                    <div class="author-avatar">
+                                        {{ probleme.auteur[:1]|upper }}
+                                    </div>
+
+                                {% endif %}
+
+                                <span class="author-text">
+
+                                    <span class="author-name">
+                                        {{ probleme.auteur }}
+                                    </span>
+
+                                    <span class="author-hint">
+                                        Cliquer pour voir le profil
+                                    </span>
+
+                                </span>
+
+                            </button>
+
+                        {% else %}
+
+                            <span class="info-value">
+                                Non renseigné
+                            </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div class="info-box">
+
+                        <span class="info-label">
+                            Responsable
+                        </span>
+
+                        <span class="info-value">
+                            {{ probleme.responsable or "Aucun responsable" }}
+                        </span>
+
+                    </div>
 
                 </div>
 
-                <form
-                    method="POST"
-                    action="{{ url_for('ajouter_commentaire', probleme_id=probleme.id) }}"
-                    class="comment-form"
+                <div class="description-section">
+
+                    <h2 class="section-title">
+                        Description du problème
+                    </h2>
+
+                    <div class="description-box">
+                        {{ probleme.description or "Aucune description renseignée." }}
+                    </div>
+
+                </div>
+
+                <div
+                    class="comments-section"
+                    id="commentsSection"
                 >
 
-                    <textarea
-                        class="comment-textarea"
-                        name="contenu"
-                        maxlength="2000"
-                        placeholder="{% if current_user and current_user.role in ('prof', 'professeur') %}Écrire un message à l'administration...{% else %}Écrire une réponse au professeur...{% endif %}"
-                        required
-                    ></textarea>
+                    <div class="comments-header">
 
-                    <div class="comment-form-bottom">
+                        <div class="comments-title-wrapper">
 
-                        <span class="comment-help">
-                            Maximum 2000 caractères
-                        </span>
-
-                        <button
-                            type="submit"
-                            class="comment-button"
-                        >
                             {% if current_user and current_user.role in ("prof", "professeur") %}
-                                📤 Envoyer à l'administration
+
+                                <h2 class="comments-title">
+                                    💬 Discussion avec l'administration
+                                </h2>
+
+                                <p class="comments-subtitle">
+                                    Échangez avec l'administration à propos de ce signalement.
+                                </p>
+
                             {% else %}
-                                📤 Répondre au professeur
+
+                                <h2 class="comments-title">
+                                    💬 Discussion avec le professeur
+                                </h2>
+
+                                <p class="comments-subtitle">
+                                    Échangez avec le professeur à propos de ce signalement.
+                                </p>
+
                             {% endif %}
-                        </button>
+
+                        </div>
+
+                        <span
+                            class="comments-count"
+                            id="commentsCount"
+                        >
+                            {{ commentaires|length }}
+                        </span>
 
                     </div>
 
-                </form>
+                    <form
+                        method="POST"
+                        action="{{ url_for('ajouter_commentaire', probleme_id=probleme.id) }}"
+                        class="comment-form"
+                    >
 
-                {% if commentaires %}
+                        <textarea
+                            class="comment-textarea"
+                            name="contenu"
+                            maxlength="2000"
+                            placeholder="{% if current_user and current_user.role in ('prof', 'professeur') %}Écrire un message à l'administration...{% else %}Écrire une réponse au professeur...{% endif %}"
+                            required
+                        ></textarea>
 
-                    <div class="comments-list">
+                        <div class="comment-form-bottom">
 
-                        {% for commentaire in commentaires %}
+                            <span class="comment-help">
+                                Maximum 2000 caractères
+                            </span>
 
-                            {% set est_moi = commentaire.auteur_id|string == current_user.id|string %}
+                            <button
+                                type="submit"
+                                class="comment-button"
+                            >
 
-                            <div class="comment-row {% if est_moi %}comment-row-own{% else %}comment-row-other{% endif %}">
+                                {% if current_user and current_user.role in ("prof", "professeur") %}
 
-                                <article class="comment-card">
+                                    📤 Envoyer à l'administration
 
-                                    <div class="comment-top">
+                                {% else %}
 
-                                        <div class="comment-author-wrapper">
+                                    📤 Répondre au professeur
 
-                                            <div class="comment-avatar">
-                                                {{ (commentaire.auteur_nom or "?")[:1]|upper }}
+                                {% endif %}
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                    <div id="commentsContent">
+
+                        {% if commentaires %}
+
+                            <div class="comments-list">
+
+                                {% for commentaire in commentaires %}
+
+                                    {% set est_moi = commentaire.auteur_id|string == current_user.id|string %}
+
+                                    <div class="comment-row {% if est_moi %}comment-row-own{% else %}comment-row-other{% endif %}">
+
+                                        <article class="comment-card">
+
+                                            <div class="comment-top">
+
+                                                <div class="comment-author-wrapper">
+
+                                                    <div class="comment-avatar">
+                                                        {{ (commentaire.auteur_nom or "?")[:1]|upper }}
+                                                    </div>
+
+                                                    <div class="comment-author">
+
+                                                        {% if est_moi %}
+                                                            Vous
+                                                        {% else %}
+                                                            {{ commentaire.auteur_nom or "Utilisateur" }}
+                                                        {% endif %}
+
+                                                        {% if est_moi %}
+
+                                                            <span class="comment-you">
+                                                                (vous)
+                                                            </span>
+
+                                                        {% endif %}
+
+                                                    </div>
+
+                                                </div>
+
+                                                <div
+                                                    class="comment-date"
+                                                    data-date="{{ commentaire.date_creation }}"
+                                                >
+                                                    {{ commentaire.date_creation }}
+                                                </div>
+
                                             </div>
 
-                                            <div class="comment-author">
-
-                                                {% if est_moi %}
-                                                    Vous
-                                                {% else %}
-                                                    {{ commentaire.auteur_nom or "Utilisateur" }}
-                                                {% endif %}
-
-                                                {% if est_moi %}
-                                                    <span class="comment-you">
-                                                        (vous)
-                                                    </span>
-                                                {% endif %}
-
+                                            <div class="comment-content">
+                                                {{ commentaire.contenu }}
                                             </div>
 
-                                        </div>
-
-                                        <div
-                                            class="comment-date"
-                                            data-date="{{ commentaire.date_creation }}"
-                                        >
-                                            {{ commentaire.date_creation }}
-                                        </div>
+                                        </article>
 
                                     </div>
 
-                                    <div class="comment-content">
-                                        {{ commentaire.contenu }}
-                                    </div>
-
-                                </article>
+                                {% endfor %}
 
                             </div>
 
-                        {% endfor %}
+                        {% else %}
+
+                            <div class="no-comments">
+                                Aucun message pour le moment. Commencez la discussion ci-dessus.
+                            </div>
+
+                        {% endif %}
 
                     </div>
 
-                {% else %}
+                </div>
 
-                    <div class="no-comments">
-                        Aucun message pour le moment. Commencez la discussion ci-dessus.
+                {% if probleme.photo_url %}
+
+                    <div class="photo-section">
+
+                        <h2 class="section-title">
+                            Photo du problème
+                        </h2>
+
+                        <div
+                            class="problem-photo-wrapper"
+                            onclick="ouvrirImage('{{ probleme.photo_url }}')"
+                        >
+
+                            <img
+                                src="{{ probleme.photo_url }}"
+                                alt="Photo du problème signalé"
+                                class="problem-photo"
+                            >
+
+                            <div class="photo-overlay-hint">
+                                🔍 Cliquer pour agrandir
+                            </div>
+
+                        </div>
+
                     </div>
 
                 {% endif %}
 
-            </div>
+                <div class="duration-box">
 
-            {% if probleme.photo_url %}
+                    <div class="duration-title">
+                        Temps de résolution
+                    </div>
 
-                <div class="photo-section">
+                    {% if probleme.statut == "resolu" %}
 
-                    <h2 class="section-title">
-                        Photo du problème
-                    </h2>
+                        <div class="duration-value">
 
-                    <div
-                        class="problem-photo-wrapper"
-                        onclick="ouvrirImage('{{ probleme.photo_url }}')"
-                    >
+                            {% if probleme.duree_resolution.jours %}
+                                {{ probleme.duree_resolution.jours }} j
+                            {% endif %}
 
-                        <img
-                            src="{{ probleme.photo_url }}"
-                            alt="Photo du problème signalé"
-                            class="problem-photo"
-                        >
+                            {% if probleme.duree_resolution.heures %}
+                                {{ probleme.duree_resolution.heures }} h
+                            {% endif %}
 
-                        <div class="photo-overlay-hint">
-                            🔍 Cliquer pour agrandir
+                            {% if probleme.duree_resolution.minutes %}
+                                {{ probleme.duree_resolution.minutes }} min
+                            {% endif %}
+
+                            {% if not probleme.duree_resolution.jours
+                                  and not probleme.duree_resolution.heures
+                                  and not probleme.duree_resolution.minutes %}
+
+                                {{ probleme.duree_resolution.secondes }} s
+
+                            {% endif %}
+
                         </div>
 
-                    </div>
+                    {% else %}
+
+                        <div
+                            class="duration-value"
+                            id="liveDuration"
+                            data-start="{{ probleme.date_creation }}"
+                        >
+                            Calcul en cours...
+                        </div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <aside class="sidebar">
+
+            {% if current_user and current_user.role == "admin" %}
+
+                <div class="card side-card">
+
+                    <h2 class="side-title">
+                        Modifier le signalement
+                    </h2>
+
+                    <form
+                        method="POST"
+                        action="{{ url_for('modifier_statut', probleme_id=probleme.id) }}"
+                    >
+
+                        <div class="form-group">
+
+                            <label
+                                class="form-label"
+                                for="statut"
+                            >
+                                Statut
+                            </label>
+
+                            <select
+                                id="statut"
+                                name="statut"
+                            >
+
+                                <option
+                                    value="nouveau"
+                                    {% if probleme.statut == "nouveau" %}selected{% endif %}
+                                >
+                                    À réaffecter
+                                </option>
+
+                                <option
+                                    value="en_cours"
+                                    {% if probleme.statut == "en_cours" %}selected{% endif %}
+                                >
+                                    En cours
+                                </option>
+
+                                <option
+                                    value="resolu"
+                                    {% if probleme.statut == "resolu" %}selected{% endif %}
+                                >
+                                    Résolu
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="form-group">
+
+                            <label
+                                class="form-label"
+                                for="responsable"
+                            >
+                                Responsable
+                            </label>
+
+                            <input
+                                type="text"
+                                id="responsable"
+                                name="responsable"
+                                value="{{ probleme.responsable or '' }}"
+                                placeholder="Personne chargée de l'intervention"
+                            >
+
+                        </div>
+
+                        <button
+                            class="save-button"
+                            type="submit"
+                        >
+                            Enregistrer les modifications
+                        </button>
+
+                    </form>
 
                 </div>
 
             {% endif %}
 
-            <div class="duration-box">
+        </aside>
 
-                <div class="duration-title">
-                    Temps de résolution
-                </div>
-
-                {% if probleme.statut == "resolu" %}
-
-                    <div class="duration-value">
-
-                        {% if probleme.duree_resolution.jours %}
-                            {{ probleme.duree_resolution.jours }} j
-                        {% endif %}
-
-                        {% if probleme.duree_resolution.heures %}
-                            {{ probleme.duree_resolution.heures }} h
-                        {% endif %}
-
-                        {% if probleme.duree_resolution.minutes %}
-                            {{ probleme.duree_resolution.minutes }} min
-                        {% endif %}
-
-                        {% if not probleme.duree_resolution.jours
-                              and not probleme.duree_resolution.heures
-                              and not probleme.duree_resolution.minutes %}
-
-                            {{ probleme.duree_resolution.secondes }} s
-
-                        {% endif %}
-
-                    </div>
-
-                {% else %}
-
-                    <div
-                        class="duration-value"
-                        id="liveDuration"
-                        data-start="{{ probleme.date_creation }}"
-                    >
-                        Calcul en cours...
-                    </div>
-
-                {% endif %}
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <aside class="sidebar">
-
-        {% if current_user and current_user.role == "admin" %}
-
-            <div class="card side-card">
-
-                <h2 class="side-title">
-                    Modifier le signalement
-                </h2>
-
-                <form
-                    method="POST"
-                    action="{{ url_for('modifier_statut', probleme_id=probleme.id) }}"
-                >
-
-                    <div class="form-group">
-
-                        <label
-                            class="form-label"
-                            for="statut"
-                        >
-                            Statut
-                        </label>
-
-                        <select
-                            id="statut"
-                            name="statut"
-                        >
-
-                            <option
-                                value="nouveau"
-                                {% if probleme.statut == "nouveau" %}selected{% endif %}
-                            >
-                                À réaffecter
-                            </option>
-
-                            <option
-                                value="en_cours"
-                                {% if probleme.statut == "en_cours" %}selected{% endif %}
-                            >
-                                En cours
-                            </option>
-
-                            <option
-                                value="resolu"
-                                {% if probleme.statut == "resolu" %}selected{% endif %}
-                            >
-                                Résolu
-                            </option>
-
-                        </select>
-
-                    </div>
-
-                    <div class="form-group">
-
-                        <label
-                            class="form-label"
-                            for="responsable"
-                        >
-                            Responsable
-                        </label>
-
-                        <input
-                            type="text"
-                            id="responsable"
-                            name="responsable"
-                            value="{{ probleme.responsable or '' }}"
-                            placeholder="Personne chargée de l'intervention"
-                        >
-
-                    </div>
-
-                    <button
-                        class="save-button"
-                        type="submit"
-                    >
-                        Enregistrer les modifications
-                    </button>
-
-                </form>
-
-            </div>
-
-        {% endif %}
-
-    </aside>
-
-</div>
-
+    </div>
 
 </main>
 
@@ -1597,44 +1621,42 @@
     onclick="fermerProfilSiFond(event)"
 >
 
+    <div class="modal-content profile-modal-content">
 
-<div class="modal-content profile-modal-content">
-
-    <button
-        type="button"
-        class="modal-close"
-        onclick="fermerProfil()"
-        aria-label="Fermer"
-    >
-        ×
-    </button>
-
-    {% if auteur_user and auteur_user.profile_photo_url %}
-
-        <img
-            src="{{ auteur_user.profile_photo_url }}"
-            alt="Photo de {{ probleme.auteur }}"
-            class="profile-big-photo"
+        <button
+            type="button"
+            class="modal-close"
+            onclick="fermerProfil()"
+            aria-label="Fermer"
         >
+            ×
+        </button>
 
-    {% else %}
+        {% if auteur_user and auteur_user.profile_photo_url %}
 
-        <div class="profile-placeholder">
-            {{ (probleme.auteur or "?")[:1]|upper }}
-        </div>
+            <img
+                src="{{ auteur_user.profile_photo_url }}"
+                alt="Photo de {{ probleme.auteur }}"
+                class="profile-big-photo"
+            >
 
-    {% endif %}
+        {% else %}
 
-    <h2 class="profile-modal-name">
-        {{ probleme.auteur or "Utilisateur inconnu" }}
-    </h2>
+            <div class="profile-placeholder">
+                {{ (probleme.auteur or "?")[:1]|upper }}
+            </div>
 
-    <p class="profile-modal-subtitle">
-        Auteur du signalement
-    </p>
+        {% endif %}
 
-</div>
+        <h2 class="profile-modal-name">
+            {{ probleme.auteur or "Utilisateur inconnu" }}
+        </h2>
 
+        <p class="profile-modal-subtitle">
+            Auteur du signalement
+        </p>
+
+    </div>
 
 </div>
 
@@ -1644,32 +1666,32 @@
     onclick="fermerImageSiFond(event)"
 >
 
+    <div class="modal-content image-modal-content">
 
-<div class="modal-content image-modal-content">
+        <button
+            type="button"
+            class="modal-close"
+            onclick="fermerImage()"
+            aria-label="Fermer"
+        >
+            ×
+        </button>
 
-    <button
-        type="button"
-        class="modal-close"
-        onclick="fermerImage()"
-        aria-label="Fermer"
-    >
-        ×
-    </button>
+        <img
+            id="fullImage"
+            src=""
+            alt="Photo agrandie"
+            class="full-image"
+        >
 
-    <img
-        id="fullImage"
-        src=""
-        alt="Photo agrandie"
-        class="full-image"
-    >
-
-</div>
-
+    </div>
 
 </div>
 
 <script>
+
     function ouvrirProfil() {
+
         const modal = document.getElementById("profileModal");
 
         if (!modal) {
@@ -1680,7 +1702,9 @@
         document.body.classList.add("modal-open");
     }
 
+
     function fermerProfil() {
+
         const modal = document.getElementById("profileModal");
 
         if (!modal) {
@@ -1691,13 +1715,17 @@
         document.body.classList.remove("modal-open");
     }
 
+
     function fermerProfilSiFond(event) {
+
         if (event.target.id === "profileModal") {
             fermerProfil();
         }
     }
 
+
     function ouvrirImage(url) {
+
         const modal = document.getElementById("imageModal");
         const image = document.getElementById("fullImage");
 
@@ -1706,11 +1734,15 @@
         }
 
         image.src = url;
+
         modal.classList.add("active");
+
         document.body.classList.add("modal-open");
     }
 
+
     function fermerImage() {
+
         const modal = document.getElementById("imageModal");
         const image = document.getElementById("fullImage");
 
@@ -1719,26 +1751,44 @@
         }
 
         modal.classList.remove("active");
+
         image.src = "";
+
         document.body.classList.remove("modal-open");
     }
 
+
     function fermerImageSiFond(event) {
+
         if (event.target.id === "imageModal") {
             fermerImage();
         }
     }
 
-    function formaterDuree(secondesTotal) {
-        secondesTotal = Math.max(0, Math.floor(secondesTotal));
 
-        const jours = Math.floor(secondesTotal / 86400);
+    function formaterDuree(secondesTotal) {
+
+        secondesTotal = Math.max(
+            0,
+            Math.floor(secondesTotal)
+        );
+
+        const jours = Math.floor(
+            secondesTotal / 86400
+        );
+
         secondesTotal %= 86400;
 
-        const heures = Math.floor(secondesTotal / 3600);
+        const heures = Math.floor(
+            secondesTotal / 3600
+        );
+
         secondesTotal %= 3600;
 
-        const minutes = Math.floor(secondesTotal / 60);
+        const minutes = Math.floor(
+            secondesTotal / 60
+        );
+
         const secondes = secondesTotal % 60;
 
         const morceaux = [];
@@ -1762,81 +1812,222 @@
         return morceaux.join(" ");
     }
 
+
     function mettreAJourDuree() {
-        const element = document.getElementById("liveDuration");
+
+        const element = document.getElementById(
+            "liveDuration"
+        );
 
         if (!element) {
             return;
         }
 
-        const dateCreation = element.dataset.start;
+        const dateCreation =
+            element.dataset.start;
 
         if (!dateCreation) {
-            element.textContent = "Durée indisponible";
+
+            element.textContent =
+                "Durée indisponible";
+
             return;
         }
 
-        const debut = new Date(dateCreation);
+        const debut =
+            new Date(dateCreation);
 
         if (isNaN(debut.getTime())) {
-            element.textContent = "Durée indisponible";
+
+            element.textContent =
+                "Durée indisponible";
+
             return;
         }
 
-        const maintenant = new Date();
+        const maintenant =
+            new Date();
 
-        const secondes = (
-            maintenant.getTime() - debut.getTime()
-        ) / 1000;
+        const secondes =
+            (
+                maintenant.getTime() -
+                debut.getTime()
+            ) / 1000;
 
-        element.textContent = formaterDuree(secondes);
+        element.textContent =
+            formaterDuree(secondes);
     }
 
+
     function formaterDatesCommentaires() {
-        const dates = document.querySelectorAll(".comment-date");
+
+        const dates =
+            document.querySelectorAll(
+                ".comment-date"
+            );
 
         dates.forEach(function(element) {
-            const date = element.dataset.date;
+
+            const date =
+                element.dataset.date;
 
             if (!date) {
                 return;
             }
 
-            const dateObjet = new Date(date);
+            const dateObjet =
+                new Date(date);
 
             if (isNaN(dateObjet.getTime())) {
                 return;
             }
 
-            element.textContent = dateObjet.toLocaleString(
-                "fr-FR",
-                {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit"
-                }
-            );
+            element.textContent =
+                dateObjet.toLocaleString(
+                    "fr-FR",
+                    {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    }
+                );
         });
     }
 
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "Escape") {
-            fermerProfil();
-            fermerImage();
+
+    async function actualiserCommentaires() {
+
+        const contenu =
+            document.getElementById(
+                "commentsContent"
+            );
+
+        const compteur =
+            document.getElementById(
+                "commentsCount"
+            );
+
+        if (!contenu) {
+            return;
         }
-    });
 
-    document.addEventListener("DOMContentLoaded", function() {
-        mettreAJourDuree();
-        formaterDatesCommentaires();
+        try {
 
-        setInterval(
-            mettreAJourDuree,
-            1000
-        );
-    });
+            const reponse =
+                await fetch(
+                    window.location.href,
+                    {
+                        method: "GET",
+                        cache: "no-store",
+                        credentials: "same-origin"
+                    }
+                );
+
+            if (!reponse.ok) {
+                return;
+            }
+
+            const texte =
+                await reponse.text();
+
+            const documentTemp =
+                new DOMParser().parseFromString(
+                    texte,
+                    "text/html"
+                );
+
+            const nouveauContenu =
+                documentTemp.getElementById(
+                    "commentsContent"
+                );
+
+            const nouveauCompteur =
+                documentTemp.getElementById(
+                    "commentsCount"
+                );
+
+            if (!nouveauContenu) {
+                return;
+            }
+
+            const ancienHtml =
+                contenu.innerHTML;
+
+            const nouveauHtml =
+                nouveauContenu.innerHTML;
+
+            if (ancienHtml !== nouveauHtml) {
+
+                contenu.innerHTML =
+                    nouveauHtml;
+
+                if (compteur && nouveauCompteur) {
+
+                    compteur.textContent =
+                        nouveauCompteur.textContent;
+                }
+
+                formaterDatesCommentaires();
+
+                const liste =
+                    contenu.querySelector(
+                        ".comments-list"
+                    );
+
+                if (liste) {
+
+                    liste.scrollIntoView({
+                        behavior: "smooth",
+                        block: "nearest"
+                    });
+                }
+            }
+
+        } catch (erreur) {
+
+            console.log(
+                "Actualisation automatique des commentaires impossible :",
+                erreur
+            );
+        }
+    }
+
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Escape") {
+
+                fermerProfil();
+                fermerImage();
+            }
+        }
+    );
+
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            mettreAJourDuree();
+
+            formaterDatesCommentaires();
+
+            setInterval(
+                mettreAJourDuree,
+                1000
+            );
+
+            setInterval(
+                actualiserCommentaires,
+                2000
+            );
+        }
+    );
+
 </script>
 
 </body>

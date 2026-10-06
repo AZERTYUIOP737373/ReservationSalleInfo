@@ -6,9 +6,8 @@
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
-        
     >
-    
+
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}">
 
     <title>Notifications - Collège SOS</title>
@@ -68,6 +67,11 @@
             opacity: 0.9;
         }
 
+        button:disabled {
+            opacity: 0.7;
+            cursor: default;
+        }
+
         a {
             color: #1769ff;
         }
@@ -75,6 +79,7 @@
         #status {
             margin-top: 20px;
             font-weight: bold;
+            min-height: 22px;
         }
 
         .success {
@@ -83,6 +88,11 @@
 
         .error {
             color: #c62828;
+        }
+
+        .active-button {
+            background: #16803c;
+            cursor: default;
         }
     </style>
 </head>
@@ -114,13 +124,8 @@
 <script>
 const publicKey = {{ vapid_public_key|tojson }};
 
-const button = document.getElementById(
-    "enableNotifications"
-);
-
-const statusElement = document.getElementById(
-    "status"
-);
+const button = document.getElementById("enableNotifications");
+const statusElement = document.getElementById("status");
 
 
 function urlBase64ToUint8Array(base64String) {
@@ -137,15 +142,95 @@ function urlBase64ToUint8Array(base64String) {
 
     const rawData = window.atob(base64);
 
-    const outputArray = new Uint8Array(
-        rawData.length
-    );
+    const outputArray = new Uint8Array(rawData.length);
 
     for (let i = 0; i < rawData.length; ++i) {
         outputArray[i] = rawData.charCodeAt(i);
     }
 
     return outputArray;
+}
+
+
+function afficherNotificationsActivees() {
+    statusElement.className = "success";
+    statusElement.textContent =
+        "✅ Notifications activées sur cet ordinateur.";
+
+    button.textContent =
+        "✅ Notifications activées";
+
+    button.classList.add("active-button");
+    button.disabled = true;
+}
+
+
+function afficherNotificationsDesactivees() {
+    statusElement.className = "";
+    statusElement.textContent = "";
+
+    button.textContent =
+        "🔔 Activer les notifications";
+
+    button.classList.remove("active-button");
+    button.disabled = false;
+}
+
+
+async function verifierEtatNotifications() {
+
+    try {
+
+        if (!("serviceWorker" in navigator)) {
+            return;
+        }
+
+        if (!("PushManager" in window)) {
+            return;
+        }
+
+        if (!("Notification" in window)) {
+            return;
+        }
+
+        if (!publicKey) {
+            statusElement.className = "error";
+            statusElement.textContent =
+                "❌ La clé publique VAPID n'est pas configurée.";
+            return;
+        }
+
+        const registration =
+            await navigator.serviceWorker.register(
+                "/service-worker.js",
+                {
+                    scope: "/"
+                }
+            );
+
+        await navigator.serviceWorker.ready;
+
+        const subscription =
+            await registration.pushManager.getSubscription();
+
+        if (
+            subscription &&
+            Notification.permission === "granted"
+        ) {
+            afficherNotificationsActivees();
+        } else {
+            afficherNotificationsDesactivees();
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Erreur lors de la vérification des notifications :",
+            error
+        );
+
+        afficherNotificationsDesactivees();
+    }
 }
 
 
@@ -202,7 +287,6 @@ async function activerNotifications() {
                 }
             );
 
-
         await navigator.serviceWorker.ready;
 
 
@@ -254,15 +338,7 @@ async function activerNotifications() {
         }
 
 
-        statusElement.className =
-            "success";
-
-        statusElement.textContent =
-            "✅ Notifications activées sur cet ordinateur.";
-
-        button.textContent =
-            "✅ Notifications activées";
-
+        afficherNotificationsActivees();
 
     } catch (error) {
 
@@ -283,7 +359,16 @@ button.addEventListener(
     "click",
     activerNotifications
 );
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+        verifierEtatNotifications();
+    }
+);
 </script>
 
 </body>
 </html>
+

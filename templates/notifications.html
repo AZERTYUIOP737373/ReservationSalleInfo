@@ -1,134 +1,199 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
 
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}">
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
 
-    <title>Notifications - Collège SOS</title>
+<link
+    rel="icon"
+    type="image/png"
+    href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}"
+>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+<title>Notifications - Collège SOS</title>
 
-        body {
-            margin: 0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            color: #17202a;
-        }
+<style>
+    * {
+        box-sizing: border-box;
+    }
 
-        .card {
-            width: min(520px, calc(100% - 30px));
-            background: white;
-            border-radius: 20px;
-            padding: 35px;
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.10);
-            text-align: center;
-        }
+    body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        color: #17202a;
+    }
 
-        h1 {
-            margin-top: 0;
-        }
+    .card {
+        width: min(540px, calc(100% - 30px));
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.10);
+        text-align: center;
+    }
 
-        p {
-            line-height: 1.6;
-            color: #5f6b76;
-        }
+    h1 {
+        margin-top: 0;
+        margin-bottom: 12px;
+    }
 
-        button,
-        a {
-            display: inline-block;
-            border: 0;
-            border-radius: 12px;
-            padding: 13px 20px;
-            font-size: 15px;
-            cursor: pointer;
-            text-decoration: none;
-            margin-top: 10px;
-        }
+    p {
+        line-height: 1.6;
+        color: #5f6b76;
+    }
 
-        button {
-            background: #1769ff;
-            color: white;
-        }
+    button,
+    a {
+        display: inline-block;
+        border: 0;
+        border-radius: 12px;
+        padding: 13px 20px;
+        font-size: 15px;
+        cursor: pointer;
+        text-decoration: none;
+        margin-top: 10px;
+    }
 
-        button:hover {
-            opacity: 0.9;
-        }
+    button {
+        background: #1769ff;
+        color: white;
+    }
 
-        button:disabled {
-            opacity: 0.7;
-            cursor: default;
-        }
+    button:hover {
+        opacity: 0.9;
+    }
 
-        a {
-            color: #1769ff;
-        }
+    button:disabled {
+        opacity: 0.7;
+        cursor: default;
+    }
 
-        #status {
-            margin-top: 20px;
-            font-weight: bold;
-            min-height: 22px;
-        }
+    a {
+        color: #1769ff;
+    }
 
-        .success {
-            color: #16803c;
-        }
+    #status {
+        margin-top: 20px;
+        font-weight: bold;
+        min-height: 22px;
+        line-height: 1.5;
+    }
 
-        .error {
-            color: #c62828;
-        }
+    .success {
+        color: #16803c;
+    }
 
-        .active-button {
-            background: #16803c;
-            cursor: default;
-        }
-    </style>
+    .error {
+        color: #c62828;
+    }
+
+    .info {
+        color: #1769ff;
+    }
+
+    .active-button {
+        background: #16803c;
+        cursor: default;
+    }
+
+    .test-button {
+        background: #5f6b76;
+    }
+
+    .test-button:hover {
+        background: #4d5862;
+    }
+
+    .test-button:disabled {
+        opacity: 0.5;
+    }
+
+    .server-info {
+        margin-top: 18px;
+        padding: 12px 15px;
+        border-radius: 12px;
+        background: #f4f6f8;
+        color: #5f6b76;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .server-info strong {
+        color: #17202a;
+    }
+</style>
+
+
 </head>
 
 <body>
 
 <div class="card">
 
-    <h1>🔔 Notifications</h1>
 
-    <p>
-        Active les notifications de Collège SOS pour recevoir
-        automatiquement les nouveaux signalements sur cet ordinateur.
-    </p>
+<h1>🔔 Notifications</h1>
 
-    <button id="enableNotifications">
-        🔔 Activer les notifications
-    </button>
+<p>
+    Active les notifications de Collège SOS pour recevoir
+    automatiquement les nouveaux signalements sur cet ordinateur.
+</p>
 
-    <div id="status"></div>
+<button id="enableNotifications">
+    🔔 Activer les notifications
+</button>
 
-    <a href="/dashboard">
-        ← Retour à l'administration
-    </a>
+<button
+    id="testNotifications"
+    class="test-button"
+    disabled
+>
+    🧪 Tester une notification
+</button>
+
+<div id="status"></div>
+
+<div
+    id="serverInfo"
+    class="server-info"
+    style="display: none;"
+></div>
+
+<a href="/dashboard">
+    ← Retour à l'administration
+</a>
+
 
 </div>
-
 
 <script>
 const publicKey = {{ vapid_public_key|tojson }};
 
-const button = document.getElementById("enableNotifications");
-const statusElement = document.getElementById("status");
+const button =
+    document.getElementById("enableNotifications");
+
+const testButton =
+    document.getElementById("testNotifications");
+
+const statusElement =
+    document.getElementById("status");
+
+const serverInfo =
+    document.getElementById("serverInfo");
 
 
 function urlBase64ToUint8Array(base64String) {
+
     const padding = "=".repeat(
         (4 - base64String.length % 4) % 4
     );
@@ -140,12 +205,19 @@ function urlBase64ToUint8Array(base64String) {
         .replace(/-/g, "+")
         .replace(/_/g, "/");
 
-    const rawData = window.atob(base64);
+    const rawData =
+        window.atob(base64);
 
-    const outputArray = new Uint8Array(rawData.length);
+    const outputArray =
+        new Uint8Array(rawData.length);
 
-    for (let i = 0; i < rawData.length; ++i) {
-        outputArray[i] = rawData.charCodeAt(i);
+    for (
+        let i = 0;
+        i < rawData.length;
+        ++i
+    ) {
+        outputArray[i] =
+            rawData.charCodeAt(i);
     }
 
     return outputArray;
@@ -153,27 +225,180 @@ function urlBase64ToUint8Array(base64String) {
 
 
 function afficherNotificationsActivees() {
+
     statusElement.className = "success";
+
     statusElement.textContent =
         "✅ Notifications activées sur cet ordinateur.";
 
     button.textContent =
         "✅ Notifications activées";
 
-    button.classList.add("active-button");
+    button.classList.add(
+        "active-button"
+    );
+
     button.disabled = true;
+
+    testButton.disabled = false;
 }
 
 
 function afficherNotificationsDesactivees() {
+
     statusElement.className = "";
+
     statusElement.textContent = "";
 
     button.textContent =
         "🔔 Activer les notifications";
 
-    button.classList.remove("active-button");
+    button.classList.remove(
+        "active-button"
+    );
+
     button.disabled = false;
+
+    testButton.disabled = true;
+}
+
+
+function afficherErreur(message) {
+
+    statusElement.className =
+        "error";
+
+    statusElement.textContent =
+        "❌ " + message;
+}
+
+
+async function obtenirServiceWorker() {
+
+    if (!("serviceWorker" in navigator)) {
+        throw new Error(
+            "Ce navigateur ne prend pas en charge les Service Workers."
+        );
+    }
+
+    const registration =
+        await navigator.serviceWorker.register(
+            "/service-worker.js",
+            {
+                scope: "/"
+            }
+        );
+
+    try {
+        await registration.update();
+    } catch (error) {
+        console.warn(
+            "Mise à jour du Service Worker impossible :",
+            error
+        );
+    }
+
+    return await navigator.serviceWorker.ready;
+}
+
+
+async function enregistrerAbonnement(subscription) {
+
+    if (!subscription) {
+        throw new Error(
+            "Aucun abonnement aux notifications trouvé."
+        );
+    }
+
+    const response =
+        await fetch(
+            "/api/push/subscribe",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify(
+                    subscription.toJSON()
+                )
+            }
+        );
+
+    let result;
+
+    try {
+        result =
+            await response.json();
+    } catch (error) {
+        throw new Error(
+            "Le serveur a renvoyé une réponse invalide."
+        );
+    }
+
+    if (
+        !response.ok ||
+        !result.success
+    ) {
+        throw new Error(
+            result.error ||
+            "Impossible d'enregistrer les notifications."
+        );
+    }
+
+    return result;
+}
+
+
+async function verifierEtatServeur() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/push/status",
+                {
+                    method: "GET",
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok) {
+            return;
+        }
+
+        const result =
+            await response.json();
+
+        if (!result.success) {
+            return;
+        }
+
+        serverInfo.style.display =
+            "block";
+
+        serverInfo.innerHTML =
+            "🖥️ <strong>Serveur :</strong> " +
+            (
+                result.vapid_configured
+                    ? "notifications configurées"
+                    : "configuration VAPID absente"
+            ) +
+            "<br>" +
+            "📱 <strong>Abonnements enregistrés :</strong> " +
+            String(
+                result.subscription_count ?? 0
+            );
+
+    } catch (error) {
+
+        console.warn(
+            "Impossible de vérifier le serveur :",
+            error
+        );
+    }
 }
 
 
@@ -182,45 +407,70 @@ async function verifierEtatNotifications() {
     try {
 
         if (!("serviceWorker" in navigator)) {
+            afficherErreur(
+                "Ce navigateur ne prend pas en charge les Service Workers."
+            );
             return;
         }
 
         if (!("PushManager" in window)) {
+            afficherErreur(
+                "Ce navigateur ne prend pas en charge les notifications Push."
+            );
             return;
         }
 
         if (!("Notification" in window)) {
+            afficherErreur(
+                "Les notifications ne sont pas disponibles."
+            );
             return;
         }
 
         if (!publicKey) {
-            statusElement.className = "error";
-            statusElement.textContent =
-                "❌ La clé publique VAPID n'est pas configurée.";
+            afficherErreur(
+                "La clé publique VAPID n'est pas configurée."
+            );
             return;
         }
 
-        const registration =
-            await navigator.serviceWorker.register(
-                "/service-worker.js",
-                {
-                    scope: "/"
-                }
-            );
 
-        await navigator.serviceWorker.ready;
+        const registration =
+            await obtenirServiceWorker();
+
 
         const subscription =
             await registration.pushManager.getSubscription();
+
 
         if (
             subscription &&
             Notification.permission === "granted"
         ) {
+
+            try {
+
+                await enregistrerAbonnement(
+                    subscription
+                );
+
+            } catch (error) {
+
+                console.warn(
+                    "Resynchronisation serveur impossible :",
+                    error
+                );
+            }
+
             afficherNotificationsActivees();
+
         } else {
+
             afficherNotificationsDesactivees();
         }
+
+
+        await verifierEtatServeur();
 
     } catch (error) {
 
@@ -230,6 +480,12 @@ async function verifierEtatNotifications() {
         );
 
         afficherNotificationsDesactivees();
+
+        if (error.message) {
+            afficherErreur(
+                error.message
+            );
+        }
     }
 }
 
@@ -238,9 +494,11 @@ async function activerNotifications() {
 
     button.disabled = true;
 
-    statusElement.className = "";
+    statusElement.className = "info";
+
     statusElement.textContent =
         "Activation en cours...";
+
 
     try {
 
@@ -269,8 +527,16 @@ async function activerNotifications() {
         }
 
 
-        const permission =
-            await Notification.requestPermission();
+        let permission =
+            Notification.permission;
+
+
+        if (permission !== "granted") {
+
+            permission =
+                await Notification.requestPermission();
+        }
+
 
         if (permission !== "granted") {
             throw new Error(
@@ -280,14 +546,7 @@ async function activerNotifications() {
 
 
         const registration =
-            await navigator.serviceWorker.register(
-                "/service-worker.js",
-                {
-                    scope: "/"
-                }
-            );
-
-        await navigator.serviceWorker.ready;
+            await obtenirServiceWorker();
 
 
         let subscription =
@@ -308,9 +567,56 @@ async function activerNotifications() {
         }
 
 
+        await enregistrerAbonnement(
+            subscription
+        );
+
+
+        afficherNotificationsActivees();
+
+
+        await verifierEtatServeur();
+
+
+    } catch (error) {
+
+        console.error(
+            "Erreur activation notifications :",
+            error
+        );
+
+        statusElement.className =
+            "error";
+
+        statusElement.textContent =
+            "❌ " + (
+                error.message ||
+                "Une erreur est survenue."
+            );
+
+        button.disabled = false;
+
+        testButton.disabled = true;
+    }
+}
+
+
+async function testerNotification() {
+
+    testButton.disabled = true;
+
+    statusElement.className =
+        "info";
+
+    statusElement.textContent =
+        "🧪 Envoi du test en cours...";
+
+
+    try {
+
         const response =
             await fetch(
-                "/api/push/subscribe",
+                "/api/push/test",
                 {
                     method: "POST",
 
@@ -319,38 +625,90 @@ async function activerNotifications() {
                             "application/json"
                     },
 
-                    body: JSON.stringify(
-                        subscription.toJSON()
-                    )
+                    cache: "no-store"
                 }
             );
 
 
-        const result =
-            await response.json();
+        let result;
 
-
-        if (!response.ok || !result.success) {
+        try {
+            result =
+                await response.json();
+        } catch (error) {
             throw new Error(
-                result.error ||
-                "Impossible d'enregistrer les notifications."
+                "Le serveur a renvoyé une réponse invalide."
             );
         }
 
 
-        afficherNotificationsActivees();
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+
+            throw new Error(
+                result.error ||
+                "Le serveur n'a pas pu envoyer le test."
+            );
+        }
+
+
+        const envoyees =
+            Number(result.sent || 0);
+
+        const echecs =
+            Number(result.failed || 0);
+
+
+        if (envoyees > 0) {
+
+            statusElement.className =
+                "success";
+
+            statusElement.textContent =
+                "✅ Notification de test envoyée par le serveur.";
+
+        } else {
+
+            statusElement.className =
+                "error";
+
+            statusElement.textContent =
+                "❌ Le serveur n'a envoyé aucune notification.";
+        }
+
+
+        serverInfo.style.display =
+            "block";
+
+        serverInfo.innerHTML =
+            "📨 <strong>Résultat du test :</strong><br>" +
+            "Notifications envoyées : " +
+            envoyees +
+            "<br>" +
+            "Échecs : " +
+            echecs;
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Erreur test notification :",
+            error
+        );
 
         statusElement.className =
             "error";
 
         statusElement.textContent =
-            "❌ " + error.message;
+            "❌ " + (
+                error.message ||
+                "Impossible d'envoyer le test."
+            );
 
-        button.disabled = false;
+    } finally {
+
+        testButton.disabled = false;
     }
 }
 
@@ -358,6 +716,12 @@ async function activerNotifications() {
 button.addEventListener(
     "click",
     activerNotifications
+);
+
+
+testButton.addEventListener(
+    "click",
+    testerNotification
 );
 
 
@@ -371,4 +735,3 @@ document.addEventListener(
 
 </body>
 </html>
-

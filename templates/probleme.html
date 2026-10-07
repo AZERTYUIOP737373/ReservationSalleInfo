@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}">
 
-    <title>Signalement #{{ probleme.id }} — Collège SOS</title>
+    <title>Signalement #{{ probleme.numero_affichage }} — Collège SOS</title>
 
 <style>
     * {
@@ -183,20 +183,13 @@
     .top-line {
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
         gap: 20px;
         margin-bottom: 22px;
     }
 
     .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        color: #8a93a3;
-        font-size: 12px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
+        display: none;
     }
 
     .eyebrow-dot {
@@ -207,9 +200,10 @@
     }
 
     .signalement-number {
-        color: #6b7280;
-        font-size: 13px;
-        font-weight: 700;
+        color: #374151;
+        font-size: 16px;
+        font-weight: 900;
+        text-align: center;
     }
 
     .main-grid {
@@ -1196,7 +1190,7 @@
         </div>
 
         <div class="signalement-number">
-            #{{ probleme.id }}
+            #{{ probleme.numero_affichage }}
         </div>
 
     </div>

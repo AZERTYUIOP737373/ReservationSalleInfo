@@ -6,8 +6,7 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-
-<title>Collège SOS</title>
+    <title>Collège SOS</title>
 
 <style>
     * {
@@ -308,6 +307,14 @@
         font-weight: 800;
     }
 
+    .report-number {
+        display: inline-block;
+        margin-right: 7px;
+        color: #3157a5;
+        font-weight: 900;
+        font-size: 13px;
+    }
+
     .report-category {
         margin: 9px 0 4px;
         font-size: 13px;
@@ -444,7 +451,6 @@
     }
 </style>
 
-
 </head>
 
 <body>
@@ -454,7 +460,6 @@
 <div class="card">
 
 {% if user %}
-
 
 <div class="top-bar">
 
@@ -708,6 +713,9 @@
                 <div class="report-top">
 
                     <div class="report-location">
+                        <span class="report-number">
+                            #{{ probleme.numero_affichage }}
+                        </span>
                         📍 {{ probleme.salle }}
                     </div>
 
@@ -785,9 +793,7 @@
 
 </div>
 
-
 {% else %}
-
 
 <div class="icon">🛠️</div>
 
@@ -830,7 +836,6 @@
 <p class="footer">
     Les professeurs doivent disposer du mot de passe fourni par l'administration pour créer leur compte.
 </p>
-
 
 {% endif %}
 
@@ -875,3 +880,4 @@
 
 </body>
 </html>
+

@@ -75,6 +75,22 @@ supabase: Client = create_client(
 )
 
 
+if not VAPID_PUBLIC_KEY:
+    print(
+        "[PUSH] ATTENTION : VAPID_PUBLIC_KEY absente."
+    )
+
+if not VAPID_PRIVATE_KEY:
+    print(
+        "[PUSH] ATTENTION : VAPID_PRIVATE_KEY absente."
+    )
+
+if not VAPID_EMAIL:
+    print(
+        "[PUSH] ATTENTION : VAPID_EMAIL absent."
+    )
+
+
 ALLOWED_IMAGES = {
     "image/jpeg": ".jpg",
     "image/png": ".png",
@@ -350,22 +366,229 @@ def supprimer_abonnement_push(endpoint):
         )
 
 
+def envoyer_push_aux_abonnements(
+    subscriptions,
+    payload
+):
+    succes = 0
+    echecs = 0
+
+    if not VAPID_PRIVATE_KEY:
+        print(
+            "[PUSH] Envoi impossible : "
+            "VAPID_PRIVATE_KEY absente."
+        )
+
+        return {
+            "success": 0,
+            "failed": len(subscriptions)
+        }
+
+    if not VAPID_EMAIL:
+        print(
+            "[PUSH] Envoi impossible : "
+            "VAPID_EMAIL absent."
+        )
+
+        return {
+            "success": 0,
+            "failed": len(subscriptions)
+        }
+
+    for subscription in subscriptions:
+        username = subscription.get(
+            "username"
+        )
+
+        endpoint = subscription.get(
+            "endpoint"
+        )
+
+        p256dh = subscription.get(
+            "p256dh"
+        )
+
+        auth = subscription.get(
+            "auth"
+        )
+
+        print(
+            "[PUSH] ----------------------------------------"
+        )
+
+        print(
+            "[PUSH] Utilisateur :",
+            username
+        )
+
+        print(
+            "[PUSH] Endpoint :",
+            endpoint[:120]
+            if endpoint
+            else "ABSENT"
+        )
+
+        if (
+            not endpoint
+            or not p256dh
+            or not auth
+        ):
+            print(
+                "[PUSH] Abonnement incomplet."
+            )
+
+            supprimer_abonnement_push(
+                endpoint
+            )
+
+            echecs += 1
+            continue
+
+        subscription_info = {
+            "endpoint": endpoint,
+            "keys": {
+                "p256dh": p256dh,
+                "auth": auth
+            }
+        }
+
+        try:
+            response = webpush(
+                subscription_info=subscription_info,
+                data=json.dumps(
+                    payload,
+                    ensure_ascii=False
+                ),
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims={
+                    "sub": VAPID_EMAIL
+                },
+                ttl=86400
+            )
+
+            succes += 1
+
+            print(
+                "[PUSH] ✓ ENVOI ACCEPTE"
+            )
+
+            if response is not None:
+                print(
+                    "[PUSH] HTTP :",
+                    getattr(
+                        response,
+                        "status_code",
+                        "?"
+                    )
+                )
+
+        except WebPushException as e:
+            echecs += 1
+
+            response = getattr(
+                e,
+                "response",
+                None
+            )
+
+            status_code = None
+
+            if response is not None:
+                status_code = getattr(
+                    response,
+                    "status_code",
+                    None
+                )
+
+            if status_code is None:
+                status_code = getattr(
+                    e,
+                    "status_code",
+                    None
+                )
+
+            print(
+                "[PUSH] ✗ ECHEC"
+            )
+
+            print(
+                "[PUSH] HTTP :",
+                status_code
+            )
+
+            print(
+                "[PUSH] Erreur :",
+                repr(e)
+            )
+
+            if response is not None:
+                try:
+                    print(
+                        "[PUSH] Réponse :",
+                        response.text[:1000]
+                    )
+                except Exception:
+                    pass
+
+            if status_code in (
+                404,
+                410
+            ):
+                print(
+                    "[PUSH] Abonnement expiré/"
+                    "introuvable."
+                )
+
+                supprimer_abonnement_push(
+                    endpoint
+                )
+
+        except Exception as e:
+            echecs += 1
+
+            print(
+                "[PUSH] ✗ ERREUR INATTENDUE :",
+                repr(e)
+            )
+
+    return {
+        "success": succes,
+        "failed": echecs
+    }
+
+
 def envoyer_notification_admins(probleme):
     print("")
-    print("[PUSH] ========================================")
-    print("[PUSH] NOUVEAU SIGNALMENT")
-    print("[PUSH] ID :", probleme.get("id"))
+    print(
+        "[PUSH] ========================================"
+    )
+    print(
+        "[PUSH] NOUVEAU SIGNALEMENT"
+    )
+    print(
+        "[PUSH] ID :",
+        probleme.get("id")
+    )
+
+    if not VAPID_PUBLIC_KEY:
+        print(
+            "[PUSH] ERREUR : VAPID_PUBLIC_KEY absente."
+        )
+
+        return
 
     if not VAPID_PRIVATE_KEY:
         print(
             "[PUSH] ERREUR : VAPID_PRIVATE_KEY absente."
         )
+
         return
 
     if not VAPID_EMAIL:
         print(
             "[PUSH] ERREUR : VAPID_EMAIL absent."
         )
+
         return
 
     try:
@@ -394,6 +617,7 @@ def envoyer_notification_admins(probleme):
             print(
                 "[PUSH] Aucun administrateur."
             )
+
             return
 
         subscriptions_result = (
@@ -420,6 +644,7 @@ def envoyer_notification_admins(probleme):
             print(
                 "[PUSH] Aucun appareil abonné."
             )
+
             return
 
         urgence = (
@@ -461,7 +686,7 @@ def envoyer_notification_admins(probleme):
         )
 
         url_signalement = (
-            "https://sos-college.onrender.com"
+            f"https://sos-college.onrender.com"
             f"/probleme/{probleme_id}"
         )
 
@@ -477,156 +702,10 @@ def envoyer_notification_admins(probleme):
             url_signalement
         )
 
-        succes = 0
-        echecs = 0
-
-        for subscription in subscriptions:
-            username = subscription.get(
-                "username"
-            )
-
-            endpoint = subscription.get(
-                "endpoint"
-            )
-
-            p256dh = subscription.get(
-                "p256dh"
-            )
-
-            auth = subscription.get(
-                "auth"
-            )
-
-            print(
-                "[PUSH] ----------------------------------------"
-            )
-
-            print(
-                "[PUSH] Utilisateur :",
-                username
-            )
-
-            print(
-                "[PUSH] Endpoint :",
-                endpoint[:120]
-                if endpoint
-                else "ABSENT"
-            )
-
-            if (
-                not endpoint
-                or not p256dh
-                or not auth
-            ):
-                print(
-                    "[PUSH] Abonnement incomplet."
-                )
-
-                supprimer_abonnement_push(
-                    endpoint
-                )
-
-                echecs += 1
-                continue
-
-            subscription_info = {
-                "endpoint": endpoint,
-                "keys": {
-                    "p256dh": p256dh,
-                    "auth": auth
-                }
-            }
-
-            try:
-                response = webpush(
-                    subscription_info=subscription_info,
-                    data=json.dumps(
-                        payload,
-                        ensure_ascii=False
-                    ),
-                    vapid_private_key=VAPID_PRIVATE_KEY,
-                    vapid_claims={
-                        "sub": VAPID_EMAIL
-                    },
-                    ttl=86400
-                )
-
-                succes += 1
-
-                print(
-                    "[PUSH] ✓ ENVOI ACCEPTE"
-                )
-
-                if response is not None:
-                    print(
-                        "[PUSH] HTTP :",
-                        getattr(
-                            response,
-                            "status_code",
-                            "?"
-                        )
-                    )
-
-            except WebPushException as e:
-                echecs += 1
-
-                response = getattr(
-                    e,
-                    "response",
-                    None
-                )
-
-                status_code = None
-
-                if response is not None:
-                    status_code = getattr(
-                        response,
-                        "status_code",
-                        None
-                    )
-
-                print(
-                    "[PUSH] ✗ ECHEC"
-                )
-
-                print(
-                    "[PUSH] HTTP :",
-                    status_code
-                )
-
-                print(
-                    "[PUSH] Erreur :",
-                    repr(e)
-                )
-
-                if response is not None:
-                    try:
-                        print(
-                            "[PUSH] Réponse :",
-                            response.text[:1000]
-                        )
-                    except Exception:
-                        pass
-
-                if status_code in (
-                    404,
-                    410
-                ):
-                    print(
-                        "[PUSH] Abonnement expiré."
-                    )
-
-                    supprimer_abonnement_push(
-                        endpoint
-                    )
-
-            except Exception as e:
-                echecs += 1
-
-                print(
-                    "[PUSH] ✗ ERREUR INATTENDUE :",
-                    repr(e)
-                )
+        resultat = envoyer_push_aux_abonnements(
+            subscriptions,
+            payload
+        )
 
         print(
             "[PUSH] ========================================"
@@ -634,9 +713,9 @@ def envoyer_notification_admins(probleme):
 
         print(
             "[PUSH] RESULTAT :",
-            succes,
+            resultat["success"],
             "accepté(s),",
-            echecs,
+            resultat["failed"],
             "échec(s)"
         )
 
@@ -824,7 +903,8 @@ def modifier_photo_profil():
         )
 
         return (
-            "Impossible d'enregistrer la photo de profil.",
+            "Impossible d'enregistrer "
+            "la photo de profil.",
             500
         )
 
@@ -1504,11 +1584,15 @@ def probleme(probleme_id):
         "prof",
         "professeur"
     ):
-        if probleme_data.get("auteur") != user.get("username"):
+        if (
+            probleme_data.get("auteur")
+            != user.get("username")
+        ):
             abort(403)
 
     else:
         session.clear()
+
         return redirect(
             url_for("connexion")
         )
@@ -1518,19 +1602,26 @@ def probleme(probleme_id):
     )
 
     if duree_secondes is not None:
-        probleme_data["duree_resolution_secondes"] = int(
+        probleme_data[
+            "duree_resolution_secondes"
+        ] = int(
             duree_secondes
         )
 
-        probleme_data["duree_resolution"] = (
-            formater_duree_secondes(
-                duree_secondes
-            )
+        probleme_data[
+            "duree_resolution"
+        ] = formater_duree_secondes(
+            duree_secondes
         )
-    else:
-        probleme_data["duree_resolution_secondes"] = 0
 
-        probleme_data["duree_resolution"] = {
+    else:
+        probleme_data[
+            "duree_resolution_secondes"
+        ] = 0
+
+        probleme_data[
+            "duree_resolution"
+        ] = {
             "jours": 0,
             "heures": 0,
             "minutes": 0,
@@ -1582,7 +1673,9 @@ def probleme(probleme_id):
             .execute()
         )
 
-        commentaires = commentaires_result.data or []
+        commentaires = (
+            commentaires_result.data or []
+        )
 
     except Exception as e:
         print(
@@ -1617,6 +1710,7 @@ def ajouter_commentaire(probleme_id):
         "professeur"
     ):
         session.clear()
+
         return redirect(
             url_for("connexion")
         )
@@ -1665,7 +1759,10 @@ def ajouter_commentaire(probleme_id):
             "prof",
             "professeur"
         ):
-            if probleme_cible.get("auteur") != user.get("username"):
+            if (
+                probleme_cible.get("auteur")
+                != user.get("username")
+            ):
                 abort(403)
 
         commentaire_data = {
@@ -1680,10 +1777,12 @@ def ajouter_commentaire(probleme_id):
             commentaire_data
         )
 
-        supabase \
-            .table("commentaires") \
-            .insert(commentaire_data) \
+        (
+            supabase
+            .table("commentaires")
+            .insert(commentaire_data)
             .execute()
+        )
 
         print(
             "[COMMENTAIRE] Commentaire ajouté avec succès."
@@ -1785,7 +1884,10 @@ def push_subscribe():
     if not VAPID_PUBLIC_KEY:
         return jsonify({
             "success": False,
-            "error": "La clé VAPID publique n'est pas configurée."
+            "error": (
+                "La clé VAPID publique "
+                "n'est pas configurée."
+            )
         }), 500
 
     data = request.get_json(
@@ -1822,7 +1924,9 @@ def push_subscribe():
         existing = (
             supabase
             .table("push_subscriptions")
-            .select("id,username,endpoint")
+            .select(
+                "id,username,endpoint"
+            )
             .eq(
                 "endpoint",
                 endpoint
@@ -1849,6 +1953,7 @@ def push_subscribe():
                 )
                 .execute()
             )
+
         else:
             result = (
                 supabase
@@ -1859,12 +1964,16 @@ def push_subscribe():
 
         if not result.data:
             print(
-                "[PUSH] Aucun abonnement retourné par Supabase."
+                "[PUSH] Aucun abonnement retourné "
+                "par Supabase."
             )
 
             return jsonify({
                 "success": False,
-                "error": "Impossible d'enregistrer l'abonnement."
+                "error": (
+                    "Impossible d'enregistrer "
+                    "l'abonnement."
+                )
             }), 500
 
         print(
@@ -1893,7 +2002,10 @@ def push_subscribe():
 
         return jsonify({
             "success": False,
-            "error": "Erreur serveur lors de l'enregistrement."
+            "error": (
+                "Erreur serveur lors de "
+                "l'enregistrement."
+            )
         }), 500
 
 
@@ -1961,6 +2073,189 @@ def push_unsubscribe():
         }), 500
 
 
+@app.route(
+    "/api/push/status",
+    methods=["GET"]
+)
+@admin_required
+def push_status():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({
+            "success": False,
+            "error": "Non connecté."
+        }), 401
+
+    try:
+        result = (
+            supabase
+            .table("push_subscriptions")
+            .select(
+                "endpoint",
+                count="exact"
+            )
+            .eq(
+                "username",
+                user["username"]
+            )
+            .execute()
+        )
+
+        count = result.count
+
+        if count is None:
+            count = len(
+                result.data or []
+            )
+
+        return jsonify({
+            "success": True,
+            "vapid_configured": bool(
+                VAPID_PUBLIC_KEY
+                and VAPID_PRIVATE_KEY
+                and VAPID_EMAIL
+            ),
+            "subscriptions": count
+        })
+
+    except Exception as e:
+        print(
+            "[PUSH] Erreur statut :",
+            repr(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Impossible de lire le statut."
+        }), 500
+
+
+@app.route(
+    "/api/push/test",
+    methods=["POST"]
+)
+@admin_required
+def push_test():
+    user = get_current_user()
+
+    if not user:
+        return jsonify({
+            "success": False,
+            "error": "Non connecté."
+        }), 401
+
+    if not VAPID_PUBLIC_KEY:
+        return jsonify({
+            "success": False,
+            "error": "VAPID_PUBLIC_KEY absente."
+        }), 500
+
+    if not VAPID_PRIVATE_KEY:
+        return jsonify({
+            "success": False,
+            "error": "VAPID_PRIVATE_KEY absente."
+        }), 500
+
+    try:
+        result = (
+            supabase
+            .table("push_subscriptions")
+            .select("*")
+            .eq(
+                "username",
+                user["username"]
+            )
+            .execute()
+        )
+
+        subscriptions = result.data or []
+
+        print("")
+        print(
+            "[PUSH TEST] ========================================"
+        )
+        print(
+            "[PUSH TEST] Utilisateur :",
+            user["username"]
+        )
+        print(
+            "[PUSH TEST] Abonnements :",
+            len(subscriptions)
+        )
+
+        if not subscriptions:
+            print(
+                "[PUSH TEST] Aucun abonnement."
+            )
+
+            return jsonify({
+                "success": False,
+                "sent": 0,
+                "failed": 0,
+                "error": (
+                    "Aucun abonnement trouvé "
+                    "pour cet administrateur."
+                )
+            }), 400
+
+        payload = {
+            "title": "🔔 Test Collège SOS",
+            "body": (
+                "Cette notification vient "
+                "directement du serveur."
+            ),
+            "url": (
+                "https://sos-college.onrender.com"
+                "/notifications"
+            ),
+            "tag": "college-sos-test"
+        }
+
+        resultat = envoyer_push_aux_abonnements(
+            subscriptions,
+            payload
+        )
+
+        print(
+            "[PUSH TEST] Résultat :",
+            resultat
+        )
+
+        print(
+            "[PUSH TEST] ========================================"
+        )
+        print("")
+
+        if resultat["success"] == 0:
+            return jsonify({
+                "success": False,
+                "sent": 0,
+                "failed": resultat["failed"],
+                "error": (
+                    "Le serveur n'a réussi "
+                    "aucun envoi."
+                )
+            }), 500
+
+        return jsonify({
+            "success": True,
+            "sent": resultat["success"],
+            "failed": resultat["failed"]
+        })
+
+    except Exception as e:
+        print(
+            "[PUSH TEST] ERREUR :",
+            repr(e)
+        )
+
+        return jsonify({
+            "success": False,
+            "error": "Erreur serveur pendant le test."
+        }), 500
+
+
 @app.route("/service-worker.js")
 def service_worker():
     response = send_from_directory(
@@ -1975,6 +2270,8 @@ def service_worker():
 
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
+
+    response.headers["Service-Worker-Allowed"] = "/"
 
     return response
 

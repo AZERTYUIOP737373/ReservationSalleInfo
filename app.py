@@ -8,6 +8,7 @@ import ssl
 import uuid
 import json
 import smtplib
+import urllib.request
 import threading
 from email.message import EmailMessage
 from datetime import datetime, timezone
@@ -92,9 +93,20 @@ SMTP_USER = os.environ.get(
 )
 
 # Mot de passe d'application Google (16 caractères), jamais le vrai
-# mot de passe du compte Gmail.
+# mot de passe du compte Gmail. Inutile sur Render (SMTP bloqué).
 SMTP_PASSWORD = os.environ.get(
     "SMTP_PASSWORD"
+)
+
+# Envoi par HTTPS via un Google Apps Script (recommandé sur Render,
+# où les ports SMTP sont bloqués). Si EMAIL_WEBHOOK_URL est définie,
+# elle est utilisée à la place du SMTP.
+EMAIL_WEBHOOK_URL = os.environ.get(
+    "EMAIL_WEBHOOK_URL"
+)
+
+EMAIL_API_SECRET = os.environ.get(
+    "EMAIL_API_SECRET"
 )
 
 EMAIL_REGEX = re.compile(
@@ -396,24 +408,108 @@ def nettoyer_entete(texte):
     )
 
 
+def envoyer_email_webhook(destinataire, sujet, corps):
+    """
+    Envoie l'email via le Google Apps Script (HTTPS, port 443).
+    Le script envoie le message depuis sos.college.com@gmail.com.
+    """
+
+    if not EMAIL_API_SECRET:
+        print(
+            "[EMAIL] EMAIL_API_SECRET absente : "
+            "envoi impossible."
+        )
+
+        return False
+
+    try:
+        donnees = json.dumps({
+            "secret": EMAIL_API_SECRET,
+            "to": destinataire,
+            "subject": nettoyer_entete(sujet),
+            "body": corps
+        }).encode("utf-8")
+
+        requete = urllib.request.Request(
+            EMAIL_WEBHOOK_URL,
+            data=donnees,
+            headers={
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+
+        # Apps Script répond par une redirection (302) : urllib
+        # la suit automatiquement.
+        with urllib.request.urlopen(
+            requete,
+            timeout=20
+        ) as reponse:
+            texte = reponse.read().decode(
+                "utf-8",
+                errors="replace"
+            )
+
+        try:
+            resultat = json.loads(texte)
+
+        except Exception:
+            print(
+                "[EMAIL] ✗ Réponse inattendue du script :",
+                texte[:200]
+            )
+
+            return False
+
+        if resultat.get("ok"):
+            print(
+                "[EMAIL] ✓ Envoyé à",
+                destinataire
+            )
+
+            return True
+
+        print(
+            "[EMAIL] ✗ Refusé par le script :",
+            resultat.get("error")
+        )
+
+        return False
+
+    except Exception as e:
+        print(
+            "[EMAIL] ✗ Echec envoi (webhook) :",
+            repr(e)
+        )
+
+        return False
+
+
 def envoyer_email(destinataire, sujet, corps):
     """
     Envoie un email texte depuis le compte Gmail du collège.
     Retourne True si l'envoi a réussi, False sinon.
     """
 
-    if not SMTP_PASSWORD:
-        print(
-            "[EMAIL] SMTP_PASSWORD absente : "
-            "envoi impossible."
-        )
-
-        return False
-
     if not email_valide(destinataire):
         print(
             "[EMAIL] Adresse invalide :",
             destinataire
+        )
+
+        return False
+
+    if EMAIL_WEBHOOK_URL:
+        return envoyer_email_webhook(
+            destinataire,
+            sujet,
+            corps
+        )
+
+    if not SMTP_PASSWORD:
+        print(
+            "[EMAIL] Ni EMAIL_WEBHOOK_URL ni SMTP_PASSWORD : "
+            "envoi impossible."
         )
 
         return False

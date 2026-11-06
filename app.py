@@ -3,8 +3,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import re
+import ssl
 import uuid
 import json
+import smtplib
+import threading
+from email.message import EmailMessage
 from datetime import datetime, timezone
 from functools import wraps
 
@@ -17,7 +22,8 @@ from flask import (
     session,
     abort,
     jsonify,
-    send_from_directory
+    send_from_directory,
+    flash
 )
 
 from supabase import create_client, Client
@@ -62,6 +68,38 @@ VAPID_EMAIL = os.environ.get(
     "mailto:baptiste.brygal@gmail.com"
 )
 
+
+SITE_URL = os.environ.get(
+    "SITE_URL",
+    "https://sos-college.onrender.com"
+).rstrip("/")
+
+SMTP_HOST = os.environ.get(
+    "SMTP_HOST",
+    "smtp.gmail.com"
+)
+
+SMTP_PORT = int(
+    os.environ.get(
+        "SMTP_PORT",
+        "465"
+    )
+)
+
+SMTP_USER = os.environ.get(
+    "SMTP_USER",
+    "sos.college.com@gmail.com"
+)
+
+# Mot de passe d'application Google (16 caractères), jamais le vrai
+# mot de passe du compte Gmail.
+SMTP_PASSWORD = os.environ.get(
+    "SMTP_PASSWORD"
+)
+
+EMAIL_REGEX = re.compile(
+    r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$"
+)
 
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise RuntimeError(
@@ -336,6 +374,159 @@ def ajouter_durees_resolution(problemes):
             }
 
     return problemes
+
+
+def email_valide(adresse):
+    if not adresse or len(adresse) > 254:
+        return False
+
+    return bool(
+        EMAIL_REGEX.match(adresse)
+    )
+
+
+def envoyer_email(destinataire, sujet, corps):
+    """
+    Envoie un email texte depuis le compte Gmail du collège.
+    Retourne True si l'envoi a réussi, False sinon.
+    """
+
+    if not SMTP_PASSWORD:
+        print(
+            "[EMAIL] SMTP_PASSWORD absente : "
+            "envoi impossible."
+        )
+
+        return False
+
+    if not email_valide(destinataire):
+        print(
+            "[EMAIL] Adresse invalide :",
+            destinataire
+        )
+
+        return False
+
+    try:
+        message = EmailMessage()
+
+        message["Subject"] = sujet
+        message["From"] = f"Collège SOS <{SMTP_USER}>"
+        message["To"] = destinataire
+
+        message.set_content(corps)
+
+        contexte = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL(
+            SMTP_HOST,
+            SMTP_PORT,
+            context=contexte,
+            timeout=10
+        ) as serveur:
+            serveur.login(
+                SMTP_USER,
+                SMTP_PASSWORD
+            )
+
+            serveur.send_message(message)
+
+        print(
+            "[EMAIL] ✓ Envoyé à",
+            destinataire
+        )
+
+        return True
+
+    except Exception as e:
+        print(
+            "[EMAIL] ✗ Echec envoi :",
+            repr(e)
+        )
+
+        return False
+
+
+def envoyer_email_en_arriere_plan(
+    destinataire,
+    sujet,
+    corps
+):
+    """
+    Lance l'envoi dans un thread pour ne pas ralentir la page.
+    """
+
+    threading.Thread(
+        target=envoyer_email,
+        args=(
+            destinataire,
+            sujet,
+            corps
+        ),
+        daemon=True
+    ).start()
+
+
+def recuperer_email_notification(username):
+    """
+    Retourne l'email de notification d'un utilisateur,
+    ou None s'il n'en a pas renseigné (ou si la colonne
+    notification_email n'existe pas encore).
+    """
+
+    if not username:
+        return None
+
+    try:
+        result = (
+            supabase
+            .table("users")
+            .select("notification_email")
+            .eq("username", username)
+            .limit(1)
+            .execute()
+        )
+
+        if not result.data:
+            return None
+
+        adresse = (
+            result.data[0].get("notification_email")
+            or ""
+        ).strip()
+
+        if email_valide(adresse):
+            return adresse
+
+        return None
+
+    except Exception as e:
+        print(
+            "[EMAIL] Lecture email impossible :",
+            repr(e)
+        )
+
+        return None
+
+
+def libelle_statut(statut):
+    return {
+        "nouveau": "À réaffecter",
+        "en_cours": "En cours",
+        "resolu": "Résolu"
+    }.get(statut, statut or "Inconnu")
+
+
+def description_signalement(probleme):
+    numero = (
+        probleme.get("numero_affichage")
+        or probleme.get("id")
+    )
+
+    salle = probleme.get("salle") or "salle inconnue"
+    categorie = probleme.get("categorie") or "Problème"
+
+    return f"#{numero} — {salle} ({categorie})"
 
 
 def supprimer_abonnement_push(endpoint):
@@ -1739,9 +1930,7 @@ def ajouter_commentaire(probleme_id):
         probleme_result = (
             supabase
             .table("problemes")
-            .select(
-                "id,auteur"
-            )
+            .select("*")
             .eq(
                 "id",
                 probleme_id
@@ -1787,6 +1976,35 @@ def ajouter_commentaire(probleme_id):
         print(
             "[COMMENTAIRE] Commentaire ajouté avec succès."
         )
+
+        if user.get("role") == "admin":
+            adresse = recuperer_email_notification(
+                probleme_cible.get("auteur")
+            )
+
+            if adresse:
+                lien = f"{SITE_URL}/probleme/{probleme_id}"
+
+                extrait = contenu
+
+                if len(extrait) > 500:
+                    extrait = extrait[:497] + "..."
+
+                corps = (
+                    f"Bonjour {probleme_cible.get('auteur')},\n\n"
+                    f"L'administration a répondu à votre "
+                    f"signalement "
+                    f"{description_signalement(probleme_cible)} :\n\n"
+                    f"{extrait}\n\n"
+                    f"Répondre : {lien}\n\n"
+                    "— Collège SOS\n"
+                )
+
+                envoyer_email_en_arriere_plan(
+                    adresse,
+                    "Collège SOS — Nouveau message sur votre signalement",
+                    corps
+                )
 
     except Exception as e:
         print(
@@ -1835,6 +2053,30 @@ def modifier_statut(probleme_id):
             400
         )
 
+    avant = None
+
+    try:
+        avant_result = (
+            supabase
+            .table("problemes")
+            .select("*")
+            .eq(
+                "id",
+                probleme_id
+            )
+            .limit(1)
+            .execute()
+        )
+
+        if avant_result.data:
+            avant = avant_result.data[0]
+
+    except Exception as e:
+        print(
+            "[EMAIL] Lecture signalement impossible :",
+            repr(e)
+        )
+
     (
         supabase
         .table("problemes")
@@ -1850,6 +2092,41 @@ def modifier_statut(probleme_id):
         .execute()
     )
 
+    if avant and avant.get("statut") != statut:
+        adresse = recuperer_email_notification(
+            avant.get("auteur")
+        )
+
+        if adresse:
+            lien = f"{SITE_URL}/probleme/{probleme_id}"
+
+            corps = (
+                f"Bonjour {avant.get('auteur')},\n\n"
+                f"Le statut de votre signalement "
+                f"{description_signalement(avant)} "
+                f"a changé.\n\n"
+                f"Ancien statut : "
+                f"{libelle_statut(avant.get('statut'))}\n"
+                f"Nouveau statut : "
+                f"{libelle_statut(statut)}\n"
+            )
+
+            if responsable:
+                corps += (
+                    f"Responsable : {responsable}\n"
+                )
+
+            corps += (
+                f"\nVoir le signalement : {lien}\n\n"
+                "— Collège SOS\n"
+            )
+
+            envoyer_email_en_arriere_plan(
+                adresse,
+                "Collège SOS — Mise à jour de votre signalement",
+                corps
+            )
+
     return redirect(
         url_for(
             "probleme",
@@ -1859,11 +2136,176 @@ def modifier_statut(probleme_id):
 
 
 @app.route("/notifications")
-@admin_required
 def notifications():
-    return render_template(
-        "notifications.html",
-        vapid_public_key=VAPID_PUBLIC_KEY or ""
+    user = get_current_user()
+
+    if not user:
+        return redirect(
+            url_for("connexion")
+        )
+
+    role = user.get("role")
+
+    if role == "admin":
+        return render_template(
+            "notifications.html",
+            is_admin=True,
+            vapid_public_key=VAPID_PUBLIC_KEY or "",
+            email_notification=""
+        )
+
+    if role in ("prof", "professeur"):
+        return render_template(
+            "notifications.html",
+            is_admin=False,
+            vapid_public_key="",
+            email_notification=(
+                recuperer_email_notification(
+                    user["username"]
+                )
+                or ""
+            )
+        )
+
+    session.clear()
+
+    return redirect(
+        url_for("connexion")
+    )
+
+
+@app.route(
+    "/notifications/email",
+    methods=["POST"]
+)
+@professor_required
+def enregistrer_email_notification():
+    user = get_current_user()
+
+    action = request.form.get(
+        "action",
+        "enregistrer"
+    )
+
+    adresse = request.form.get(
+        "email",
+        ""
+    ).strip().lower()
+
+    if action == "supprimer":
+        try:
+            (
+                supabase
+                .table("users")
+                .update({
+                    "notification_email": None
+                })
+                .eq(
+                    "id",
+                    user["id"]
+                )
+                .execute()
+            )
+
+            flash(
+                "Adresse email supprimée. "
+                "Vous ne recevrez plus d'emails.",
+                "success"
+            )
+
+        except Exception as e:
+            print(
+                "[EMAIL] Erreur suppression :",
+                repr(e)
+            )
+
+            flash(
+                "Impossible de supprimer l'adresse email.",
+                "error"
+            )
+
+        return redirect(
+            url_for("notifications")
+        )
+
+    if not email_valide(adresse):
+        flash(
+            "Cette adresse email n'est pas valide.",
+            "error"
+        )
+
+        return redirect(
+            url_for("notifications")
+        )
+
+    try:
+        result = (
+            supabase
+            .table("users")
+            .update({
+                "notification_email": adresse
+            })
+            .eq(
+                "id",
+                user["id"]
+            )
+            .execute()
+        )
+
+        if not result.data:
+            raise RuntimeError(
+                "Aucune ligne mise à jour."
+            )
+
+    except Exception as e:
+        print(
+            "[EMAIL] Erreur enregistrement :",
+            repr(e)
+        )
+
+        flash(
+            "Impossible d'enregistrer l'adresse email. "
+            "Vérifiez que la colonne notification_email "
+            "existe dans la table users.",
+            "error"
+        )
+
+        return redirect(
+            url_for("notifications")
+        )
+
+    corps = (
+        f"Bonjour {user['username']},\n\n"
+        "Votre adresse email est bien enregistrée sur "
+        "Collège SOS.\n\n"
+        "Vous recevrez un email lorsque l'administration "
+        "répondra à l'un de vos signalements ou changera "
+        "son statut.\n\n"
+        f"{SITE_URL}/professeur\n\n"
+        "— Collège SOS\n"
+    )
+
+    if envoyer_email(
+        adresse,
+        "Collège SOS — Adresse email enregistrée",
+        corps
+    ):
+        flash(
+            "Adresse enregistrée. Un email de confirmation "
+            "vient de vous être envoyé.",
+            "success"
+        )
+
+    else:
+        flash(
+            "Adresse enregistrée, mais l'email de "
+            "confirmation n'a pas pu être envoyé. "
+            "Contactez l'administrateur.",
+            "error"
+        )
+
+    return redirect(
+        url_for("notifications")
     )
 
 

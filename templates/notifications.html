@@ -1,318 +1,701 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}"
+    >
 
-<link
-    rel="icon"
-    type="image/png"
-    href="{{ url_for('static', filename='282-2828535_bb-logo-symbol.png') }}"
->
+    <title>Notifications - Collège SOS</title>
 
-<title>Notifications - Collège SOS</title>
+    <style>
+        :root {
+            --bleu: #1e66ff;
+            --bleu-fonce: #1757e0;
+            --bleu-pale: #e6eefe;
+            --bleu-fond: #eef3ff;
+            --texte: #0c1033;
+            --texte-doux: #5b6a9a;
+            --vert: #22b45a;
+            --vert-pale: #e3f6ea;
+            --rouge: #ee4a52;
+            --ardoise: #4b5b80;
+            --bordure: #dfe6f5;
+        }
 
-<style>
-    * {
-        box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    body {
-        margin: 0;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: Arial, sans-serif;
-        background: #f4f6f8;
-        color: #17202a;
-    }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 15px;
+            font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+            background: linear-gradient(160deg, #f8faff 0%, #eaf0ff 100%);
+            color: var(--texte);
+            position: relative;
+            overflow-x: hidden;
+        }
 
-    .card {
-        width: min(540px, calc(100% - 30px));
-        background: white;
-        border-radius: 20px;
-        padding: 35px;
-        box-shadow: 0 15px 45px rgba(0, 0, 0, 0.10);
-        text-align: center;
-    }
+        /* ---------- Décor en arrière-plan ---------- */
 
-    h1 {
-        margin-top: 0;
-        margin-bottom: 12px;
-    }
+        .deco {
+            position: fixed;
+            z-index: 0;
+            pointer-events: none;
+            background: #c9dafc;
+            opacity: 0.75;
+        }
 
-    p {
-        line-height: 1.6;
-        color: #5f6b76;
-    }
+        .deco-1 {
+            top: -140px;
+            right: -120px;
+            width: 420px;
+            height: 360px;
+            border-radius: 55% 45% 60% 40%;
+            background: linear-gradient(135deg, #bcd2fb, #d7e4fd);
+        }
 
-    button,
-    a {
-        display: inline-block;
-        border: 0;
-        border-radius: 12px;
-        padding: 13px 20px;
-        font-size: 15px;
-        cursor: pointer;
-        text-decoration: none;
-        margin-top: 10px;
-    }
+        .deco-2 {
+            bottom: -160px;
+            right: -100px;
+            width: 460px;
+            height: 340px;
+            border-radius: 60% 40% 50% 50%;
+            background: linear-gradient(135deg, #c9dafc, #b6cdfa);
+        }
 
-    button {
-        background: #1769ff;
-        color: white;
-    }
+        .deco-3 {
+            top: 28%;
+            left: -130px;
+            width: 300px;
+            height: 420px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d3e1fd, #c3d5fb);
+        }
 
-    button:hover {
-        opacity: 0.9;
-    }
+        .deco-4 {
+            top: 12%;
+            left: 6%;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+        }
 
-    button:disabled {
-        opacity: 0.7;
-        cursor: default;
-    }
+        .deco-5 {
+            bottom: 8%;
+            left: 8%;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+        }
 
-    a {
-        color: #1769ff;
-    }
+        .deco-6 {
+            top: 22%;
+            right: 8%;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+        }
 
-    #status {
-        margin-top: 20px;
-        font-weight: bold;
-        min-height: 22px;
-        line-height: 1.5;
-    }
+        /* ---------- Carte ---------- */
 
-    .success {
-        color: #16803c;
-    }
+        .card {
+            position: relative;
+            z-index: 1;
+            width: min(600px, 100%);
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 32px 34px 28px;
+            box-shadow:
+                0 30px 70px rgba(40, 80, 180, 0.14),
+                0 4px 14px rgba(40, 80, 180, 0.06);
+        }
 
-    .error {
-        color: #c62828;
-    }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 22px;
+            margin-bottom: 14px;
+        }
 
-    .info {
-        color: #1769ff;
-    }
+        .icon-tile {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 74px;
+            height: 74px;
+            border-radius: 22px;
+            background: var(--bleu-pale);
+            color: var(--bleu);
+        }
 
-    .active-button {
-        background: #16803c;
-        cursor: default;
-    }
+        .icon-tile svg {
+            width: 38px;
+            height: 38px;
+        }
 
-    .test-button {
-        background: #5f6b76;
-    }
+        .icon-tile.small {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+        }
 
-    .test-button:hover {
-        background: #4d5862;
-    }
+        .icon-tile.small svg {
+            width: 28px;
+            height: 28px;
+        }
 
-    .test-button:disabled {
-        opacity: 0.5;
-    }
+        h1 {
+            margin: 0;
+            font-size: 44px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--texte);
+        }
 
-    .server-info {
-        margin-top: 18px;
-        padding: 12px 15px;
-        border-radius: 12px;
-        background: #f4f6f8;
-        color: #5f6b76;
-        font-size: 14px;
-        line-height: 1.5;
-    }
+        h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            color: var(--texte);
+        }
 
-    .server-info strong {
-        color: #17202a;
-    }
+        p {
+            margin: 0 0 20px;
+            line-height: 1.6;
+            font-size: 17px;
+            color: var(--texte-doux);
+            text-align: center;
+        }
 
-    .email-section {
-        margin-top: 28px;
-        padding-top: 24px;
-        border-top: 1px solid #e3e8f0;
-    }
+        svg {
+            display: block;
+            flex-shrink: 0;
+        }
 
-    .email-section h2 {
-        margin: 0 0 8px;
-        font-size: 20px;
-    }
+        /* ---------- Boutons ---------- */
 
-    .email-form {
-        margin-top: 14px;
-        text-align: left;
-    }
+        button,
+        a.retour {
+            font-family: inherit;
+        }
 
-    .email-form label {
-        display: block;
-        margin-bottom: 7px;
-        font-size: 14px;
-        font-weight: bold;
-    }
+        button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border: 0;
+            border-radius: 16px;
+            padding: 0 22px;
+            height: 58px;
+            font-size: 18px;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            background: var(--bleu);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+        }
 
-    .email-form input[type="email"] {
-        width: 100%;
-        padding: 13px 14px;
-        border: 1px solid #d8dee8;
-        border-radius: 12px;
-        font-size: 15px;
-        outline: none;
-    }
+        button svg {
+            width: 26px;
+            height: 26px;
+        }
 
-    .email-form input[type="email"]:focus {
-        border-color: #1769ff;
-        box-shadow: 0 0 0 4px #e8f0ff;
-    }
+        button:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(30, 102, 255, 0.22);
+        }
 
-    .email-form button {
-        width: 100%;
-    }
+        button:focus-visible,
+        input:focus-visible,
+        a.retour:focus-visible {
+            outline: 3px solid #9dbcff;
+            outline-offset: 2px;
+        }
 
-    .danger-button {
-        background: #c62828;
-    }
+        button:disabled {
+            opacity: 0.55;
+            cursor: default;
+        }
 
-    .flash {
-        margin-top: 18px;
-        padding: 12px 15px;
-        border-radius: 12px;
-        font-weight: bold;
-        line-height: 1.5;
-    }
+        .actions {
+            display: flex;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
 
-    .flash.success {
-        background: #e8f6ee;
-        color: #16803c;
-    }
+        .actions button {
+            flex: 1 1 0;
+            min-width: 0;
+            padding: 0 14px;
+            font-size: 17px;
+        }
 
-    .flash.error {
-        background: #fdecec;
-        color: #c62828;
-    }
-</style>
+        .active-button {
+            background: var(--vert);
+            cursor: default;
+            opacity: 1 !important;
+            box-shadow: 0 8px 18px rgba(34, 180, 90, 0.25);
+        }
 
+        .active-button:hover:not(:disabled) {
+            transform: none;
+        }
 
+        .test-button {
+            background: var(--ardoise);
+            box-shadow: 0 8px 18px rgba(75, 91, 128, 0.22);
+        }
+
+        .test-button:disabled {
+            opacity: 0.5;
+            box-shadow: none;
+        }
+
+        .danger-button {
+            background: var(--rouge);
+            height: 54px;
+        }
+
+        .danger-button:hover:not(:disabled) {
+            box-shadow: 0 8px 18px rgba(238, 74, 82, 0.25);
+        }
+
+        /* ---------- Statut ---------- */
+
+        #status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-height: 52px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        #status:empty {
+            display: none;
+        }
+
+        #status svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        #status.success {
+            background: var(--vert-pale);
+            color: var(--vert);
+        }
+
+        #status.error {
+            background: #fdeaea;
+            color: #c62828;
+        }
+
+        #status.info {
+            background: var(--bleu-fond);
+            color: var(--bleu);
+        }
+
+        .server-info {
+            margin-top: 14px;
+            padding: 14px 18px;
+            border-radius: 18px;
+            background: var(--bleu-fond);
+            color: var(--texte-doux);
+            font-size: 16px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .server-info .ligne {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .server-info svg {
+            width: 26px;
+            height: 26px;
+            color: var(--bleu);
+        }
+
+        .server-info strong {
+            color: var(--texte);
+            font-weight: 800;
+        }
+
+        /* ---------- Section email ---------- */
+
+        .email-section {
+            margin-top: 26px;
+            padding-top: 26px;
+            border-top: 2px solid #eaeffa;
+        }
+
+        .email-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            margin-bottom: 14px;
+        }
+
+        .email-form {
+            margin-top: 18px;
+            text-align: left;
+        }
+
+        .email-form label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--texte);
+        }
+
+        .input-wrap {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .input-wrap svg {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 28px;
+            height: 28px;
+            color: var(--ardoise);
+            pointer-events: none;
+        }
+
+        .email-form input[type="email"] {
+            width: 100%;
+            height: 58px;
+            padding: 0 16px 0 70px;
+            border: 2px solid var(--bordure);
+            border-radius: 18px;
+            font-family: inherit;
+            font-size: 18px;
+            color: var(--texte);
+            background: #fff;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .email-form input[type="email"]::placeholder {
+            color: #9aa6c6;
+        }
+
+        .email-form input[type="email"]:focus {
+            border-color: var(--bleu);
+            box-shadow: 0 0 0 4px #e1ebff;
+        }
+
+        .email-form button {
+            width: 100%;
+        }
+
+        .email-form + .email-form {
+            margin-top: 14px;
+        }
+
+        .flash {
+            margin-top: 14px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-weight: 700;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .flash.success {
+            background: var(--vert-pale);
+            color: #16803c;
+        }
+
+        .flash.error {
+            background: #fdeaea;
+            color: #c62828;
+        }
+
+        /* ---------- Retour ---------- */
+
+        .footer {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 2px solid #eaeffa;
+            text-align: center;
+        }
+
+        a.retour {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 19px;
+            color: var(--bleu);
+            text-decoration: none;
+            border-radius: 10px;
+            padding: 4px 8px;
+        }
+
+        a.retour svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        a.retour:hover {
+            color: var(--bleu-fonce);
+            text-decoration: underline;
+        }
+
+        /* ---------- Mobile ---------- */
+
+        @media (max-width: 560px) {
+            .card {
+                padding: 26px 20px 22px;
+                border-radius: 26px;
+            }
+
+            .header {
+                gap: 14px;
+            }
+
+            .icon-tile {
+                width: 60px;
+                height: 60px;
+                border-radius: 18px;
+            }
+
+            .icon-tile svg {
+                width: 30px;
+                height: 30px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            p {
+                font-size: 15px;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .actions button {
+                flex: none;
+                width: 100%;
+            }
+
+            #status {
+                font-size: 16px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
+<div class="deco deco-1"></div>
+<div class="deco deco-2"></div>
+<div class="deco deco-3"></div>
+<div class="deco deco-4"></div>
+<div class="deco deco-5"></div>
+<div class="deco deco-6"></div>
+
 <div class="card">
 
-
-<h1>🔔 Notifications</h1>
-
-<p>
-    Active les notifications de Collège SOS pour recevoir
-    automatiquement les nouveaux signalements sur cet ordinateur.
-</p>
-
-<button id="enableNotifications">
-    🔔 Activer les notifications
-</button>
-
-<button
-    id="testNotifications"
-    class="test-button"
-    disabled
->
-    🧪 Tester une notification
-</button>
-
-<div id="status"></div>
-
-<div
-    id="serverInfo"
-    class="server-info"
-    style="display: none;"
-></div>
-
-<div class="email-section">
-
-<h2>📧 Notifications par email</h2>
-
-<p>
-    Renseignez une adresse email pour recevoir un email à chaque
-    nouveau signalement envoyé par un professeur, en plus de la
-    notification sur cet ordinateur.
-</p>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% for categorie, message in messages %}
-        <div class="flash {{ categorie }}">
-            {{ message }}
+    <div class="header">
+        <div class="icon-tile">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2.5a1.6 1.6 0 0 1 1.6 1.6v.6c2.7.7 4.6 3.1 4.6 6v3.7l1.7 2.6c.5.8 0 1.8-1 1.8H5.1c-1 0-1.5-1-1-1.8l1.7-2.6v-3.7c0-2.9 1.9-5.3 4.6-6v-.6A1.6 1.6 0 0 1 12 2.5Z"/>
+                <path d="M9.6 19.6h4.8a2.4 2.4 0 0 1-4.8 0Z"/>
+            </svg>
         </div>
-    {% endfor %}
-{% endwith %}
 
-<form
-    method="POST"
-    action="{{ url_for('enregistrer_email_notification') }}"
-    class="email-form"
->
-    <label for="email">
-        Votre adresse email
-    </label>
+        <h1>Notifications</h1>
+    </div>
 
-    <input
-        type="email"
-        id="email"
-        name="email"
-        placeholder="exemple@gmail.com"
-        value="{{ email_notification }}"
-        maxlength="254"
-        autocomplete="email"
-        required
-    >
+    <p>
+        Active les notifications de Collège SOS pour recevoir
+        automatiquement les nouveaux signalements sur cet ordinateur.
+    </p>
 
-    <button
-        type="submit"
-        name="action"
-        value="enregistrer"
-    >
+    <div class="actions">
+        <button id="enableNotifications">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2.5a1.6 1.6 0 0 1 1.6 1.6v.6c2.7.7 4.6 3.1 4.6 6v3.7l1.7 2.6c.5.8 0 1.8-1 1.8H5.1c-1 0-1.5-1-1-1.8l1.7-2.6v-3.7c0-2.9 1.9-5.3 4.6-6v-.6A1.6 1.6 0 0 1 12 2.5Z"/>
+                <path d="M9.6 19.6h4.8a2.4 2.4 0 0 1-4.8 0Z"/>
+            </svg>
+            <span>Activer les notifications</span>
+        </button>
+
+        <button
+            id="testNotifications"
+            class="test-button"
+            disabled
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/>
+            </svg>
+            <span>Tester une notification</span>
+        </button>
+    </div>
+
+    <div id="status"></div>
+
+    <div
+        id="serverInfo"
+        class="server-info"
+        style="display: none;"
+    ></div>
+
+    <div class="email-section">
+
+        <div class="email-header">
+            <div class="icon-tile small">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2.5" y="4.5" width="19" height="15" rx="3" fill="currentColor" stroke="none"/>
+                    <path d="m5.5 8.5 6.5 5 6.5-5" stroke="#fff" stroke-width="2"/>
+                </svg>
+            </div>
+
+            <h2>Notifications par email</h2>
+        </div>
+
+        <p>
+            Renseignez une adresse email pour recevoir un email à chaque
+            nouveau signalement envoyé par un professeur, en plus de la
+            notification sur cet ordinateur.
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categorie, message in messages %}
+                <div class="flash {{ categorie }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <form
+            method="POST"
+            action="{{ url_for('enregistrer_email_notification') }}"
+            class="email-form"
+        >
+            <label for="email">
+                Votre adresse email
+            </label>
+
+            <div class="input-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="2.5" y="4.5" width="19" height="15" rx="3"/>
+                    <path d="m4.5 8 7.5 5.5L19.5 8"/>
+                </svg>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="exemple@gmail.com"
+                    value="{{ email_notification }}"
+                    maxlength="254"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <button
+                type="submit"
+                name="action"
+                value="enregistrer"
+            >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M5 3h11.2a2 2 0 0 1 1.4.6l2.8 2.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm2 2v4.5a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V5H7Zm5 7.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>
+                </svg>
+                <span>
+                    {% if email_notification %}
+                        Modifier mon adresse
+                    {% else %}
+                        Enregistrer et recevoir un email de test
+                    {% endif %}
+                </span>
+            </button>
+        </form>
+
         {% if email_notification %}
-            💾 Modifier mon adresse
-        {% else %}
-            📨 Enregistrer et recevoir un email de test
+        <form
+            method="POST"
+            action="{{ url_for('enregistrer_email_notification') }}"
+            class="email-form"
+        >
+            <input
+                type="hidden"
+                name="email"
+                value="{{ email_notification }}"
+            >
+
+            <button
+                type="submit"
+                name="action"
+                value="supprimer"
+                class="danger-button"
+                formnovalidate
+            >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M9 2.5h6l.7 1.5H20a1 1 0 1 1 0 2H4a1 1 0 1 1 0-2h4.3L9 2.5ZM5.5 8h13l-.9 11.2a2.5 2.5 0 0 1-2.5 2.3H8.9a2.5 2.5 0 0 1-2.5-2.3L5.5 8Zm4 2.5a.9.9 0 0 0-.9.9v6.2a.9.9 0 1 0 1.8 0v-6.2a.9.9 0 0 0-.9-.9Zm5 0a.9.9 0 0 0-.9.9v6.2a.9.9 0 1 0 1.8 0v-6.2a.9.9 0 0 0-.9-.9Z"/>
+                </svg>
+                <span>Ne plus recevoir d'emails</span>
+            </button>
+        </form>
         {% endif %}
-    </button>
-</form>
 
-{% if email_notification %}
-<form
-    method="POST"
-    action="{{ url_for('enregistrer_email_notification') }}"
-    class="email-form"
->
-    <input
-        type="hidden"
-        name="email"
-        value="{{ email_notification }}"
-    >
+    </div>
 
-    <button
-        type="submit"
-        name="action"
-        value="supprimer"
-        class="danger-button"
-        formnovalidate
-    >
-        🗑️ Ne plus recevoir d'emails
-    </button>
-</form>
-{% endif %}
-
-</div>
-
-<a href="/dashboard">
-    ← Retour à l'administration
-</a>
-
+    <div class="footer">
+        <a class="retour" href="/dashboard">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 12H5M11 6l-6 6 6 6"/>
+            </svg>
+            Retour à l'administration
+        </a>
+    </div>
 
 </div>
 
@@ -330,6 +713,82 @@ const statusElement =
 
 const serverInfo =
     document.getElementById("serverInfo");
+
+
+/* ---------- Icônes (design) ---------- */
+
+const ICONES = {
+
+    cloche:
+        '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M12 2.5a1.6 1.6 0 0 1 1.6 1.6v.6c2.7.7 4.6 3.1 4.6 6v3.7l1.7 2.6c.5.8 0 1.8-1 1.8H5.1c-1 0-1.5-1-1-1.8l1.7-2.6v-3.7c0-2.9 1.9-5.3 4.6-6v-.6A1.6 1.6 0 0 1 12 2.5Z"/>' +
+        '<path d="M9.6 19.6h4.8a2.4 2.4 0 0 1-4.8 0Z"/></svg>',
+
+    coche:
+        '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+        '<rect x="2" y="2" width="20" height="20" rx="5.5" fill="currentColor"/>' +
+        '<path d="M7 12.4l3.3 3.3L17 9" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+
+    croix:
+        '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+        '<rect x="2" y="2" width="20" height="20" rx="5.5" fill="currentColor"/>' +
+        '<path d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>',
+
+    info:
+        '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">' +
+        '<rect x="2" y="2" width="20" height="20" rx="5.5" fill="currentColor"/>' +
+        '<path d="M12 11v5.2" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/>' +
+        '<circle cx="12" cy="7.8" r="1.5" fill="#fff"/></svg>',
+
+    ecran:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<rect x="2.5" y="3.5" width="19" height="13" rx="2.5"/>' +
+        '<path d="M8 20.5h8M12 16.5v4"/></svg>',
+
+    calendrier:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<rect x="3.5" y="4.5" width="17" height="16" rx="3"/>' +
+        '<path d="M8 2.5v4M16 2.5v4M3.5 10h17"/>' +
+        '<path d="M8 14h.01M12 14h.01M16 14h.01M8 17.5h.01M12 17.5h.01" stroke-width="2.6"/></svg>',
+
+    flask:
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76Z"/></svg>'
+};
+
+
+function definirBouton(element, icone, texte) {
+
+    element.innerHTML = icone + "<span></span>";
+
+    element.querySelector("span").textContent = texte;
+}
+
+
+function afficherStatut(type, message) {
+
+    const icones = {
+        success: ICONES.coche,
+        error: ICONES.croix,
+        info: ICONES.info
+    };
+
+    statusElement.className = type;
+
+    statusElement.innerHTML =
+        (icones[type] || "") + "<span></span>";
+
+    statusElement.querySelector("span").textContent =
+        message;
+}
+
+
+function viderStatut() {
+
+    statusElement.className = "";
+
+    statusElement.innerHTML = "";
+}
 
 
 function urlBase64ToUint8Array(base64String) {
@@ -366,13 +825,16 @@ function urlBase64ToUint8Array(base64String) {
 
 function afficherNotificationsActivees() {
 
-    statusElement.className = "success";
+    afficherStatut(
+        "success",
+        "Notifications activées sur cet ordinateur."
+    );
 
-    statusElement.textContent =
-        "✅ Notifications activées sur cet ordinateur.";
-
-    button.textContent =
-        "✅ Notifications activées";
+    definirBouton(
+        button,
+        ICONES.coche,
+        "Notifications activées"
+    );
 
     button.classList.add(
         "active-button"
@@ -386,12 +848,13 @@ function afficherNotificationsActivees() {
 
 function afficherNotificationsDesactivees() {
 
-    statusElement.className = "";
+    viderStatut();
 
-    statusElement.textContent = "";
-
-    button.textContent =
-        "🔔 Activer les notifications";
+    definirBouton(
+        button,
+        ICONES.cloche,
+        "Activer les notifications"
+    );
 
     button.classList.remove(
         "active-button"
@@ -405,11 +868,10 @@ function afficherNotificationsDesactivees() {
 
 function afficherErreur(message) {
 
-    statusElement.className =
-        "error";
-
-    statusElement.textContent =
-        "❌ " + message;
+    afficherStatut(
+        "error",
+        message
+    );
 }
 
 
@@ -517,20 +979,27 @@ async function verifierEtatServeur() {
         }
 
         serverInfo.style.display =
-            "block";
+            "flex";
 
         serverInfo.innerHTML =
-            "🖥️ <strong>Serveur :</strong> " +
-            (
-                result.vapid_configured
-                    ? "notifications configurées"
-                    : "configuration VAPID absente"
-            ) +
-            "<br>" +
-            "📱 <strong>Abonnements enregistrés :</strong> " +
-            String(
-                result.subscription_count ?? 0
-            );
+            '<div class="ligne">' +
+                ICONES.ecran +
+                "<span><strong>Serveur :</strong> " +
+                (
+                    result.vapid_configured
+                        ? "notifications configurées"
+                        : "configuration VAPID absente"
+                ) +
+                "</span>" +
+            "</div>" +
+            '<div class="ligne">' +
+                ICONES.calendrier +
+                "<span><strong>Abonnements enregistrés :</strong> " +
+                String(
+                    Number(result.subscription_count ?? 0)
+                ) +
+                "</span>" +
+            "</div>";
 
     } catch (error) {
 
@@ -634,10 +1103,10 @@ async function activerNotifications() {
 
     button.disabled = true;
 
-    statusElement.className = "info";
-
-    statusElement.textContent =
-        "Activation en cours...";
+    afficherStatut(
+        "info",
+        "Activation en cours..."
+    );
 
 
     try {
@@ -725,14 +1194,10 @@ async function activerNotifications() {
             error
         );
 
-        statusElement.className =
-            "error";
-
-        statusElement.textContent =
-            "❌ " + (
-                error.message ||
-                "Une erreur est survenue."
-            );
+        afficherErreur(
+            error.message ||
+            "Une erreur est survenue."
+        );
 
         button.disabled = false;
 
@@ -745,11 +1210,10 @@ async function testerNotification() {
 
     testButton.disabled = true;
 
-    statusElement.className =
-        "info";
-
-    statusElement.textContent =
-        "🧪 Envoi du test en cours...";
+    afficherStatut(
+        "info",
+        "Envoi du test en cours..."
+    );
 
 
     try {
@@ -803,32 +1267,34 @@ async function testerNotification() {
 
         if (envoyees > 0) {
 
-            statusElement.className =
-                "success";
-
-            statusElement.textContent =
-                "✅ Notification de test envoyée par le serveur.";
+            afficherStatut(
+                "success",
+                "Notification de test envoyée par le serveur."
+            );
 
         } else {
 
-            statusElement.className =
-                "error";
-
-            statusElement.textContent =
-                "❌ Le serveur n'a envoyé aucune notification.";
+            afficherStatut(
+                "error",
+                "Le serveur n'a envoyé aucune notification."
+            );
         }
 
 
         serverInfo.style.display =
-            "block";
+            "flex";
 
         serverInfo.innerHTML =
-            "📨 <strong>Résultat du test :</strong><br>" +
-            "Notifications envoyées : " +
+            '<div class="ligne">' +
+                ICONES.info +
+                "<span><strong>Résultat du test :</strong></span>" +
+            "</div>" +
+            '<div class="ligne"><span>Notifications envoyées : ' +
             envoyees +
-            "<br>" +
-            "Échecs : " +
-            echecs;
+            "</span></div>" +
+            '<div class="ligne"><span>Échecs : ' +
+            echecs +
+            "</span></div>";
 
     } catch (error) {
 
@@ -837,14 +1303,10 @@ async function testerNotification() {
             error
         );
 
-        statusElement.className =
-            "error";
-
-        statusElement.textContent =
-            "❌ " + (
-                error.message ||
-                "Impossible d'envoyer le test."
-            );
+        afficherErreur(
+            error.message ||
+            "Impossible d'envoyer le test."
+        );
 
     } finally {
 

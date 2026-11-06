@@ -385,6 +385,17 @@ def email_valide(adresse):
     )
 
 
+def nettoyer_entete(texte):
+    """
+    Supprime les retours à la ligne d'un texte destiné à un
+    en-tête d'email (empêche l'injection d'en-têtes).
+    """
+
+    return " ".join(
+        str(texte or "").split()
+    )
+
+
 def envoyer_email(destinataire, sujet, corps):
     """
     Envoie un email texte depuis le compte Gmail du collège.
@@ -410,7 +421,7 @@ def envoyer_email(destinataire, sujet, corps):
     try:
         message = EmailMessage()
 
-        message["Subject"] = sujet
+        message["Subject"] = nettoyer_entete(sujet)
         message["From"] = f"Collège SOS <{SMTP_USER}>"
         message["To"] = destinataire
 
@@ -447,31 +458,10 @@ def envoyer_email(destinataire, sujet, corps):
         return False
 
 
-def envoyer_email_en_arriere_plan(
-    destinataire,
-    sujet,
-    corps
-):
-    """
-    Lance l'envoi dans un thread pour ne pas ralentir la page.
-    """
-
-    threading.Thread(
-        target=envoyer_email,
-        args=(
-            destinataire,
-            sujet,
-            corps
-        ),
-        daemon=True
-    ).start()
-
-
 def recuperer_email_notification(username):
     """
     Retourne l'email de notification d'un utilisateur,
-    ou None s'il n'en a pas renseigné (ou si la colonne
-    notification_email n'existe pas encore).
+    ou None s'il n'en a pas renseigné.
     """
 
     if not username:
@@ -509,24 +499,93 @@ def recuperer_email_notification(username):
         return None
 
 
-def libelle_statut(statut):
-    return {
-        "nouveau": "À réaffecter",
-        "en_cours": "En cours",
-        "resolu": "Résolu"
-    }.get(statut, statut or "Inconnu")
+def envoyer_email_nouveau_signalement(probleme):
+    """
+    Envoie un email à chaque administrateur ayant renseigné
+    une adresse, quand un professeur crée un signalement.
+    Ne bloque jamais la création du signalement.
+    """
 
+    try:
+        admins_result = (
+            supabase
+            .table("users")
+            .select("username,notification_email")
+            .eq("role", "admin")
+            .execute()
+        )
 
-def description_signalement(probleme):
-    numero = (
-        probleme.get("numero_affichage")
-        or probleme.get("id")
-    )
+        adresses = []
 
-    salle = probleme.get("salle") or "salle inconnue"
-    categorie = probleme.get("categorie") or "Problème"
+        for admin in admins_result.data or []:
+            adresse = (
+                admin.get("notification_email")
+                or ""
+            ).strip().lower()
 
-    return f"#{numero} — {salle} ({categorie})"
+            if (
+                email_valide(adresse)
+                and adresse not in adresses
+            ):
+                adresses.append(adresse)
+
+        if not adresses:
+            print(
+                "[EMAIL] Aucun administrateur "
+                "n'a renseigné d'adresse email."
+            )
+
+            return
+
+        probleme_id = probleme.get("id")
+        urgence = probleme.get("urgence") or "normale"
+        salle = probleme.get("salle") or "Salle inconnue"
+        categorie = probleme.get("categorie") or "Problème"
+        auteur = probleme.get("auteur") or "Inconnu"
+        description = probleme.get("description") or ""
+
+        if urgence == "urgente":
+            sujet = (
+                f"🚨 URGENT — Nouveau signalement : "
+                f"{salle} ({categorie})"
+            )
+            niveau = "URGENTE"
+        else:
+            sujet = (
+                f"Nouveau signalement : "
+                f"{salle} ({categorie})"
+            )
+            niveau = "Normale"
+
+        lien = f"{SITE_URL}/probleme/{probleme_id}"
+
+        corps = (
+            "Un nouveau signalement vient d'être envoyé.\n\n"
+            f"Salle : {salle}\n"
+            f"Catégorie : {categorie}\n"
+            f"Urgence : {niveau}\n"
+            f"Signalé par : {auteur}\n\n"
+            f"Description :\n{description}\n\n"
+            f"Voir le signalement : {lien}\n\n"
+            "— Collège SOS\n"
+        )
+
+        for adresse in adresses:
+            threading.Thread(
+                target=envoyer_email,
+                args=(
+                    adresse,
+                    sujet,
+                    corps
+                ),
+                daemon=True
+            ).start()
+
+    except Exception as e:
+        print(
+            "[EMAIL] Erreur notification email :",
+            repr(e)
+        )
 
 
 def supprimer_abonnement_push(endpoint):
@@ -1239,6 +1298,10 @@ def signaler():
 
     probleme = result.data[0]
 
+    envoyer_email_nouveau_signalement(
+        probleme
+    )
+
     envoyer_notification_admins(
         probleme
     )
@@ -1930,7 +1993,9 @@ def ajouter_commentaire(probleme_id):
         probleme_result = (
             supabase
             .table("problemes")
-            .select("*")
+            .select(
+                "id,auteur"
+            )
             .eq(
                 "id",
                 probleme_id
@@ -1976,35 +2041,6 @@ def ajouter_commentaire(probleme_id):
         print(
             "[COMMENTAIRE] Commentaire ajouté avec succès."
         )
-
-        if user.get("role") == "admin":
-            adresse = recuperer_email_notification(
-                probleme_cible.get("auteur")
-            )
-
-            if adresse:
-                lien = f"{SITE_URL}/probleme/{probleme_id}"
-
-                extrait = contenu
-
-                if len(extrait) > 500:
-                    extrait = extrait[:497] + "..."
-
-                corps = (
-                    f"Bonjour {probleme_cible.get('auteur')},\n\n"
-                    f"L'administration a répondu à votre "
-                    f"signalement "
-                    f"{description_signalement(probleme_cible)} :\n\n"
-                    f"{extrait}\n\n"
-                    f"Répondre : {lien}\n\n"
-                    "— Collège SOS\n"
-                )
-
-                envoyer_email_en_arriere_plan(
-                    adresse,
-                    "Collège SOS — Nouveau message sur votre signalement",
-                    corps
-                )
 
     except Exception as e:
         print(
@@ -2053,30 +2089,6 @@ def modifier_statut(probleme_id):
             400
         )
 
-    avant = None
-
-    try:
-        avant_result = (
-            supabase
-            .table("problemes")
-            .select("*")
-            .eq(
-                "id",
-                probleme_id
-            )
-            .limit(1)
-            .execute()
-        )
-
-        if avant_result.data:
-            avant = avant_result.data[0]
-
-    except Exception as e:
-        print(
-            "[EMAIL] Lecture signalement impossible :",
-            repr(e)
-        )
-
     (
         supabase
         .table("problemes")
@@ -2092,41 +2104,6 @@ def modifier_statut(probleme_id):
         .execute()
     )
 
-    if avant and avant.get("statut") != statut:
-        adresse = recuperer_email_notification(
-            avant.get("auteur")
-        )
-
-        if adresse:
-            lien = f"{SITE_URL}/probleme/{probleme_id}"
-
-            corps = (
-                f"Bonjour {avant.get('auteur')},\n\n"
-                f"Le statut de votre signalement "
-                f"{description_signalement(avant)} "
-                f"a changé.\n\n"
-                f"Ancien statut : "
-                f"{libelle_statut(avant.get('statut'))}\n"
-                f"Nouveau statut : "
-                f"{libelle_statut(statut)}\n"
-            )
-
-            if responsable:
-                corps += (
-                    f"Responsable : {responsable}\n"
-                )
-
-            corps += (
-                f"\nVoir le signalement : {lien}\n\n"
-                "— Collège SOS\n"
-            )
-
-            envoyer_email_en_arriere_plan(
-                adresse,
-                "Collège SOS — Mise à jour de votre signalement",
-                corps
-            )
-
     return redirect(
         url_for(
             "probleme",
@@ -2136,41 +2113,19 @@ def modifier_statut(probleme_id):
 
 
 @app.route("/notifications")
+@admin_required
 def notifications():
     user = get_current_user()
 
-    if not user:
-        return redirect(
-            url_for("connexion")
-        )
-
-    role = user.get("role")
-
-    if role == "admin":
-        return render_template(
-            "notifications.html",
-            is_admin=True,
-            vapid_public_key=VAPID_PUBLIC_KEY or "",
-            email_notification=""
-        )
-
-    if role in ("prof", "professeur"):
-        return render_template(
-            "notifications.html",
-            is_admin=False,
-            vapid_public_key="",
-            email_notification=(
-                recuperer_email_notification(
-                    user["username"]
-                )
-                or ""
+    return render_template(
+        "notifications.html",
+        vapid_public_key=VAPID_PUBLIC_KEY or "",
+        email_notification=(
+            recuperer_email_notification(
+                user["username"]
             )
+            or ""
         )
-
-    session.clear()
-
-    return redirect(
-        url_for("connexion")
     )
 
 
@@ -2178,7 +2133,7 @@ def notifications():
     "/notifications/email",
     methods=["POST"]
 )
-@professor_required
+@admin_required
 def enregistrer_email_notification():
     user = get_current_user()
 
@@ -2278,10 +2233,9 @@ def enregistrer_email_notification():
         f"Bonjour {user['username']},\n\n"
         "Votre adresse email est bien enregistrée sur "
         "Collège SOS.\n\n"
-        "Vous recevrez un email lorsque l'administration "
-        "répondra à l'un de vos signalements ou changera "
-        "son statut.\n\n"
-        f"{SITE_URL}/professeur\n\n"
+        "Vous recevrez un email à chaque nouveau "
+        "signalement envoyé par un professeur.\n\n"
+        f"{SITE_URL}/dashboard\n\n"
         "— Collège SOS\n"
     )
 
@@ -2300,7 +2254,7 @@ def enregistrer_email_notification():
         flash(
             "Adresse enregistrée, mais l'email de "
             "confirmation n'a pas pu être envoyé. "
-            "Contactez l'administrateur.",
+            "Consultez les logs du serveur ([EMAIL]).",
             "error"
         )
 

@@ -133,8 +133,19 @@
         color: #17202a;
     }
 
+    .email-section {
+        margin-top: 28px;
+        padding-top: 24px;
+        border-top: 1px solid #e3e8f0;
+    }
+
+    .email-section h2 {
+        margin: 0 0 8px;
+        font-size: 20px;
+    }
+
     .email-form {
-        margin-top: 22px;
+        margin-top: 14px;
         text-align: left;
     }
 
@@ -194,14 +205,41 @@
 <div class="card">
 
 
-{% if not is_admin %}
-
-<h1>📧 Notifications par email</h1>
+<h1>🔔 Notifications</h1>
 
 <p>
-    Renseignez votre adresse email pour être prévenu(e)
-    directement lorsque l'administration répond à l'un de
-    vos signalements ou change son statut.
+    Active les notifications de Collège SOS pour recevoir
+    automatiquement les nouveaux signalements sur cet ordinateur.
+</p>
+
+<button id="enableNotifications">
+    🔔 Activer les notifications
+</button>
+
+<button
+    id="testNotifications"
+    class="test-button"
+    disabled
+>
+    🧪 Tester une notification
+</button>
+
+<div id="status"></div>
+
+<div
+    id="serverInfo"
+    class="server-info"
+    style="display: none;"
+></div>
+
+<div class="email-section">
+
+<h2>📧 Notifications par email</h2>
+
+<p>
+    Renseignez une adresse email pour recevoir un email à chaque
+    nouveau signalement envoyé par un professeur, en plus de la
+    notification sur cet ordinateur.
 </p>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -225,7 +263,7 @@
         type="email"
         id="email"
         name="email"
-        placeholder="prenom.nom@exemple.fr"
+        placeholder="exemple@gmail.com"
         value="{{ email_notification }}"
         maxlength="254"
         autocomplete="email"
@@ -269,49 +307,15 @@
 </form>
 {% endif %}
 
-<a href="{{ url_for('professeur') }}">
-    ← Retour à mes signalements
-</a>
-
-{% else %}
-
-<h1>🔔 Notifications</h1>
-
-<p>
-    Active les notifications de Collège SOS pour recevoir
-    automatiquement les nouveaux signalements sur cet ordinateur.
-</p>
-
-<button id="enableNotifications">
-    🔔 Activer les notifications
-</button>
-
-<button
-    id="testNotifications"
-    class="test-button"
-    disabled
->
-    🧪 Tester une notification
-</button>
-
-<div id="status"></div>
-
-<div
-    id="serverInfo"
-    class="server-info"
-    style="display: none;"
-></div>
+</div>
 
 <a href="/dashboard">
     ← Retour à l'administration
 </a>
 
-{% endif %}
-
 
 </div>
 
-{% if is_admin %}
 <script>
 const publicKey = {{ vapid_public_key|tojson }};
 
@@ -868,7 +872,6 @@ document.addEventListener(
     }
 );
 </script>
-{% endif %}
 
 </body>
 </html>

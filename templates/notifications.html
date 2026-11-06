@@ -132,6 +132,58 @@
     .server-info strong {
         color: #17202a;
     }
+
+    .email-form {
+        margin-top: 22px;
+        text-align: left;
+    }
+
+    .email-form label {
+        display: block;
+        margin-bottom: 7px;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .email-form input[type="email"] {
+        width: 100%;
+        padding: 13px 14px;
+        border: 1px solid #d8dee8;
+        border-radius: 12px;
+        font-size: 15px;
+        outline: none;
+    }
+
+    .email-form input[type="email"]:focus {
+        border-color: #1769ff;
+        box-shadow: 0 0 0 4px #e8f0ff;
+    }
+
+    .email-form button {
+        width: 100%;
+    }
+
+    .danger-button {
+        background: #c62828;
+    }
+
+    .flash {
+        margin-top: 18px;
+        padding: 12px 15px;
+        border-radius: 12px;
+        font-weight: bold;
+        line-height: 1.5;
+    }
+
+    .flash.success {
+        background: #e8f6ee;
+        color: #16803c;
+    }
+
+    .flash.error {
+        background: #fdecec;
+        color: #c62828;
+    }
 </style>
 
 
@@ -141,6 +193,87 @@
 
 <div class="card">
 
+
+{% if not is_admin %}
+
+<h1>📧 Notifications par email</h1>
+
+<p>
+    Renseignez votre adresse email pour être prévenu(e)
+    directement lorsque l'administration répond à l'un de
+    vos signalements ou change son statut.
+</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% for categorie, message in messages %}
+        <div class="flash {{ categorie }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endwith %}
+
+<form
+    method="POST"
+    action="{{ url_for('enregistrer_email_notification') }}"
+    class="email-form"
+>
+    <label for="email">
+        Votre adresse email
+    </label>
+
+    <input
+        type="email"
+        id="email"
+        name="email"
+        placeholder="prenom.nom@exemple.fr"
+        value="{{ email_notification }}"
+        maxlength="254"
+        autocomplete="email"
+        required
+    >
+
+    <button
+        type="submit"
+        name="action"
+        value="enregistrer"
+    >
+        {% if email_notification %}
+            💾 Modifier mon adresse
+        {% else %}
+            📨 Enregistrer et recevoir un email de test
+        {% endif %}
+    </button>
+</form>
+
+{% if email_notification %}
+<form
+    method="POST"
+    action="{{ url_for('enregistrer_email_notification') }}"
+    class="email-form"
+>
+    <input
+        type="hidden"
+        name="email"
+        value="{{ email_notification }}"
+    >
+
+    <button
+        type="submit"
+        name="action"
+        value="supprimer"
+        class="danger-button"
+        formnovalidate
+    >
+        🗑️ Ne plus recevoir d'emails
+    </button>
+</form>
+{% endif %}
+
+<a href="{{ url_for('professeur') }}">
+    ← Retour à mes signalements
+</a>
+
+{% else %}
 
 <h1>🔔 Notifications</h1>
 
@@ -173,9 +306,12 @@
     ← Retour à l'administration
 </a>
 
+{% endif %}
+
 
 </div>
 
+{% if is_admin %}
 <script>
 const publicKey = {{ vapid_public_key|tojson }};
 
@@ -732,6 +868,7 @@ document.addEventListener(
     }
 );
 </script>
+{% endif %}
 
 </body>
 </html>
